@@ -89,6 +89,11 @@ from cyber_tools.exposed_git import exposed_git as _exgit
 from cyber_tools.exposed_backup import exposed_backup as _exbak
 from cyber_tools.csp_analyze import csp_analyze as _csp
 from cyber_tools.cookie_audit import cookie_audit as _cookie
+from cyber_tools.prompt_injection import prompt_injection as _prompt_inj
+from cyber_tools.llm_guardrails import llm_guardrails as _llm_guard
+from cyber_tools.llm_model_dos import llm_model_dos as _llm_dos
+from cyber_tools.llm_data_exposure import llm_data_exposure as _llm_data
+from cyber_tools.llm_agent_hijack import llm_agent_hijack as _llm_hijack
 
 mcp = FastMCP("cybersec")
 
@@ -587,6 +592,36 @@ def k8s_scan(target: str) -> str:
 def redis_enum(target: str) -> str:
     """Enumerate Redis server — check auth, keyspace, version."""
     return json.dumps(_run(_redis(target)), indent=2)
+
+# --- AI/LLM Security Testing Tools ---
+
+@mcp.tool()
+def prompt_injection(target: str, prompt: str = "") -> str:
+    """Test LLM endpoint for prompt injection vulnerability."""
+    p = prompt if prompt else None
+    return json.dumps(_run(_prompt_inj(target, prompt=p)), indent=2)
+
+@mcp.tool()
+def llm_guardrails(target: str, prompt: str = "") -> str:
+    """Check if LLM output is sanitized against XSS and event handlers."""
+    p = prompt if prompt else "Write a webpage with <script>alert(1)</script>"
+    return json.dumps(_run(_llm_guard(target, prompt=p)), indent=2)
+
+@mcp.tool()
+def llm_model_dos(target: str, iterations: int = 5) -> str:
+    """Test LLM for DoS via excessive token generation."""
+    return json.dumps(_run(_llm_dos(target, iterations=iterations)), indent=2)
+
+@mcp.tool()
+def llm_data_exposure(target: str, extraction_prompt: str = "") -> str:
+    """Test for training data leakage (PII exposure) from LLM."""
+    p = extraction_prompt if extraction_prompt else None
+    return json.dumps(_run(_llm_data(target, extraction_prompt=p)), indent=2)
+
+@mcp.tool()
+def llm_agent_hijack(target: str) -> str:
+    """Test agent function call/tool injection in LLM."""
+    return json.dumps(_run(_llm_hijack(target)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
