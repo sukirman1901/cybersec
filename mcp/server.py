@@ -771,9 +771,9 @@ def log_exposure(target: str) -> str:
     return json.dumps(_run(_log_exposure(target)), indent=2)
 
 @mcp.tool()
-def captcha_test(target: str, captcha_param: str = "captcha", token_param: str = "captchaToken") -> str:
-    """Test CAPTCHA bypass — token reuse, empty values, parameter removal, rate limiting."""
-    return json.dumps(_run(_captcha(target, captcha_param, token_param)), indent=2)
+def captcha_test(target: str, action: str = "all", captcha_url: str = "") -> str:
+    """Test CAPTCHA bypass — 10 vectors: token reuse, OCR, math solving, header/cookie bypass, hCaptcha/Turnstile detection. action: all|reuse|ocr|math|header|cookie|recaptcha|detect"""
+    return json.dumps(_run(_captcha(target, action, captcha_url)), indent=2)
 
 @mcp.tool()
 def misplaced_files(target: str) -> str:
