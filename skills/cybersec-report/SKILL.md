@@ -41,13 +41,26 @@ Create a TodoWrite for each item and complete in order:
    }
    ```
 
-4. **Review Report** — Verify:
+4. **Generate Remediation Code** — For each vulnerability:
+   - Run `generate_report(target, findings_json)` — tool auto-generates fix code
+   - Verify fix code is correct for the target's tech stack
+   - If finding type isn't auto-matched, write custom fix code manually:
+     - LFI: Path validation + allowlist pattern
+     - SQLi: Parameterized queries / ORM
+     - XSS: HTML escaping + CSP headers
+     - SSRF: URL allowlist + IP blacklist
+     - Open ports: Firewall rules
+     - Weak SSL: TLS config snippet
+     - Missing headers: Security header config
+
+5. **Review Report** — Verify:
    - All findings are documented
    - Risk ratings are justified
-   - Remediation steps are actionable
+   - Remediation steps are actionable with code snippets
+   - Fix code is copy-pasteable (correct syntax, no placeholders missing)
    - Executive summary explains business impact
 
-5. **Remediation Plan** — Create prioritized fix list:
+6. **Remediation Plan** — Create prioritized fix list:
    - Immediate (24h): Critical vulnerabilities, exposed credentials
    - Short-term (1 week): High vulnerabilities, missing patches
    - Medium-term (2 weeks): Medium vulnerabilities, config hardening
@@ -57,4 +70,4 @@ Create a TodoWrite for each item and complete in order:
 `generate_report`, `cve_search`, `dork_search`
 
 ### Output
-Professional security report with: executive summary, methodology, detailed findings with evidence, risk ratings, and prioritized remediation plan.
+Professional security report with: executive summary, methodology, detailed findings with evidence, risk ratings, prioritized remediation plan, and copy-pasteable fix code per vulnerability.
