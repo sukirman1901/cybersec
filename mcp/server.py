@@ -131,6 +131,10 @@ from cyber_tools.prototype_pollution import prototype_pollution as _prototype_po
 from cyber_tools.vhost_discovery import vhost_discovery as _vhost
 from cyber_tools.joomla_scan import joomla_scan as _joomla
 from cyber_tools.sharepoint_scan import sharepoint_scan as _sharepoint
+from cyber_tools.ghdb_search import ghdb_search as _ghdb
+from cyber_tools.exploit_db import exploit_db_search as _exploit_search
+from cyber_tools.exploit_db import exploit_db_detail as _exploit_detail
+from cyber_tools.exploit_db import exploit_db_download as _exploit_download
 
 mcp = FastMCP("cybersec")
 
@@ -856,6 +860,26 @@ def joomla_scan(target: str) -> str:
 def sharepoint_scan(target: str) -> str:
     """Scan Microsoft SharePoint — version, exposed paths, web services, API endpoints."""
     return json.dumps(_run(_sharepoint(target)), indent=2)
+
+@mcp.tool()
+def ghdb_search(query: str = "", category: str = "", limit: int = 20) -> str:
+    """Search Google Hacking Database (GHDB) for sensitive information dorks — files containing passwords, admin panels, directory listings."""
+    return json.dumps(_run(_ghdb(query, category, limit)), indent=2)
+
+@mcp.tool()
+def exploit_db_search(query: str = "", cve: str = "", type_: str = "", platform: str = "", port: int = 0, limit: int = 20) -> str:
+    """Search Exploit-DB for public exploits by keyword, CVE, type (dos/local/remote/webapps), platform."""
+    return json.dumps(_run(_exploit_search(query, cve, type_, platform, port, limit)), indent=2)
+
+@mcp.tool()
+def exploit_db_detail(exploit_id: str) -> str:
+    """Get Exploit-DB exploit details — title, author, CVE, code, download link."""
+    return json.dumps(_run(_exploit_detail(exploit_id)), indent=2)
+
+@mcp.tool()
+def exploit_db_download(exploit_id: str) -> str:
+    """Download exploit code from Exploit-DB by exploit ID."""
+    return json.dumps(_run(_exploit_download(exploit_id)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
