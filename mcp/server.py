@@ -127,6 +127,10 @@ from cyber_tools.wordpress_scan import wordpress_scan as _wordpress_scan
 from cyber_tools.graphql_injection import graphql_injection as _graphql_injection
 from cyber_tools.websocket_test import websocket_test as _websocket_test
 from cyber_tools.hash_detect import hash_detect as _hash_detect
+from cyber_tools.prototype_pollution import prototype_pollution as _prototype_pollution
+from cyber_tools.vhost_discovery import vhost_discovery as _vhost
+from cyber_tools.joomla_scan import joomla_scan as _joomla
+from cyber_tools.sharepoint_scan import sharepoint_scan as _sharepoint
 
 mcp = FastMCP("cybersec")
 
@@ -809,9 +813,9 @@ def cookie_editor(target: str, cookie_str: str = "", action: str = "analyze") ->
     return json.dumps(_run(_cookie_editor(target, cookie_str, action)), indent=2)
 
 @mcp.tool()
-def xss_detect(target: str, param: str = "", method: str = "get") -> str:
-    """Active XSS injection testing — reflected XSS detection via multiple payload types."""
-    return json.dumps(_run(_xss_detect(target, param, method)), indent=2)
+def xss_detect(target: str, param: str = "", method: str = "get", use_browser: bool = False) -> str:
+    """Active XSS injection testing — reflected, stored, DOM, and browser-based XSS detection with Playwright support."""
+    return json.dumps(_run(_xss_detect(target, param, method, use_browser)), indent=2)
 
 @mcp.tool()
 def wordpress_scan(target: str) -> str:
@@ -832,6 +836,26 @@ def websocket_test(target: str) -> str:
 def hash_detect(hash_string: str) -> str:
     """Identify hash type from format — MD5, SHA1/256/512, bcrypt, NTLM, argon2, and 20+ more."""
     return json.dumps(_run(_hash_detect(hash_string)), indent=2)
+
+@mcp.tool()
+def prototype_pollution(target: str, param: str = "") -> str:
+    """Test for client-side/server-side prototype pollution via query params and JSON body."""
+    return json.dumps(_run(_prototype_pollution(target, param)), indent=2)
+
+@mcp.tool()
+def vhost_discovery(target: str) -> str:
+    """Discover virtual hosts by probing common subdomain vhosts via Host header manipulation."""
+    return json.dumps(_run(_vhost(target)), indent=2)
+
+@mcp.tool()
+def joomla_scan(target: str) -> str:
+    """Scan Joomla CMS — version, admin, components, plugins, exposed configs."""
+    return json.dumps(_run(_joomla(target)), indent=2)
+
+@mcp.tool()
+def sharepoint_scan(target: str) -> str:
+    """Scan Microsoft SharePoint — version, exposed paths, web services, API endpoints."""
+    return json.dumps(_run(_sharepoint(target)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
