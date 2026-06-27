@@ -79,6 +79,16 @@ from cyber_tools.host_header import host_header as _hosthdr
 from cyber_tools.race_condition import race_condition as _race
 from cyber_tools.oauth_scan import oauth_scan as _oauth
 from cyber_tools.api_auth import api_auth as _apiauth
+from cyber_tools.apk_analyze import apk_analyze as _apk
+from cyber_tools.binary_checksec import binary_checksec as _binary
+from cyber_tools.ci_cd_scan import ci_cd_scan as _cicd
+from cyber_tools.ssl_pinning_check import ssl_pinning_check as _sslpin
+from cyber_tools.log4j_scan import log4j_scan as _log4j
+from cyber_tools.supply_chain import supply_chain as _supply
+from cyber_tools.exposed_git import exposed_git as _exgit
+from cyber_tools.exposed_backup import exposed_backup as _exbak
+from cyber_tools.csp_analyze import csp_analyze as _csp
+from cyber_tools.cookie_audit import cookie_audit as _cookie
 
 mcp = FastMCP("cybersec")
 
@@ -421,6 +431,58 @@ def s3_scanner(bucket_name: str) -> str:
 def searchsploit(search_term: str) -> str:
     """Search exploit-db for exploits. Requires searchsploit CLI."""
     return json.dumps(_run(_searchsploit(search_term)), indent=2)
+
+# --- Mobile, Binary & Supply Chain (Batch 3) ---
+
+@mcp.tool()
+def apk_analyze(target: str) -> str:
+    """Analyze APK file — permissions, exported activities, package name, suspicious files."""
+    return json.dumps(_run(_apk(target)), indent=2)
+
+@mcp.tool()
+def binary_checksec(target: str) -> str:
+    """Analyze binary security — ELF/Mach-O/PE, PIE, NX, linked libs, interesting strings."""
+    return json.dumps(_run(_binary(target)), indent=2)
+
+@mcp.tool()
+def ci_cd_scan(target: str) -> str:
+    """Scan CI/CD configs — GitHub Actions, GitLab CI, Jenkins, CircleCI, secrets exposure."""
+    return json.dumps(_run(_cicd(target)), indent=2)
+
+@mcp.tool()
+def ssl_pinning_check(target: str, port: int = 443) -> str:
+    """Check SSL certificate details, HSTS, and cert verification behavior."""
+    return json.dumps(_run(_sslpin(target, port=port)), indent=2)
+
+@mcp.tool()
+def log4j_scan(target: str) -> str:
+    """Test for Log4j JNDI injection via headers and params."""
+    return json.dumps(_run(_log4j(target)), indent=2)
+
+@mcp.tool()
+def supply_chain(target: str) -> str:
+    """Check exposed manifest files for known vulnerable package versions."""
+    return json.dumps(_run(_supply(target)), indent=2)
+
+@mcp.tool()
+def exposed_git(target: str) -> str:
+    """Check for exposed .git folder — config, HEAD, logs, objects."""
+    return json.dumps(_run(_exgit(target)), indent=2)
+
+@mcp.tool()
+def exposed_backup(target: str) -> str:
+    """Scan for exposed backup files (.bak, .old, .sql, .dump, ~, etc)."""
+    return json.dumps(_run(_exbak(target)), indent=2)
+
+@mcp.tool()
+def csp_analyze(target: str) -> str:
+    """Analyze Content-Security-Policy header + other security headers."""
+    return json.dumps(_run(_csp(target)), indent=2)
+
+@mcp.tool()
+def cookie_audit(target: str) -> str:
+    """Audit cookie security — HttpOnly, Secure, SameSite, sensitive cookies."""
+    return json.dumps(_run(_cookie(target)), indent=2)
 
 # --- Framework & CMS Scanners (Batch 2) ---
 
