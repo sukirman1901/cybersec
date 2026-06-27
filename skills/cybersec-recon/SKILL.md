@@ -3,12 +3,35 @@ name: cybersec-recon
 description: Use when user asks to perform reconnaissance, enumerate subdomains, check DNS, or discover target infrastructure
 ---
 
+<HARD-GATE>
+Do NOT proceed to scanning or any other phase until reconnaissance is complete.
+You MUST run ALL relevant recon tools before concluding the recon phase.
+At minimum: dns_lookup + whois_lookup + http_probe_target + crt_search.
+</HARD-GATE>
+
 ## Reconnaissance Methodology
 
-1. **DNS Enumeration** — Call `dns_lookup(target)` to get A, AAAA, MX, NS, TXT records
-2. **Subdomain Discovery** — Try common subdomains via `dns_lookup(sub.target)`: www, mail, admin, api, dev, staging, blog, cdn, test, vpn
-3. **HTTP Probing** — Call `http_probe_target(target)` to detect web technologies
-4. **WAF Detection** — Call `waf_detection(target)` to check for Web Application Firewall
-5. **Google Dorking** — If target is vague, use `dork_search("site:target.com")` to find exposed info
+### Checklist
 
-**Output:** Compile findings with target infrastructure, tech stack, and potential attack surface.
+Create a TodoWrite for each item and complete in order:
+
+1. **Target Validation** — Validate target resolves via `dns_lookup(target)` (A, AAAA, MX, NS, TXT, CNAME records)
+2. **WHOIS Lookup** — Call `whois_lookup(target)` for domain registration, registrar, dates
+3. **Subdomain Enumeration** — Call `subdomain_enum(target)` for passive subdomain discovery via crt.sh, DNS brute, APIs
+4. **Certificate Transparency** — Call `crt_search(target)` for historical certificates and subdomains
+5. **HTTP Probing** — Call `http_probe_target(target)` to detect live web services, tech stack, headers
+6. **WAF Detection** — Call `waf_detection(target)` to identify Web Application Firewall
+7. **Reverse IP** — Call `reverse_ip(target)` to find other domains on same IP
+8. **ASN Lookup** — Call `asn_lookup(target)` for network ownership and IP range
+9. **Origin IP Discovery** — If CDN detected, call `origin_ip_discovery(target)` to find real origin
+10. **Service Fingerprint** — For each open port, call `service_fingerprint(target, port)` for banner grabs
+11. **Google Dorking** — Call `dork_search("site:target.com")` to find exposed info
+
+### Tools Available
+`dns_lookup`, `whois_lookup`, `subdomain_enum`, `crt_search`, `http_probe_target`, `waf_detection`, `reverse_ip`, `asn_lookup`, `origin_ip_discovery`, `service_fingerprint`, `dork_search`
+
+### Output
+Compile findings as: target infrastructure map, subdomains, tech stack, CDN/WAF status, network ownership, and potential entry points.
+
+### Next Skill
+When all checklist items complete, load `cybersec-scanning` skill for port/service scanning.
