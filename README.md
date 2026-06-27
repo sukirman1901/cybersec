@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo-cybersec.png" alt="Cybersec Logo" width="300" />
+</p>
+
 # Cybersec — AI Cybersecurity Plugin
 
 **147+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
