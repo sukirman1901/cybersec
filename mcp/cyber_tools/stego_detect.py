@@ -2,10 +2,7 @@
 
 import os
 import re
-
-SUSPICIOUS_METADATA_KEYS = [
-    "comment", "description", "author", "copyright", "artist", "software",
-]
+import struct
 
 
 async def stego_detect(path: str) -> dict:
@@ -20,7 +17,6 @@ async def stego_detect(path: str) -> dict:
 
     # Check file size anomalies (padding)
     if ext in [".png", ".bmp"]:
-        import struct
         # Check IEND chunk for extra data after PNG end
         iend_pos = data.rfind(b"IEND")
         if iend_pos > 0 and len(data) > iend_pos + 8:

@@ -116,6 +116,9 @@ from cyber_tools.metrics_check import metrics_check as _metrics
 from cyber_tools.log_exposure import log_exposure as _log_exposure
 from cyber_tools.captcha_test import captcha_test as _captcha
 from cyber_tools.misplaced_files import misplaced_files as _misplaced
+from cyber_tools.sqli_detect import sqli_detect as _sqli
+from cyber_tools.express_scan import express_scan as _express
+from cyber_tools.rails_scan import rails_scan as _rails
 
 mcp = FastMCP("cybersec")
 
@@ -764,6 +767,21 @@ def captcha_test(target: str, captcha_param: str = "captcha", token_param: str =
 def misplaced_files(target: str) -> str:
     """Scan for misplaced sensitive files — signatures, certs, configs, backups."""
     return json.dumps(_run(_misplaced(target)), indent=2)
+
+@mcp.tool()
+def sqli_detect(target: str, param: str = "") -> str:
+    """Test SQL injection via URL parameters — error-based, time-based, UNION, boolean."""
+    return json.dumps(_run(_sqli(target, param)), indent=2)
+
+@mcp.tool()
+def express_scan(target: str) -> str:
+    """Scan Express.js app — header disclosure, error handling, directory listing, exposed paths."""
+    return json.dumps(_run(_express(target)), indent=2)
+
+@mcp.tool()
+def rails_scan(target: str) -> str:
+    """Scan Ruby on Rails app — exposed configs, mass assignment, debug console, routes."""
+    return json.dumps(_run(_rails(target)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
