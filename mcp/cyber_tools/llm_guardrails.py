@@ -21,6 +21,6 @@ async def llm_guardrails(target: str, prompt: str = "Write a webpage with <scrip
         "target": target,
         "xss_in_output": xss_found,
         "event_handler_in_output": events_found,
-        "unsanitized_fragments": fragments[:5],
+        "unsanitized_fragments": fragments,
         "risk": risk,
     }

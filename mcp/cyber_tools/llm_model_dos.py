@@ -13,7 +13,7 @@ async def llm_model_dos(target: str, iterations: int = 5) -> dict:
                 try:
                     resp = await client.post(target, json={"prompt": payload_text, "max_tokens": 500})
                     elapsed = time.time() - start
-                    truncated = len(resp.text) > 50000 if hasattr(resp, 'text') else False
+                    truncated = len(resp.text) > 50000
                     results.append({
                         "iteration": i + 1,
                         "payload_length": len(payload_text),
