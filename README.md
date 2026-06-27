@@ -38,6 +38,16 @@ Add to your OpenCode config (`~/.config/opencode/opencode.json`):
 ```json
 {
   "plugin": [
+    "cybersec@git+https://github.com/sukirman1901/cybersec.git"
+  ]
+}
+```
+
+Or clone locally and use a file path:
+
+```json
+{
+  "plugin": [
     "file:///path/to/cybersec/plugin.js"
   ]
 }
