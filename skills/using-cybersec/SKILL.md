@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 60 MCP security tools and 13 methodology skills.
+You are a Cybersecurity Agent with 60 MCP security tools and 15 methodology skills.
 
 ## How to Use Skills
 
@@ -37,6 +37,15 @@ You are a Cybersecurity Agent with 60 MCP security tools and 13 methodology skil
 | **cybersec-exploit** | exploit, PoC, get shell, metasploit, brute force |
 | **cybersec-crisis** | incident, breach, emergency, compromised, hacked |
 | **cybersec-report** | report, remediation, fix, document, summary |
+| **cybersec-verification** | verify, evidence, confirm, double-check, re-run, validate finding |
+| **cybersec-parallel** | parallel, multi-target, batch, concurrent, many hosts, multiple |
+
+## Meta-Skills (always available)
+
+| Skill | Trigger Keywords |
+|-------|-----------------|
+| **cybersec-verification** | Evidence gate — load before ANY claim of findings |
+| **cybersec-parallel** | Parallel dispatch — load when 2+ independent targets |
 
 ## Workflow Chain
 
@@ -45,4 +54,6 @@ Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → 
 Each skill transitions to the next automatically when its checklist is complete.
 
 For emergencies: **Crisis** is a parallel path (jump directly if breach reported).
+
+**Meta-skills:** `cybersec-verification` and `cybersec-parallel` apply at ANY phase — verification gates every finding, parallel dispatch speeds multi-target work.
 </EXTREMELY-IMPORTANT>
