@@ -61,7 +61,7 @@ Or if cloned locally:
 ```json
 {
   "plugin": [
-    "file:///Users/aaa/Documents/Developer/cybersec/plugin.js"
+    "file:///path/to/cybersec/plugin.js"
   ]
 }
 ```
@@ -237,9 +237,9 @@ Skills load automatically via intent detection. The AI follows the skill's metho
 
 ```bash
 # Verify MCP server works
-/Users/aaa/Documents/Developer/cybersec/mcp/.venv/bin/python3 -m server
+./mcp/.venv/bin/python3 -m server
 # Should start a stdio MCP server — test with:
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | /Users/aaa/Documents/Developer/cybersec/mcp/.venv/bin/python3 -m server
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
 Expected output: 45 tools listed.
