@@ -44,6 +44,13 @@ from cyber_tools.ssrf_detect import ssrf_detect as _ssrf
 from cyber_tools.sub_takeover import sub_takeover as _subto
 from cyber_tools.origin_ip_discovery import origin_ip_discovery as _origin
 from cyber_tools.service_fingerprint import service_fingerprint as _svcfp
+from cyber_tools.shodan_lookup import shodan_lookup as _shodan
+from cyber_tools.wayback_urls import wayback_urls as _wayback
+from cyber_tools.bypass_403 import bypass_403 as _bypass
+from cyber_tools.smuggling_check import smuggling_check as _smuggling
+from cyber_tools.gf_patterns import gf_patterns as _gf
+from cyber_tools.oob_test import oob_test as _oob
+from cyber_tools.nuclei_scan import nuclei_scan as _nuclei
 
 mcp = FastMCP("cybersec")
 
@@ -307,6 +314,43 @@ def origin_ip_discovery(target: str) -> str:
 def service_fingerprint(target: str, port: int = 80) -> str:
     """Deep service fingerprinting via banner grabbing."""
     return json.dumps(_run(_svcfp(target, port=port)), indent=2)
+
+# --- Bug Bounty Tools ---
+
+@mcp.tool()
+def shodan_lookup(query: str, api_key: str = "") -> str:
+    """Search Shodan for exposed devices and services."""
+    return json.dumps(_run(_shodan(query, api_key=api_key)), indent=2)
+
+@mcp.tool()
+def wayback_urls(domain: str, limit: int = 100) -> str:
+    """Fetch URL history from Wayback Machine."""
+    return json.dumps(_run(_wayback(domain, limit=limit)), indent=2)
+
+@mcp.tool()
+def bypass_403(target: str) -> str:
+    """Test 403 bypass techniques (headers, path, method)."""
+    return json.dumps(_run(_bypass(target)), indent=2)
+
+@mcp.tool()
+def smuggling_check(target: str) -> str:
+    """Test for HTTP request smuggling (CL.TE, TE.CL)."""
+    return json.dumps(_run(_smuggling(target)), indent=2)
+
+@mcp.tool()
+def gf_patterns(urls: str) -> str:
+    """Find sensitive patterns in URLs (debug, api, files, params)."""
+    return json.dumps(_run(_gf(urls)), indent=2)
+
+@mcp.tool()
+def oob_test(target: str, payload: str = "") -> str:
+    """Test for blind OOB interaction (SSRF, RCE, template injection)."""
+    return json.dumps(_run(_oob(target, payload=payload)), indent=2)
+
+@mcp.tool()
+def nuclei_scan(target: str, template: str = "", severity: str = "") -> str:
+    """Template-based vulnerability scanner. Requires nuclei CLI."""
+    return json.dumps(_run(_nuclei(target, template=template, severity=severity)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
