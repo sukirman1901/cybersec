@@ -18,7 +18,9 @@ Create a TodoWrite for each item and complete in order:
 1. **Target Validation** — Validate target resolves via `dns_lookup(target)` (A, AAAA, MX, NS, TXT, CNAME records)
 2. **WHOIS Lookup** — Call `whois_lookup(target)` for domain registration, registrar, dates
 3. **Subdomain Enumeration** — Call `subdomain_enum(target)` for passive subdomain discovery via crt.sh, DNS brute, APIs
-4. **Certificate Transparency** — Call `crt_search(target)` for historical certificates and subdomains
+4. **Subdomain Takeover Check** — Call `sub_takeover(target)` to check if any subdomains are vulnerable to takeover
+5. **Advanced Enumeration** — If available, call `amass_enum(target)` for deeper attack surface mapping
+6. **Certificate Transparency** — Call `crt_search(target)` for historical certificates and subdomains
 5. **HTTP Probing** — Call `http_probe_target(target)` to detect live web services, tech stack, headers
 6. **WAF Detection** — Call `waf_detection(target)` to identify Web Application Firewall
 7. **Reverse IP** — Call `reverse_ip(target)` to find other domains on same IP
@@ -28,7 +30,7 @@ Create a TodoWrite for each item and complete in order:
 11. **Google Dorking** — Call `dork_search("site:target.com")` to find exposed info
 
 ### Tools Available
-`dns_lookup`, `whois_lookup`, `subdomain_enum`, `crt_search`, `http_probe_target`, `waf_detection`, `reverse_ip`, `asn_lookup`, `origin_ip_discovery`, `service_fingerprint`, `dork_search`
+`dns_lookup`, `whois_lookup`, `subdomain_enum`, `sub_takeover`, `amass_enum`, `crt_search`, `http_probe_target`, `waf_detection`, `reverse_ip`, `asn_lookup`, `origin_ip_discovery`, `service_fingerprint`, `dork_search`
 
 ### Output
 Compile findings as: target infrastructure map, subdomains, tech stack, CDN/WAF status, network ownership, and potential entry points.

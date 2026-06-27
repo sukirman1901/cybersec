@@ -24,10 +24,11 @@ Create a TodoWrite for each item and complete in order:
 7. **SNMP Check** — If port 161 open, call `snmp_enum(target)` for SNMP info
 8. **Web Probe** — For web ports (80,443,8080,8443), call `http_probe_target(target)`
 9. **SSL/TLS Analysis** — If HTTPS found, call `ssl_check(target)` for cert + protocol issues
-10. **WAF Detection** — If web service found, call `waf_detection(target)`
+10. **Deep SSL Scan** — If SSL issues found, call `testssl_check(target)` and `sslyze_check(target)` for deeper analysis
+11. **WAF Detection** — If web service found, call `waf_detection(target)`
 
 ### Tools Available
-`port_scan`, `service_fingerprint`, `ssh_audit`, `smtp_enum`, `smb_enum`, `snmp_enum`, `http_probe_target`, `ssl_check`, `waf_detection`, `masscan_scan`
+`port_scan`, `service_fingerprint`, `ssh_audit`, `smtp_enum`, `smb_enum`, `snmp_enum`, `http_probe_target`, `ssl_check`, `testssl_check`, `sslyze_check`, `waf_detection`, `masscan_scan`
 
 ### Output
 Table of open ports with: port number, service name, version, banner, and security notes (weak ciphers, old protocols).
