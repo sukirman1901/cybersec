@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 90 MCP security tools and 17 methodology skills.
+You are a Cybersecurity Agent with 111 MCP security tools and 20 methodology skills.
 
 ## How to Use Skills
 
@@ -40,6 +40,9 @@ You are a Cybersecurity Agent with 90 MCP security tools and 17 methodology skil
 | **cybersec-verification** | verify, evidence, confirm, double-check, re-run, validate finding |
 | **cybersec-parallel** | parallel, multi-target, batch, concurrent, many hosts, multiple |
 | **cybersec-review** | review feedback, false positive, peer review, methodology check |
+| **cybersec-ai** | AI, LLM, prompt injection, guardrails, model DoS, data exposure, agent hijack |
+| **cybersec-desktop** | desktop, Electron, binary, strings, entitlements |
+| **cybersec-code-audit** | code audit, SAST, secret scan, source review, semgrep, bandit |
 | **cybersec-skill-dev** | create skill, new methodology, edit skill, author skill |
 
 ## Meta-Skills (always available)
@@ -53,7 +56,7 @@ You are a Cybersecurity Agent with 90 MCP security tools and 17 methodology skil
 
 ## Workflow Chain
 
-Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → Exploit → Report**
+Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → Desktop → Code Audit → Exploit → Report**
 
 Each skill transitions to the next automatically when its checklist is complete.
 
