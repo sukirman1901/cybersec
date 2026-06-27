@@ -28,13 +28,30 @@ Create a TodoWrite for each item and complete in order:
 11. **SSTI Test** — If template engine detected, call `ssti_detect(target)`
 12. **XXE Test** — If XML processing likely, call `xxe_detect(target)`
 13. **SSRF Test** — If app makes external requests, call `ssrf_detect(target)`
-14. **SQLi / XSS** — If user input found: call `sqlmap_check(target)` and `xsstrike_check(target)` (with user consent)
+14. **CAPTCHA Detection** — Call `captcha_test(target, action="detect")` to identify captcha type on forms
+15. **CAPTCHA Bypass** — If captcha detected: call `captcha_test(target, action="all")` to test all bypass vectors (token reuse, empty values, OCR, math solving, header/cookie manipulation)
+16. **SQLi / XSS** — If user input found: call `sqlmap_check(target)` and `xsstrike_check(target)` (with user consent)
+
+### Auto-CAPTCHA Protocol
+
+**When testing forms/endpoints, ALWAYS auto-detect and test captcha bypass:**
+
+1. On ANY form submission endpoint, run `captcha_test(endpoint, action="detect")`
+2. If captcha detected (reCAPTCHA, hCaptcha, Turnstile, image, math):
+   - Auto-run `captcha_test(endpoint, action="math")` for math captchas
+   - Auto-run `captcha_test(endpoint, action="ocr")` for image captchas
+   - Auto-run `captcha_test(endpoint, action="header")` for header bypass
+   - Auto-run `captcha_test(endpoint, action="cookie")` for cookie bypass
+   - Auto-run `captcha_test(endpoint, action="reuse")` for token reuse
+3. Report all bypass attempts with evidence
+4. If bypass successful: note in report as HIGH/CRITICAL finding
+5. If all bypasses fail: note captcha is effective
 
 ### Tools Available
-`dir_bruteforce`, `api_fuzz`, `cors_check`, `open_redirect`, `jwt_analyze`, `graphql_introspect`, `wpscan_check`, `cmseek_check`, `param_discovery`, `lfi_detect`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `sqlmap_check`, `xsstrike_check`, `nikto_scan`, `gobuster_dir`, `ffuf_fuzz`
+`dir_bruteforce`, `api_fuzz`, `cors_check`, `open_redirect`, `jwt_analyze`, `graphql_introspect`, `wpscan_check`, `cmseek_check`, `param_discovery`, `lfi_detect`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `sqlmap_check`, `xsstrike_check`, `nikto_scan`, `gobuster_dir`, `ffuf_fuzz`, `captcha_test`
 
 ### Output
-Web application assessment with: discovered paths, API endpoints, misconfigurations, input validation issues, CMS vulnerabilities, and exploit potential.
+Web application assessment with: discovered paths, API endpoints, misconfigurations, input validation issues, CMS vulnerabilities, CAPTCHA bypass results, and exploit potential.
 
 ### Next Skill
 When all checklist items complete, load `cybersec-exploit` skill for exploitation.

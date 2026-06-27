@@ -66,5 +66,7 @@ Each skill transitions to the next automatically when its checklist is complete.
 
 For emergencies: **Crisis** is a parallel path (jump directly if breach reported).
 
+**Auto-CAPTCHA Protocol:** When testing web forms, ALWAYS auto-detect captchas and test bypass vectors. See `cybersec-web` skill for full protocol.
+
 **Meta-skills:** `cybersec-verification`, `cybersec-parallel`, `cybersec-review` apply at ANY phase — verification gates every finding, parallel dispatch speeds multi-target work, review verifies before reporting. Use `cybersec-skill-dev` to create new methodology skills test-first.
 </EXTREMELY-IMPORTANT>
