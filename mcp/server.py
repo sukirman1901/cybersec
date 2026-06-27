@@ -121,6 +121,12 @@ from cyber_tools.express_scan import express_scan as _express
 from cyber_tools.rails_scan import rails_scan as _rails
 from cyber_tools.mcp_abuse_test import mcp_abuse_test as _mcp_abuse
 from cyber_tools.browser_agent_hijack import browser_agent_hijack as _browser_hijack
+from cyber_tools.cookie_editor import cookie_editor as _cookie_editor
+from cyber_tools.xss_detect import xss_detect as _xss_detect
+from cyber_tools.wordpress_scan import wordpress_scan as _wordpress_scan
+from cyber_tools.graphql_injection import graphql_injection as _graphql_injection
+from cyber_tools.websocket_test import websocket_test as _websocket_test
+from cyber_tools.hash_detect import hash_detect as _hash_detect
 
 mcp = FastMCP("cybersec")
 
@@ -794,6 +800,38 @@ def mcp_abuse_test(target: str) -> str:
 def browser_agent_hijack(target: str, page_content: str = "") -> str:
     """Test browser-based AI agents for hijack — prompt injection via web content, hidden forms, autofill, clickjacking."""
     return json.dumps(_run(_browser_hijack(target, page_content)), indent=2)
+
+# --- New Security Testing Tools ---
+
+@mcp.tool()
+def cookie_editor(target: str, cookie_str: str = "", action: str = "analyze") -> str:
+    """Decode, forge, and test cookie manipulation — base64/JSON decode, privilege escalation."""
+    return json.dumps(_run(_cookie_editor(target, cookie_str, action)), indent=2)
+
+@mcp.tool()
+def xss_detect(target: str, param: str = "", method: str = "get") -> str:
+    """Active XSS injection testing — reflected XSS detection via multiple payload types."""
+    return json.dumps(_run(_xss_detect(target, param, method)), indent=2)
+
+@mcp.tool()
+def wordpress_scan(target: str) -> str:
+    """Scan WordPress site — version, plugins, themes, XML-RPC, REST API, exposed paths."""
+    return json.dumps(_run(_wordpress_scan(target)), indent=2)
+
+@mcp.tool()
+def graphql_injection(target: str) -> str:
+    """Test GraphQL endpoints — SQL injection, deep nesting, alias batching, introspection, auth bypass."""
+    return json.dumps(_run(_graphql_injection(target)), indent=2)
+
+@mcp.tool()
+def websocket_test(target: str) -> str:
+    """Test WebSocket endpoints — origin validation, CSWSH, Socket.IO detection."""
+    return json.dumps(_run(_websocket_test(target)), indent=2)
+
+@mcp.tool()
+def hash_detect(hash_string: str) -> str:
+    """Identify hash type from format — MD5, SHA1/256/512, bcrypt, NTLM, argon2, and 20+ more."""
+    return json.dumps(_run(_hash_detect(hash_string)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
