@@ -59,6 +59,16 @@ from cyber_tools.hydra_brute import hydra_brute as _hydra
 from cyber_tools.cloud_enum import cloud_enum as _cloud
 from cyber_tools.s3_scanner import s3_scanner as _s3
 from cyber_tools.searchsploit import searchsploit as _searchsploit
+from cyber_tools.csrf_detect import csrf_detect as _csrf
+from cyber_tools.idor_detect import idor_detect as _idor
+from cyber_tools.cmd_injection import cmd_injection as _cmd
+from cyber_tools.nosql_inject import nosql_inject as _nosql
+from cyber_tools.laravel_scan import laravel_scan as _laravel
+from cyber_tools.php_deserialize import php_deserialize as _php
+from cyber_tools.java_deserialize import java_deserialize as _java
+from cyber_tools.docker_scan import docker_scan as _docker
+from cyber_tools.k8s_scan import k8s_scan as _k8s
+from cyber_tools.redis_enum import redis_enum as _redis
 
 mcp = FastMCP("cybersec")
 
@@ -401,6 +411,58 @@ def s3_scanner(bucket_name: str) -> str:
 def searchsploit(search_term: str) -> str:
     """Search exploit-db for exploits. Requires searchsploit CLI."""
     return json.dumps(_run(_searchsploit(search_term)), indent=2)
+
+# --- Advanced Web & Infra Tools (Batch 1) ---
+
+@mcp.tool()
+def csrf_detect(target: str) -> str:
+    """Check forms for CSRF tokens, SameSite cookies, and Origin/Referer validation."""
+    return json.dumps(_run(_csrf(target)), indent=2)
+
+@mcp.tool()
+def idor_detect(target: str, ids: str = "1,2,3") -> str:
+    """Test for Insecure Direct Object References by accessing sequential IDs."""
+    return json.dumps(_run(_idor(target, ids=ids)), indent=2)
+
+@mcp.tool()
+def cmd_injection(target: str, param: str = "cmd") -> str:
+    """Test for command injection (semicolon, pipe, subshell, etc)."""
+    return json.dumps(_run(_cmd(target, param=param)), indent=2)
+
+@mcp.tool()
+def nosql_inject(target: str, param: str = "user") -> str:
+    """Test for NoSQL injection (MongoDB $ne, $gt, $where payloads)."""
+    return json.dumps(_run(_nosql(target, param=param)), indent=2)
+
+@mcp.tool()
+def laravel_scan(target: str) -> str:
+    """Scan Laravel app for .env leak, debug mode, artisan exposure, etc."""
+    return json.dumps(_run(_laravel(target)), indent=2)
+
+@mcp.tool()
+def php_deserialize(target: str, param: str = "") -> str:
+    """Check for PHP deserialization vulnerabilities via gadget chains."""
+    return json.dumps(_run(_php(target, param=param)), indent=2)
+
+@mcp.tool()
+def java_deserialize(target: str) -> str:
+    """Check for Java deserialization endpoints, RMI, JNDI, and serialized data."""
+    return json.dumps(_run(_java(target)), indent=2)
+
+@mcp.tool()
+def docker_scan(target: str) -> str:
+    """Scan for Docker socket exposure, container escape paths, env leaks."""
+    return json.dumps(_run(_docker(target)), indent=2)
+
+@mcp.tool()
+def k8s_scan(target: str) -> str:
+    """Scan K8s API for unauthorized access, secrets exposure, RBAC issues."""
+    return json.dumps(_run(_k8s(target)), indent=2)
+
+@mcp.tool()
+def redis_enum(target: str) -> str:
+    """Enumerate Redis server — check auth, keyspace, version."""
+    return json.dumps(_run(_redis(target)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

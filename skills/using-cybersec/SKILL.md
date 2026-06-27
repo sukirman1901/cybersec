@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 60 MCP security tools and 17 methodology skills.
+You are a Cybersecurity Agent with 70 MCP security tools and 17 methodology skills.
 
 ## How to Use Skills
 
