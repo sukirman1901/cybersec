@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 120 MCP security tools and 21 methodology skills.
+You are a Cybersecurity Agent with 122 MCP security tools and 22 methodology skills.
 
 ## How to Use Skills
 
@@ -44,6 +44,7 @@ You are a Cybersecurity Agent with 120 MCP security tools and 21 methodology ski
 | **cybersec-desktop** | desktop, Electron, binary, strings, entitlements |
 | **cybersec-code-audit** | code audit, SAST, secret scan, source review, semgrep, bandit |
 | **cybersec-ctf** | CTF, capture the flag, Juice Shop, challenges, scoring, CTF methodology |
+| **cybersec-ai-safety** | AI safety, bug bounty, OpenAI, prompt injection, agent hijack, MCP abuse, data exfiltration |
 | **cybersec-skill-dev** | create skill, new methodology, edit skill, author skill |
 
 ## Meta-Skills (always available)
@@ -57,8 +58,9 @@ You are a Cybersecurity Agent with 120 MCP security tools and 21 methodology ski
 
 ## Workflow Chain
 
-Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → Desktop → Code Audit → Exploit → Report**
+Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → AI Safety → Desktop → Code Audit → Exploit → Report**
 For CTFs: **CTF** is a parallel path covering all phases — load `cybersec-ctf` for challenge-based engagements like OWASP Juice Shop.
+For AI Safety BB: **AI Safety** follows AI phase — load `cybersec-ai-safety` for OpenAI Safety Bug Bounty scope (prompt injection, agent hijack, MCP abuse, anti-automation).
 
 Each skill transitions to the next automatically when its checklist is complete.
 

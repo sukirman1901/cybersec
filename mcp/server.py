@@ -119,6 +119,8 @@ from cyber_tools.misplaced_files import misplaced_files as _misplaced
 from cyber_tools.sqli_detect import sqli_detect as _sqli
 from cyber_tools.express_scan import express_scan as _express
 from cyber_tools.rails_scan import rails_scan as _rails
+from cyber_tools.mcp_abuse_test import mcp_abuse_test as _mcp_abuse
+from cyber_tools.browser_agent_hijack import browser_agent_hijack as _browser_hijack
 
 mcp = FastMCP("cybersec")
 
@@ -782,6 +784,16 @@ def express_scan(target: str) -> str:
 def rails_scan(target: str) -> str:
     """Scan Ruby on Rails app — exposed configs, mass assignment, debug console, routes."""
     return json.dumps(_run(_rails(target)), indent=2)
+
+@mcp.tool()
+def mcp_abuse_test(target: str) -> str:
+    """Test MCP server for abuse vectors — dangerous tools, JSON-RPC injection, prompt injection in tool descriptions."""
+    return json.dumps(_run(_mcp_abuse(target)), indent=2)
+
+@mcp.tool()
+def browser_agent_hijack(target: str, page_content: str = "") -> str:
+    """Test browser-based AI agents for hijack — prompt injection via web content, hidden forms, autofill, clickjacking."""
+    return json.dumps(_run(_browser_hijack(target, page_content)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
