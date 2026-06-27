@@ -1,0 +1,39 @@
+{
+  "name": "cybersec",
+  "version": "1.0.0",
+  "description": "Cybersecurity MCP tools and pentesting methodology skills.",
+  "author": {
+    "name": "Sukirman",
+    "email": "sukirman1901@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/sukirman1901/cybersec",
+  "license": "MIT",
+  "keywords": [
+    "cybersecurity",
+    "pentesting",
+    "recon",
+    "vulnerability",
+    "security",
+    "mcp",
+    "skills",
+    "scanning",
+    "exploitation"
+  ],
+  "skills": "./skills/",
+  "sessionStart": {
+    "skill": "using-cybersec"
+  },
+  "skillInstructions": "Kimi Code tool mapping for Cybersec skills:\n\n- When a Cybersec skill says to ask the user, ask clarifying questions, ask one question at a time, present multiple-choice options, use the terminal for a question, or wait for the user's choice, call Kimi Code's `AskUserQuestion` tool. Do not render those choices as plain assistant text unless `AskUserQuestion` is unavailable or the session is in auto permission mode.\n- For `AskUserQuestion`, provide 1 question with 2-4 concrete options when possible. Put the recommended option first and suffix its label with `(Recommended)`.\n- When a Cybersec skill refers to `TodoWrite`, use Kimi Code's `TodoList` tool.\n- When a Cybersec skill says `Task tool (general-purpose)` or asks you to dispatch a subagent, use Kimi Code's `Agent` tool with a Kimi subagent type.\n- For implementation, code review, spec review, quality review, and filled Cybersec subagent prompt templates, call `Agent` with `subagent_type: \"coder\"`, paste the fully filled prompt into `prompt`, and provide a short `description`.\n- For read-only codebase exploration that would take several searches, use `Agent` with `subagent_type: \"explore\"`.\n- For read-only planning or architecture design, use `Agent` with `subagent_type: \"plan\"`.\n- Keep dependent Cybersec subagent steps sequential. Use multiple `Agent` calls, or `run_in_background: true` only when the work is independent and background agents are available.\n- When a Cybersec skill refers to the `Skill` tool, use Kimi Code's native `Skill` tool.\n- Use Kimi Code's `Read`, `Write`, `Edit`, `Bash`, `Grep`, `Glob`, `FetchURL`, `WebSearch`, and MCP tools by their actual exposed names.\n- When a skill asks to search file contents, use `Grep`; when it asks to find files by path or pattern, use `Glob`; when it asks to fetch a URL, use `FetchURL`; when it asks to search the web, use `WebSearch`.\n- Cybersec MCP tools (port_scan, dns_lookup, etc.) are available via MCP and called by their tool names directly.",
+  "interface": {
+    "displayName": "Cybersec",
+    "shortDescription": "Cybersecurity testing tools and pentesting methodology for coding agents",
+    "longDescription": "Use Cybersec to perform penetration testing, vulnerability assessment, reconnaissance, and security reporting through your AI agent.",
+    "developerName": "Sukirman",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/sukirman1901/cybersec"
+  }
+}

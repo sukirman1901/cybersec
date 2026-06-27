@@ -1,0 +1,6 @@
+{
+  "name": "cybersec",
+  "description": "Cybersecurity MCP tools and pentesting methodology skills: recon, scanning, vulns, web testing, exploitation, reporting",
+  "version": "1.0.0",
+  "contextFileName": "GEMINI.md"
+}

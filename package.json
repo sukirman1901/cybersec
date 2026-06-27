@@ -1,0 +1,34 @@
+{
+  "name": "cybersec",
+  "version": "1.0.0",
+  "description": "Cybersecurity MCP tools and pentesting methodology skills for coding agents",
+  "type": "module",
+  "main": "./.opencode/plugins/cybersec.js",
+  "keywords": [
+    "pi-package",
+    "cybersecurity",
+    "pentesting",
+    "recon",
+    "vulnerability",
+    "security",
+    "mcp",
+    "skills",
+    "scanning",
+    "exploitation"
+  ],
+  "author": {
+    "name": "Sukirman",
+    "email": "sukirman1901@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/sukirman1901/cybersec",
+  "repository": "https://github.com/sukirman1901/cybersec",
+  "license": "MIT",
+  "pi": {
+    "extensions": [
+      "./.pi/extensions/cybersec.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  }
+}

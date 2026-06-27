@@ -1,0 +1,20 @@
+{
+  "name": "cybersec-dev",
+  "description": "Development marketplace for Cybersec cybersecurity tools and skills",
+  "owner": {
+    "name": "Sukirman",
+    "email": "sukirman1901@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "cybersec",
+      "description": "Cybersecurity MCP tools and pentesting methodology skills: recon, scanning, vulns, web testing, exploitation, reporting",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Sukirman",
+        "email": "sukirman1901@users.noreply.github.com"
+      }
+    }
+  ]
+}

@@ -30,8 +30,8 @@ const extractAndStripFrontmatter = (content) => {
 };
 
 export const CybersecPlugin = async ({ client, directory }) => {
-  const skillsDir = path.resolve(__dirname, 'skills');
-  const mcpsDir = path.resolve(__dirname, 'mcp');
+  const skillsDir = path.resolve(__dirname, '../../skills');
+  const mcpsDir = path.resolve(__dirname, '../../mcp');
 
   const getBootstrapContent = () => {
     const skillPath = path.join(skillsDir, 'using-cybersec', 'SKILL.md');

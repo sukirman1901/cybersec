@@ -1,0 +1,44 @@
+{
+  "name": "cybersec",
+  "version": "1.0.0",
+  "description": "Cybersecurity MCP tools and pentesting methodology skills: recon, scanning, vulnerability analysis, web testing, exploitation, and security reporting.",
+  "author": {
+    "name": "Sukirman",
+    "email": "sukirman1901@users.noreply.github.com",
+    "url": "https://github.com/sukirman1901"
+  },
+  "homepage": "https://github.com/sukirman1901/cybersec",
+  "repository": "https://github.com/sukirman1901/cybersec",
+  "license": "MIT",
+  "keywords": [
+    "cybersecurity",
+    "pentesting",
+    "recon",
+    "vulnerability",
+    "security",
+    "mcp",
+    "skills",
+    "scanning",
+    "exploitation"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-codex.json",
+  "interface": {
+    "displayName": "Cybersec",
+    "shortDescription": "Cybersecurity testing tools and pentesting methodology for coding agents",
+    "longDescription": "Use Cybersec to perform penetration testing, vulnerability assessment, reconnaissance, and security reporting through your AI agent. 125+ MCP security tools and 22 methodology skills.",
+    "developerName": "Sukirman",
+    "category": "Security",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Scan this target for security vulnerabilities",
+      "Perform reconnaissance on this domain"
+    ],
+    "websiteURL": "https://github.com/sukirman1901/cybersec",
+    "brandColor": "#DC2626"
+  }
+}
