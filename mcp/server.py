@@ -110,6 +110,12 @@ from cyber_tools.bandit_scan import bandit_scan as _bandit
 from cyber_tools.semgrep_scan import semgrep_scan as _semgrep
 from cyber_tools.cloud_iam_audit import cloud_iam_audit as _cloud_iam
 from cyber_tools.cloud_infra import cloud_infra as _cloud_infra
+from cyber_tools.jwt_forgery import jwt_forgery as _jwt_forgery
+from cyber_tools.stego_detect import stego_detect as _stego
+from cyber_tools.metrics_check import metrics_check as _metrics
+from cyber_tools.log_exposure import log_exposure as _log_exposure
+from cyber_tools.captcha_test import captcha_test as _captcha
+from cyber_tools.misplaced_files import misplaced_files as _misplaced
 
 mcp = FastMCP("cybersec")
 
@@ -726,6 +732,38 @@ def cloud_iam_audit(provider: str = "aws") -> str:
 def cloud_infra(provider: str = "aws", service: str = "ec2") -> str:
     """Enumerate cloud infra config — open security groups, unencrypted storage, public endpoints."""
     return json.dumps(_run(_cloud_infra(provider, service)), indent=2)
+
+# --- Juice Shop CTF Tools ---
+
+@mcp.tool()
+def jwt_forgery(token: str) -> str:
+    """Test JWT for known attacks — none algorithm, weak secret, kid injection, algorithm confusion."""
+    return json.dumps(_run(_jwt_forgery(token)), indent=2)
+
+@mcp.tool()
+def stego_detect(path: str) -> str:
+    """Detect hidden data in files — steganography, LSB, metadata anomalies, embedded strings."""
+    return json.dumps(_run(_stego(path)), indent=2)
+
+@mcp.tool()
+def metrics_check(target: str) -> str:
+    """Check for exposed metrics endpoints — Prometheus, Actuator, debug, health."""
+    return json.dumps(_run(_metrics(target)), indent=2)
+
+@mcp.tool()
+def log_exposure(target: str) -> str:
+    """Scan for exposed log files — access logs, error logs, debug logs with sensitive data."""
+    return json.dumps(_run(_log_exposure(target)), indent=2)
+
+@mcp.tool()
+def captcha_test(target: str, captcha_param: str = "captcha", token_param: str = "captchaToken") -> str:
+    """Test CAPTCHA bypass — token reuse, empty values, parameter removal, rate limiting."""
+    return json.dumps(_run(_captcha(target, captcha_param, token_param)), indent=2)
+
+@mcp.tool()
+def misplaced_files(target: str) -> str:
+    """Scan for misplaced sensitive files — signatures, certs, configs, backups."""
+    return json.dumps(_run(_misplaced(target)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
