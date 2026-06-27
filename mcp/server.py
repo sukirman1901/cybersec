@@ -51,6 +51,14 @@ from cyber_tools.smuggling_check import smuggling_check as _smuggling
 from cyber_tools.gf_patterns import gf_patterns as _gf
 from cyber_tools.oob_test import oob_test as _oob
 from cyber_tools.nuclei_scan import nuclei_scan as _nuclei
+from cyber_tools.nmap_scan import nmap_scan as _nmap
+from cyber_tools.ldap_enum import ldap_enum as _ldap
+from cyber_tools.bloodhound_collect import bloodhound_collect as _bloodhound
+from cyber_tools.hash_analyze import hash_analyze as _hash
+from cyber_tools.hydra_brute import hydra_brute as _hydra
+from cyber_tools.cloud_enum import cloud_enum as _cloud
+from cyber_tools.s3_scanner import s3_scanner as _s3
+from cyber_tools.searchsploit import searchsploit as _searchsploit
 
 mcp = FastMCP("cybersec")
 
@@ -351,6 +359,48 @@ def oob_test(target: str, payload: str = "") -> str:
 def nuclei_scan(target: str, template: str = "", severity: str = "") -> str:
     """Template-based vulnerability scanner. Requires nuclei CLI."""
     return json.dumps(_run(_nuclei(target, template=template, severity=severity)), indent=2)
+
+# --- Enterprise Pentesting Tools (Phase 2) ---
+
+@mcp.tool()
+def nmap_scan(target: str, ports: str = "", scripts: str = "") -> str:
+    """Full nmap network scan with service detection. Requires nmap CLI."""
+    return json.dumps(_run(_nmap(target, ports=ports, scripts=scripts)), indent=2)
+
+@mcp.tool()
+def ldap_enum(target: str) -> str:
+    """LDAP anonymous bind and server enumeration."""
+    return json.dumps(_run(_ldap(target)), indent=2)
+
+@mcp.tool()
+def bloodhound_collect(domain: str, username: str = "", password: str = "") -> str:
+    """Collect AD data for BloodHound analysis. Requires bloodhound-python CLI."""
+    return json.dumps(_run(_bloodhound(domain, username=username, password=password)), indent=2)
+
+@mcp.tool()
+def hash_analyze(hash_string: str) -> str:
+    """Identify hash type from its format (MD5, SHA1, bcrypt, NTLM, etc)."""
+    return json.dumps(_run(_hash(hash_string)), indent=2)
+
+@mcp.tool()
+def hydra_brute(target: str, service: str = "ssh", username: str = "root", wordlist: str = "") -> str:
+    """Online password brute forcing. Requires hydra CLI."""
+    return json.dumps(_run(_hydra(target, service=service, username=username, wordlist=wordlist)), indent=2)
+
+@mcp.tool()
+def cloud_enum(company: str) -> str:
+    """Enumerate cloud storage resources (AWS S3, Azure, GCP) for a company name."""
+    return json.dumps(_run(_cloud(company)), indent=2)
+
+@mcp.tool()
+def s3_scanner(bucket_name: str) -> str:
+    """Check if an S3 bucket is publicly accessible and list its contents."""
+    return json.dumps(_run(_s3(bucket_name)), indent=2)
+
+@mcp.tool()
+def searchsploit(search_term: str) -> str:
+    """Search exploit-db for exploits. Requires searchsploit CLI."""
+    return json.dumps(_run(_searchsploit(search_term)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
