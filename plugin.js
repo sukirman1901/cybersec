@@ -55,19 +55,15 @@ ${content}
         config.skills.paths.push(skillsDir);
       }
       config.mcp = config.mcp || {};
-      config.mcp.servers = config.mcp.servers || [];
       const venvPython = path.join(mcpsDir, '.venv', 'bin', 'python3');
       const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
-      const cybersecMcp = {
-        type: 'local',
-        name: 'cybersec',
-        transport: 'stdio',
-        command: pythonBin,
-        args: ['-m', 'server'],
-        workingDir: mcpsDir,
-      };
-      if (!config.mcp.servers.some(s => s.name === 'cybersec')) {
-        config.mcp.servers.push(cybersecMcp);
+      if (!config.mcp.cybersec) {
+        config.mcp.cybersec = {
+          type: 'local',
+          command: [pythonBin, '-m', 'server'],
+          cwd: mcpsDir,
+          enabled: true,
+        };
       }
     },
     'experimental.chat.messages.transform': async (_input, output) => {
