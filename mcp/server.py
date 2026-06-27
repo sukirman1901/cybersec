@@ -99,6 +99,11 @@ from cyber_tools.ios_data_storage import ios_data_storage as _ios_storage
 from cyber_tools.ios_objection import ios_objection as _ios_obj
 from cyber_tools.ios_frida import ios_frida as _ios_fr
 from cyber_tools.ios_signing import ios_signing as _ios_sign
+from cyber_tools.desktop_strings import desktop_strings as _desktop_strings
+from cyber_tools.desktop_electron import desktop_electron as _desktop_electron
+from cyber_tools.desktop_config import desktop_config as _desktop_config
+from cyber_tools.desktop_packages import desktop_packages as _desktop_packages
+from cyber_tools.desktop_entitlements import desktop_entitlements as _desktop_ent
 
 mcp = FastMCP("cybersec")
 
@@ -654,6 +659,33 @@ def ios_frida(action: str = "ssl_pinning", process: str = "") -> str:
 def ios_signing(path: str) -> str:
     """Check iOS app signing — provisioning profile, team ID, ad-hoc vs distribution."""
     return json.dumps(_run(_ios_sign(path)), indent=2)
+
+# --- Desktop App Security Testing Tools ---
+
+@mcp.tool()
+def desktop_strings(path: str, min_length: int = 6) -> str:
+    """Extract strings from desktop binaries — find secrets, API keys, URLs, IPs."""
+    return json.dumps(_run(_desktop_strings(path, min_length)), indent=2)
+
+@mcp.tool()
+def desktop_electron(path: str) -> str:
+    """Analyze Electron app — ASAR unpack, preload inspection, IPC safety."""
+    return json.dumps(_run(_desktop_electron(path)), indent=2)
+
+@mcp.tool()
+def desktop_config(path: str, recursive: bool = True) -> str:
+    """Scan for exposed config files and saved credentials in desktop apps."""
+    return json.dumps(_run(_desktop_config(path, recursive)), indent=2)
+
+@mcp.tool()
+def desktop_packages(path: str) -> str:
+    """Check bundled package versions in desktop apps for known CVEs."""
+    return json.dumps(_run(_desktop_packages(path)), indent=2)
+
+@mcp.tool()
+def desktop_entitlements(path: str) -> str:
+    """Check macOS entitlements, Windows manifest, Linux capabilities in desktop apps."""
+    return json.dumps(_run(_desktop_ent(path)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
