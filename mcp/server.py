@@ -104,6 +104,10 @@ from cyber_tools.desktop_electron import desktop_electron as _desktop_electron
 from cyber_tools.desktop_config import desktop_config as _desktop_config
 from cyber_tools.desktop_packages import desktop_packages as _desktop_packages
 from cyber_tools.desktop_entitlements import desktop_entitlements as _desktop_ent
+from cyber_tools.secret_scanner import secret_scanner as _secret_scanner
+from cyber_tools.sast_review import sast_review as _sast_review
+from cyber_tools.bandit_scan import bandit_scan as _bandit
+from cyber_tools.semgrep_scan import semgrep_scan as _semgrep
 
 mcp = FastMCP("cybersec")
 
@@ -686,6 +690,28 @@ def desktop_packages(path: str) -> str:
 def desktop_entitlements(path: str) -> str:
     """Check macOS entitlements, Windows manifest, Linux capabilities in desktop apps."""
     return json.dumps(_run(_desktop_ent(path)), indent=2)
+
+# --- Code Security Audit Tools ---
+
+@mcp.tool()
+def secret_scanner(path: str, min_entropy: float = 4.5) -> str:
+    """Regex + entropy-based secret scanning — API keys, tokens, passwords in code."""
+    return json.dumps(_run(_secret_scanner(path, min_entropy)), indent=2)
+
+@mcp.tool()
+def sast_review(path: str) -> str:
+    """Pattern-based code review — detect eval, deserialization, SQLi, XSS patterns."""
+    return json.dumps(_run(_sast_review(path)), indent=2)
+
+@mcp.tool()
+def bandit_scan(path: str, severity: str = "medium") -> str:
+    """Run bandit SAST scanner on Python codebase."""
+    return json.dumps(_run(_bandit(path, severity)), indent=2)
+
+@mcp.tool()
+def semgrep_scan(path: str, pattern: str = "") -> str:
+    """Run semgrep multi-language SAST — auto or custom pattern."""
+    return json.dumps(_run(_semgrep(path, pattern or None)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
