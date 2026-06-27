@@ -69,6 +69,16 @@ from cyber_tools.java_deserialize import java_deserialize as _java
 from cyber_tools.docker_scan import docker_scan as _docker
 from cyber_tools.k8s_scan import k8s_scan as _k8s
 from cyber_tools.redis_enum import redis_enum as _redis
+from cyber_tools.spring_scan import spring_scan as _spring
+from cyber_tools.nextjs_scan import nextjs_scan as _nextjs
+from cyber_tools.django_scan import django_scan as _django
+from cyber_tools.magento_scan import magento_scan as _magento
+from cyber_tools.drupal_scan import drupal_scan as _drupal
+from cyber_tools.upload_bypass import upload_bypass as _upload
+from cyber_tools.host_header import host_header as _hosthdr
+from cyber_tools.race_condition import race_condition as _race
+from cyber_tools.oauth_scan import oauth_scan as _oauth
+from cyber_tools.api_auth import api_auth as _apiauth
 
 mcp = FastMCP("cybersec")
 
@@ -411,6 +421,58 @@ def s3_scanner(bucket_name: str) -> str:
 def searchsploit(search_term: str) -> str:
     """Search exploit-db for exploits. Requires searchsploit CLI."""
     return json.dumps(_run(_searchsploit(search_term)), indent=2)
+
+# --- Framework & CMS Scanners (Batch 2) ---
+
+@mcp.tool()
+def spring_scan(target: str) -> str:
+    """Spring Boot actuator scan — env, heapdump, beans, mappings, configprops."""
+    return json.dumps(_run(_spring(target)), indent=2)
+
+@mcp.tool()
+def nextjs_scan(target: str) -> str:
+    """Next.js security scan — source maps, data endpoints, SSR misconfig."""
+    return json.dumps(_run(_nextjs(target)), indent=2)
+
+@mcp.tool()
+def django_scan(target: str) -> str:
+    """Django security scan — debug mode, SECRET_KEY, admin, session flags."""
+    return json.dumps(_run(_django(target)), indent=2)
+
+@mcp.tool()
+def magento_scan(target: str) -> str:
+    """Magento security scan — admin, downloader, local.xml, system.log."""
+    return json.dumps(_run(_magento(target)), indent=2)
+
+@mcp.tool()
+def drupal_scan(target: str) -> str:
+    """Drupal security scan — drupalgeddon, install.php, settings.php, jsonapi."""
+    return json.dumps(_run(_drupal(target)), indent=2)
+
+@mcp.tool()
+def upload_bypass(target: str) -> str:
+    """Test file upload filters — PHP/JSP/ASP shell, double ext, null byte, SVG XSS."""
+    return json.dumps(_run(_upload(target)), indent=2)
+
+@mcp.tool()
+def host_header_injection(target: str) -> str:
+    """Test host header injection — password reset poisoning, cache poison."""
+    return json.dumps(_run(_hosthdr(target)), indent=2)
+
+@mcp.tool()
+def race_condition(target: str, parallel: int = 5, endpoint: str = "") -> str:
+    """Test for race conditions by sending parallel requests to sensitive endpoints."""
+    return json.dumps(_run(_race(target, parallel=parallel, endpoint=endpoint)), indent=2)
+
+@mcp.tool()
+def oauth_scan(target: str) -> str:
+    """Scan OAuth/OIDC endpoints — authorize, token, .well-known, redirect_uri."""
+    return json.dumps(_run(_oauth(target)), indent=2)
+
+@mcp.tool()
+def api_auth(target: str) -> str:
+    """Test API auth bypass — no auth, basic, bearer fake, internal headers."""
+    return json.dumps(_run(_apiauth(target)), indent=2)
 
 # --- Advanced Web & Infra Tools (Batch 1) ---
 
