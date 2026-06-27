@@ -35,8 +35,9 @@ async def llm_data_exposure(target: str, extraction_prompt: str = None) -> dict:
                         data_exposure_found = True
                         findings.append({
                             "prompt": prompt[:80],
-                            "pii_type": pii_type,
-                            "matches": list(set(matches))[:5],
+                            "type": pii_type,
+                            "count": len(matches),
+                            "samples": list(set(matches))[:5],
                             "response_snippet": text[:200],
                         })
     except Exception as e:
