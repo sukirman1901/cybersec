@@ -23,6 +23,11 @@ Empowers the AI to perform penetration testing, vulnerability assessment, reconn
 - [How It Works](#how-it-works)
 - [MCP Server Setup](#mcp-server-setup)
 - [MCP Tools Reference](#mcp-tools-reference)
+- [Agents (OpenCode)](#agents-opencode)
+  - [Pentester (Primary)](#pentester-primary)
+  - [Recon (Subagent)](#recon-subagent)
+  - [Vuln Analyst (Subagent)](#vuln-analyst-subagent)
+  - [Report Writer (Subagent)](#report-writer-subagent)
 - [Skills Guide](#skills-guide)
 - [Troubleshooting](#troubleshooting)
 - [Requirements](#requirements)
@@ -205,8 +210,25 @@ After installation, verify it works by asking your agent:
 > "scan port 80,443 on example.com"
 > "check SSL for example.com"
 > "enumerate subdomains for example.com"
+> "audit example.com and generate a report"
 
 The AI will automatically load the right skill and use the MCP tools.
+
+### OpenCode Agents
+
+On OpenCode, press **Tab** to switch to the **Pentester** agent (red), then:
+
+```
+audit example.com
+```
+
+Or invoke subagents directly:
+
+```
+@recon gather intelligence on example.com
+@vuln-analyst scan for vulnerabilities
+@report-writer generate a report
+```
 
 ---
 
@@ -501,6 +523,145 @@ The plugin includes **22** methodology skills that guide the AI through structur
 | **using-cybersec** | (bootstrap — auto-loaded every session) |
 
 Skills load automatically via intent detection. The AI follows the skill's methodology step by step.
+
+---
+
+## Agents (OpenCode)
+
+OpenCode-compatible agents are included in `.opencode/agents/`. These agents have tailored permissions and prompts for different security testing phases.
+
+### Pentester (Primary)
+
+**File:** `.opencode/agents/pentester.md`
+**Mode:** Primary (cycle with Tab: Build → Plan → Pentester)
+**Color:** Red (`#DC2626`)
+**Permissions:** Full access (edit, bash, read, all MCP tools)
+
+The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 125+ MCP tools, can edit files, run bash commands, and dispatch subagents.
+
+**Usage:**
+1. Press **Tab** in OpenCode until you see **Pentester** (red)
+2. Ask: `"audit example.com"` or `"find vulnerabilities in this codebase"`
+
+**Flow:**
+```
+User: "audit example.com"
+  → Pentester auto-loads cybersec-recon skill
+  → Calls @recon subagent for passive intel
+  → Calls @vuln-analyst subagent for active scanning
+  → Calls @report-writer subagent for report
+  → Output: Full penetration testing report
+```
+
+### Recon (Subagent)
+
+**File:** `.opencode/agents/recon.md`
+**Mode:** Subagent (invoke with `@recon`)
+**Color:** Blue (`#3B82F6`)
+**Permissions:** Read-only (no edit, no bash)
+
+Passive reconnaissance and OSINT specialist. Gathers intelligence without actively probing the target.
+
+**Skills:** `cybersec-recon`, `cybersec-osint`
+
+**Tools:** `subdomain_enum`, `dns_lookup`, `whois_lookup`, `crt_search`, `shodan_lookup`, `wayback_urls`, `dork_search`, `ghdb_search`, `reverse_ip`, `asn_lookup`
+
+**Usage:**
+```
+@recon gather intelligence on example.com
+@recon find subdomains for target.com
+@recon run OSINT on this domain
+```
+
+### Vuln Analyst (Subagent)
+
+**File:** `.opencode/agents/vuln-analyst.md`
+**Mode:** Subagent (invoke with `@vuln-analyst`)
+**Color:** Amber (`#F59E0B`)
+**Permissions:** Bash + read (no file editing)
+
+Active vulnerability analyst. Scans, fingerprints, and tests for vulnerabilities. Can run bash commands and MCP tools but cannot edit project files.
+
+**Skills:** `cybersec-scanning`, `cybersec-vulns`, `cybersec-web`, `cybersec-bugbounty`, `cybersec-ad`, `cybersec-cloud`, `cybersec-password`, `cybersec-ai`, `cybersec-ai-safety`, `cybersec-desktop`, `cybersec-code-audit`, `cybersec-ctf`, `cybersec-exploit`
+
+**Tools:** `port_scan`, `nmap_scan`, `ssl_check`, `vuln_scan`, `sqli_detect`, `xss_detect`, `nuclei_scan`, `nikto_scan`, `sqlmap_check`, `exploit_db_search`, `cloud_enum`, `s3_scanner`, `bloodhound_collect`, `ldap_enum`, `bandit_scan`, `semgrep_scan`, `prompt_injection`, `apk_analyze`, `ipa_analyze`, and 80+ more
+
+**Usage:**
+```
+@vuln-analyst scan ports on example.com
+@vuln-analyst test for SQL injection in this URL
+@vuln-analyst run nuclei scan on target
+@vuln-analyst audit this codebase for vulnerabilities
+```
+
+### Report Writer (Subagent)
+
+**File:** `.opencode/agents/report-writer.md`
+**Mode:** Subagent (invoke with `@report-writer`)
+**Color:** Green (`#10B981`)
+**Permissions:** Edit + read (no bash)
+
+Security report writer. Verifies findings and generates professional penetration testing reports with remediation plans.
+
+**Skills:** `cybersec-report`, `cybersec-verification`, `cybersec-review`
+
+**Tools:** `generate_report`, plus all read-only MCP tools for verification
+
+**Usage:**
+```
+@report-writer generate a pentest report from these findings
+@report-writer verify these vulnerabilities and write a report
+@report-writer create a remediation plan for these issues
+```
+
+**Report structure:**
+```
+# Penetration Testing Report
+## Executive Summary
+## Scope
+## Methodology
+## Findings (sorted by severity: Critical → High → Medium → Low → Info)
+  - Description, Evidence, Reproduction, Impact, Remediation
+## Remediation Summary
+## References (CVEs, OWASP, etc.)
+```
+
+### Agent Workflow Diagram
+
+```
+                    ┌─────────────────────────────────┐
+                    │       PENTESTER (primary)       │
+                    │   Tab → Build → Plan → Pentester │
+                    │     Full access, all skills     │
+                    └──────────────┬──────────────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    ▼              ▼              ▼
+             ┌──────────┐  ┌─────────────┐  ┌──────────────┐
+             │  @recon  │  │@vuln-analyst│  │@report-writer│
+             │ read-only│  │ bash + read │  │  edit + read │
+             │ passive  │  │   active    │  │    report    │
+             │ OSINT    │  │  scanning   │  │  verify+write│
+             └──────────┘  └─────────────┘  └──────────────┘
+```
+
+### Creating Custom Agents
+
+You can create your own agents by adding markdown files to `.opencode/agents/`:
+
+```markdown
+---
+description: Custom security analyst for your workflow
+mode: subagent
+permission:
+  edit: deny
+  bash: allow
+---
+Your custom prompt here.
+```
+
+See the [OpenCode Agents documentation](https://opencode.ai/docs/agents/) for full reference.
 
 ---
 
