@@ -94,6 +94,11 @@ from cyber_tools.llm_guardrails import llm_guardrails as _llm_guard
 from cyber_tools.llm_model_dos import llm_model_dos as _llm_dos
 from cyber_tools.llm_data_exposure import llm_data_exposure as _llm_data
 from cyber_tools.llm_agent_hijack import llm_agent_hijack as _llm_hijack
+from cyber_tools.ipa_analyze import ipa_analyze as _ipa
+from cyber_tools.ios_data_storage import ios_data_storage as _ios_storage
+from cyber_tools.ios_objection import ios_objection as _ios_obj
+from cyber_tools.ios_frida import ios_frida as _ios_fr
+from cyber_tools.ios_signing import ios_signing as _ios_sign
 
 mcp = FastMCP("cybersec")
 
@@ -622,6 +627,33 @@ def llm_data_exposure(target: str, extraction_prompt: str = "") -> str:
 def llm_agent_hijack(target: str) -> str:
     """Test agent function call/tool injection in LLM."""
     return json.dumps(_run(_llm_hijack(target)), indent=2)
+
+# --- iOS Security Testing Tools ---
+
+@mcp.tool()
+def ipa_analyze(path: str) -> str:
+    """Analyze iOS IPA file — metadata, entitlements, plist, permissions."""
+    return json.dumps(_run(_ipa(path)), indent=2)
+
+@mcp.tool()
+def ios_data_storage(path: str) -> str:
+    """Check iOS app for insecure local data storage patterns."""
+    return json.dumps(_run(_ios_storage(path)), indent=2)
+
+@mcp.tool()
+def ios_objection(action: str = "keychain", package: str = "") -> str:
+    """Run objection iOS runtime exploration — keychain dump, sqlite, nsuserdefaults."""
+    return json.dumps(_run(_ios_obj(action, package or None)), indent=2)
+
+@mcp.tool()
+def ios_frida(action: str = "ssl_pinning", process: str = "") -> str:
+    """Run frida on iOS device — SSL pinning bypass, method tracing, process list."""
+    return json.dumps(_run(_ios_fr(action, process or None)), indent=2)
+
+@mcp.tool()
+def ios_signing(path: str) -> str:
+    """Check iOS app signing — provisioning profile, team ID, ad-hoc vs distribution."""
+    return json.dumps(_run(_ios_sign(path)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
