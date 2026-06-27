@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-mcp-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          cd mcp
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install fastmcp>=0.4.0 httpx dnspython
+
+      - name: Test MCP server starts and lists tools
+        run: |
+          cd mcp
+          . .venv/bin/activate
+          echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python -m server | python -c "
+          import sys, json
+          data = json.load(sys.stdin)
+          tools = data.get('result', {}).get('tools', [])
+          assert len(tools) >= 100, f'Expected 100+ tools, got {len(tools)}'
+          print(f'PASS: {len(tools)} tools registered')
+          "
+
+  validate-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        run: |
+          for f in \
+            .claude-plugin/plugin.json \
+            .claude-plugin/marketplace.json \
+            .cursor-plugin/plugin.json \
+            .codex-plugin/plugin.json \
+            .kimi-plugin/plugin.json \
+            gemini-extension.json \
+            package.json \
+            hooks/hooks.json \
+            hooks/hooks-cursor.json \
+            hooks/hooks-codex.json; do
+            python -m json.tool "$f" > /dev/null || { echo "INVALID: $f"; exit 1; }
+            echo "OK: $f"
+          done
+
+  validate-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Check Python syntax
+        run: |
+          find mcp/cyber_tools -name "*.py" -exec python -m py_compile {} \;
+          python -m py_compile mcp/server.py
+          echo "All Python files compile OK"
