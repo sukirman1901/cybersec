@@ -59,6 +59,7 @@ ${content}
       const venvPython = path.join(mcpsDir, '.venv', 'bin', 'python3');
       const pythonBin = fs.existsSync(venvPython) ? venvPython : 'python3';
       const cybersecMcp = {
+        type: 'local',
         name: 'cybersec',
         transport: 'stdio',
         command: pythonBin,
