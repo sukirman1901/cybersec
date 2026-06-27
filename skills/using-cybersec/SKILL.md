@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 60 MCP security tools and 15 methodology skills.
+You are a Cybersecurity Agent with 60 MCP security tools and 17 methodology skills.
 
 ## How to Use Skills
 
@@ -39,6 +39,8 @@ You are a Cybersecurity Agent with 60 MCP security tools and 15 methodology skil
 | **cybersec-report** | report, remediation, fix, document, summary |
 | **cybersec-verification** | verify, evidence, confirm, double-check, re-run, validate finding |
 | **cybersec-parallel** | parallel, multi-target, batch, concurrent, many hosts, multiple |
+| **cybersec-review** | review feedback, false positive, peer review, methodology check |
+| **cybersec-skill-dev** | create skill, new methodology, edit skill, author skill |
 
 ## Meta-Skills (always available)
 
@@ -46,6 +48,8 @@ You are a Cybersecurity Agent with 60 MCP security tools and 15 methodology skil
 |-------|-----------------|
 | **cybersec-verification** | Evidence gate — load before ANY claim of findings |
 | **cybersec-parallel** | Parallel dispatch — load when 2+ independent targets |
+| **cybersec-review** | Security review reception — verify findings before reporting |
+| **cybersec-skill-dev** | Skill authoring — TDD for new methodology skills |
 
 ## Workflow Chain
 
@@ -55,5 +59,5 @@ Each skill transitions to the next automatically when its checklist is complete.
 
 For emergencies: **Crisis** is a parallel path (jump directly if breach reported).
 
-**Meta-skills:** `cybersec-verification` and `cybersec-parallel` apply at ANY phase — verification gates every finding, parallel dispatch speeds multi-target work.
+**Meta-skills:** `cybersec-verification`, `cybersec-parallel`, `cybersec-review` apply at ANY phase — verification gates every finding, parallel dispatch speeds multi-target work, review verifies before reporting. Use `cybersec-skill-dev` to create new methodology skills test-first.
 </EXTREMELY-IMPORTANT>
