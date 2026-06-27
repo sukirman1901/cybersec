@@ -6,3 +6,5 @@ __pycache__/
 .env
 .DS_Store
 docs/
+mcp/.findings_db.json
+mcp/.monitor_db.json

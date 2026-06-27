@@ -1,6 +1,6 @@
 # Cybersec — AI Cybersecurity Plugin
 
-**125+ pure-Python MCP security tools** + **22 pentesting methodology skills** for AI coding agents.
+**147+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
 
 Works with: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **GitHub Copilot CLI**, **Kimi Code**, **OpenCode**, **Pi**.
 
@@ -23,6 +23,7 @@ Empowers the AI to perform penetration testing, vulnerability assessment, reconn
 - [How It Works](#how-it-works)
 - [MCP Server Setup](#mcp-server-setup)
 - [MCP Tools Reference](#mcp-tools-reference)
+  - [Enterprise Tools (HackerOne / Pentest-Tools.com inspired)](#enterprise-tools)
 - [Agents (OpenCode)](#agents-opencode)
   - [Pentester (Primary)](#pentester-primary)
   - [Recon (Subagent)](#recon-subagent)
@@ -242,6 +243,8 @@ Or invoke subagents directly:
 
 The AI follows a standard pentesting methodology: **Recon → OSINT → Scanning → Vulnerability Analysis → Web Testing → Bug Bounty → AD → Cloud → Password → AI → AI Safety → Desktop → Code Audit → Exploitation → Reporting**
 
+For continuous monitoring: **CTEM** runs in parallel — Discovery → Validation → Prioritization → Remediation in a continuous loop.
+
 ### Example Session
 
 **User:** "Test security for example.com"
@@ -257,7 +260,7 @@ The AI will:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 125+ security tools via stdio transport using FastMCP.
+The Cybersec MCP server provides 147+ security tools via stdio transport using FastMCP.
 
 ### For Non-OpenCode Platforms
 
@@ -281,7 +284,7 @@ On platforms that don't auto-register the MCP server (Claude Code, Cursor, Codex
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 125+ tools listed.
+Expected: 147+ tools listed.
 
 ---
 
@@ -491,11 +494,29 @@ Require the corresponding CLI binary. Returns install hint if not found:
 | `ssl_pinning_check` | SSL pinning behavior check |
 | `oob_test` | OOB blind interaction test |
 
+### Enterprise Tools
+
+Inspired by HackerOne and Pentest-Tools.com — workflow orchestration, findings management, continuous monitoring, and risk scoring.
+
+| Tool | Description |
+|------|-------------|
+| `attack_surface_map` | Aggregate scan results into an attack surface graph |
+| `findings_manager` | Centralized findings DB — add, list, update status, stats, export, clear. Deduplicates by hash |
+| `vuln_validate` | Verify exploitability, filter false positives with confidence score |
+| `pentest_workflow` | Chain tools with conditions. 5 templates: web-audit, recon-full, network-scan, bugbounty, cloud-audit |
+| `continuous_monitor` | Track target changes over time with snapshot diffing |
+| `retest_vuln` | Re-run scan to confirm fix. Supports sqli, xss, lfi, ssrf, open_redirect, ssti, log4j |
+| `bulk_scan` | Scan multiple targets at once (port_scan, http_probe, ssl_check, vuln_scan). Max 50 |
+| `vuln_diff` | Compare 2 scan results — new, resolved, changed findings + port changes |
+| `authenticated_scan` | Scan behind login (form/cookie/header auth). Detects IDOR, sensitive data, missing headers |
+| `report_export` | Export to HTML, CSV, markdown, JSON. HTML includes styled executive summary |
+| `risk_score` | CVSS + business impact + likelihood scoring |
+
 ---
 
 ## Skills Guide
 
-The plugin includes **22** methodology skills that guide the AI through structured security testing:
+The plugin includes **23** methodology skills that guide the AI through structured security testing:
 
 | Skill | Triggers When User Says... |
 |-------|---------------------------|
@@ -520,6 +541,7 @@ The plugin includes **22** methodology skills that guide the AI through structur
 | **cybersec-parallel** | "parallel", "multi-target", "batch", "concurrent" |
 | **cybersec-review** | "review feedback", "false positive", "peer review" |
 | **cybersec-skill-dev** | "create skill", "new methodology", "edit skill" |
+| **cybersec-ctem** | "CTEM", "attack surface", "continuous monitoring", "exposure management" |
 | **using-cybersec** | (bootstrap — auto-loaded every session) |
 
 Skills load automatically via intent detection. The AI follows the skill's methodology step by step.
@@ -537,7 +559,7 @@ OpenCode-compatible agents are included in `.opencode/agents/`. These agents hav
 **Color:** Red (`#DC2626`)
 **Permissions:** Full access (edit, bash, read, all MCP tools)
 
-The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 125+ MCP tools, can edit files, run bash commands, and dispatch subagents.
+The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 147+ MCP tools, can edit files, run bash commands, and dispatch subagents.
 
 **Usage:**
 1. Press **Tab** in OpenCode until you see **Pentester** (red)
@@ -676,7 +698,7 @@ See the [OpenCode Agents documentation](https://opencode.ai/docs/agents/) for fu
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected output: 125+ tools listed.
+Expected output: 147+ tools listed.
 
 ### OpenCode plugin not loading
 

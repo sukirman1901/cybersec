@@ -2,7 +2,7 @@
 
 ## If You Are an AI Agent
 
-This plugin provides 125+ cybersecurity MCP tools and 22 methodology skills for penetration testing, vulnerability assessment, and security reporting.
+This plugin provides 147+ cybersecurity MCP tools and 23 methodology skills for penetration testing, vulnerability assessment, and security reporting.
 
 Before using these tools against any target:
 
@@ -12,7 +12,7 @@ Before using these tools against any target:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 125+ security tools via stdio transport.
+The Cybersec MCP server provides 147+ security tools via stdio transport.
 
 ### Install Python dependencies
 
@@ -45,11 +45,11 @@ Add to your agent's MCP configuration:
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 125+ tools listed.
+Expected: 147+ tools listed.
 
 ## Skills
 
-This plugin includes 22 cybersecurity methodology skills:
+This plugin includes 23 cybersecurity methodology skills:
 
 | Skill | Triggers When User Says... |
 |-------|---------------------------|
@@ -74,10 +74,13 @@ This plugin includes 22 cybersecurity methodology skills:
 | cybersec-parallel | "parallel", "multi-target", "batch", "concurrent" |
 | cybersec-review | "review feedback", "false positive", "peer review" |
 | cybersec-skill-dev | "create skill", "new methodology", "edit skill" |
+| cybersec-ctem | "CTEM", "attack surface", "continuous monitoring", "exposure management" |
 
 ## Workflow
 
 Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → AI Safety → Desktop → Code Audit → Exploit → Report**
+
+For continuous monitoring: **CTEM** runs in parallel — Discovery → Validation → Prioritization → Remediation in a continuous loop.
 
 Skills load automatically via intent detection. The AI follows the skill's methodology step by step.
 

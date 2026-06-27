@@ -132,11 +132,22 @@ from cyber_tools.vhost_discovery import vhost_discovery as _vhost
 from cyber_tools.joomla_scan import joomla_scan as _joomla
 from cyber_tools.sharepoint_scan import sharepoint_scan as _sharepoint
 from cyber_tools.ghdb_search import ghdb_search as _ghdb
+mcp = FastMCP("cybersec")
+
 from cyber_tools.exploit_db import exploit_db_search as _exploit_search
 from cyber_tools.exploit_db import exploit_db_detail as _exploit_detail
 from cyber_tools.exploit_db import exploit_db_download as _exploit_download
-
-mcp = FastMCP("cybersec")
+from cyber_tools.attack_surface import attack_surface_map as _attack_surface
+from cyber_tools.findings_manager import findings_manager as _findings_mgr
+from cyber_tools.vuln_validate import vuln_validate as _vuln_validate
+from cyber_tools.pentest_workflow import pentest_workflow as _pentest_workflow
+from cyber_tools.continuous_monitor import continuous_monitor as _continuous_monitor
+from cyber_tools.retest_vuln import retest_vuln as _retest_vuln
+from cyber_tools.bulk_scan import bulk_scan as _bulk_scan
+from cyber_tools.vuln_diff import vuln_diff as _vuln_diff
+from cyber_tools.authenticated_scan import authenticated_scan as _authenticated_scan
+from cyber_tools.report_export import report_export as _report_export
+from cyber_tools.risk_score import risk_score as _risk_score
 
 def _run(coro):
     try:
@@ -880,6 +891,63 @@ def exploit_db_detail(exploit_id: str) -> str:
 def exploit_db_download(exploit_id: str) -> str:
     """Download exploit code from Exploit-DB by exploit ID."""
     return json.dumps(_run(_exploit_download(exploit_id)), indent=2)
+
+# --- Enterprise Tools (HackerOne / Pentest-Tools.com inspired) ---
+
+@mcp.tool()
+def attack_surface_map(scan_results: str) -> str:
+    """Build an attack surface map from aggregated scan results. Accepts JSON string with results from port_scan, dns_lookup, subdomain_enum, http_probe, vuln_scan, etc."""
+    return _attack_surface(scan_results)
+
+@mcp.tool()
+def findings_manager(action: str, findings_json: str = "", finding_id: str = "", status: str = "", notes: str = "") -> str:
+    """Manage penetration testing findings — add, list, update status, stats, export, clear. Deduplicates by hash. Status: new, confirmed, false_positive, fixing, fixed, retested, wont_fix."""
+    return _findings_mgr(action, findings_json, finding_id, status, notes)
+
+@mcp.tool()
+def vuln_validate(finding_json: str) -> str:
+    """Validate a vulnerability finding — confirm exploitability or flag as false positive. Accepts JSON with type, host, evidence, response."""
+    return _vuln_validate(finding_json)
+
+@mcp.tool()
+def pentest_workflow(target: str, template: str = "web-audit", custom_json: str = "") -> str:
+    """Define a chain of pentest tools with conditions. Templates: web-audit, recon-full, network-scan, bugbounty, cloud-audit. Or provide custom JSON."""
+    return _pentest_workflow(target, template, custom_json)
+
+@mcp.tool()
+def continuous_monitor(target: str, scan_results: str = "", action: str = "record") -> str:
+    """Monitor a target for changes over time. Actions: record, history, diff, stats, clear. Stores snapshots and detects changes."""
+    return _continuous_monitor(target, scan_results, action)
+
+@mcp.tool()
+def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: str = "") -> str:
+    """Retest a previously found vulnerability to confirm if it's fixed. Supports: sqli, xss, lfi, ssrf, open_redirect, ssti, log4j."""
+    return _retest_vuln(target, vuln_type, param, original_payload)
+
+@mcp.tool()
+def bulk_scan(targets: str, tool: str = "port_scan") -> str:
+    """Scan multiple targets at once. Targets: comma or newline separated. Tool: port_scan, http_probe, ssl_check, vuln_scan. Max 50 targets."""
+    return _bulk_scan(targets, tool)
+
+@mcp.tool()
+def vuln_diff(scan_before: str, scan_after: str) -> str:
+    """Compare 2 scan results to identify new, resolved, and changed vulnerabilities. Accepts 2 JSON strings from any scan."""
+    return _vuln_diff(scan_before, scan_after)
+
+@mcp.tool()
+def authenticated_scan(target: str, login_url: str = "", username: str = "", password: str = "", auth_type: str = "form", cookies: str = "", headers: str = "") -> str:
+    """Scan a web target behind authentication. auth_type: form (username/password), cookie (session cookie JSON), header (bearer/api key JSON). Detects IDOR, sensitive data, missing headers."""
+    return _authenticated_scan(target, login_url, username, password, auth_type, cookies, headers)
+
+@mcp.tool()
+def report_export(target: str, findings_json: str, format: str = "html") -> str:
+    """Export pentest report to multiple formats: html, csv, markdown, json. HTML includes styled executive summary with severity color coding."""
+    return _report_export(target, findings_json, format)
+
+@mcp.tool()
+def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
+    """Calculate risk score for a vulnerability finding. Combines CVSS severity, business impact, and exploitability likelihood. asset_value: low, medium, high, critical."""
+    return _risk_score(finding_json, target_asset_value)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

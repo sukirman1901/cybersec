@@ -80,6 +80,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 | **cybersec-ctf** | CTF, capture the flag, Juice Shop, challenges, scoring, CTF methodology |
 | **cybersec-ai-safety** | AI safety, bug bounty, OpenAI, prompt injection, agent hijack, MCP abuse, data exfiltration |
 | **cybersec-skill-dev** | create skill, new methodology, edit skill, author skill |
+| **cybersec-ctem** | CTEM, attack surface, continuous monitoring, exposure management |
 
 ## Meta-Skills (always available)
 
@@ -93,6 +94,8 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 ## Workflow Chain
 
 Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → AI Safety → Desktop → Code Audit → Exploit → Report**
+
+For continuous monitoring: **CTEM** runs in parallel — Discovery → Validation → Prioritization → Remediation in a continuous loop.
 For CTFs: **CTF** is a parallel path covering all phases — load `cybersec-ctf` for challenge-based engagements like OWASP Juice Shop.
 For AI Safety BB: **AI Safety** follows AI phase — load `cybersec-ai-safety` for OpenAI Safety Bug Bounty scope (prompt injection, agent hijack, MCP abuse, anti-automation).
 
