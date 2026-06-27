@@ -108,6 +108,8 @@ from cyber_tools.secret_scanner import secret_scanner as _secret_scanner
 from cyber_tools.sast_review import sast_review as _sast_review
 from cyber_tools.bandit_scan import bandit_scan as _bandit
 from cyber_tools.semgrep_scan import semgrep_scan as _semgrep
+from cyber_tools.cloud_iam_audit import cloud_iam_audit as _cloud_iam
+from cyber_tools.cloud_infra import cloud_infra as _cloud_infra
 
 mcp = FastMCP("cybersec")
 
@@ -712,6 +714,18 @@ def bandit_scan(path: str, severity: str = "medium") -> str:
 def semgrep_scan(path: str, pattern: str = "") -> str:
     """Run semgrep multi-language SAST — auto or custom pattern."""
     return json.dumps(_run(_semgrep(path, pattern or None)), indent=2)
+
+# --- Cloud Security Testing Tools ---
+
+@mcp.tool()
+def cloud_iam_audit(provider: str = "aws") -> str:
+    """Audit cloud IAM policies — overly permissive roles, public access, cross-account trust."""
+    return json.dumps(_run(_cloud_iam(provider)), indent=2)
+
+@mcp.tool()
+def cloud_infra(provider: str = "aws", service: str = "ec2") -> str:
+    """Enumerate cloud infra config — open security groups, unencrypted storage, public endpoints."""
+    return json.dumps(_run(_cloud_infra(provider, service)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
