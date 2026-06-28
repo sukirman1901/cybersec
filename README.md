@@ -4,7 +4,7 @@
 
 # Cybersec — AI Cybersecurity Plugin
 
-**163+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
+**172+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
 
 Works with: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **GitHub Copilot CLI**, **Kimi Code**, **OpenCode**, **Pi**.
 
@@ -265,7 +265,7 @@ The AI will:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 163+ security tools via stdio transport using FastMCP.
+The Cybersec MCP server provides 172+ security tools via stdio transport using FastMCP.
 
 ### For Non-OpenCode Platforms
 
@@ -289,7 +289,7 @@ On platforms that don't auto-register the MCP server (Claude Code, Cursor, Codex
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 163+ tools listed.
+Expected: 172+ tools listed.
 
 ---
 
@@ -539,6 +539,16 @@ Automated exploitation, workflow management, OSINT, reporting, and integrations.
 | `vuln_database` | Local vulnerability database — add, search, update, delete, tags, import/export |
 | `github_issue` | Create GitHub issue from security finding — labels, severity, evidence |
 | `custom_wordlist` | Custom wordlist manager — create, merge, generate, import, upload |
+| `auth_macro_runner` | Multi-step auth session chain — form login, basic auth, bearer token, cookie persistence, custom step sequences |
+| `csrf_extract` | Extract and analyze anti-CSRF tokens from meta tags, hidden inputs, JS variables, cookies, and headers |
+| `idor_access_validation` | Multi-role IDOR/BOLA validation — sequential enum, cross-user access, negative/array bypass |
+| `injection_validator` | Unified injection validator — SQLi, XSS, NoSQL, CMD, LDAP, SSTI, XXE with multi-technique payloads |
+| `oast_callback_server` | OAST callback correlation for blind SSRF/XXE/OOB — generate, poll, status, retry |
+| `upload_exploit_chain` | Upload → Verify → Execute chain — PHP/JSP/ASP/SVG/PY/SH payloads with execution validation |
+| `cache_poison_check` | Web cache poisoning detection — header injection, cache deception, scheme bypass, key manipulation |
+| `cmd_oast_helper` | Blind command injection OAST — OOB callback correlation + time-based detection |
+| `report_schema_v2` | Standardized report schema v2 — validate, convert v1→v2, merge, create with evidence chain hash |
+| `vuln_validate` | **[UPGRADED]** Confidence engine v2 — evidence scoring, FP signal detection, reproducibility check, severity-adjusted recommendations |
 
 ---
 
@@ -587,7 +597,7 @@ OpenCode-compatible agents are included in `.opencode/agents/`. These agents hav
 **Color:** Red (`#DC2626`)
 **Permissions:** Full access (edit, bash, read, all MCP tools)
 
-The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 163+ MCP tools, can edit files, run bash commands, and dispatch subagents.
+The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 172+ MCP tools, can edit files, run bash commands, and dispatch subagents.
 
 **Usage:**
 1. Press **Tab** in OpenCode until you see **Pentester** (red)
@@ -726,7 +736,7 @@ See the [OpenCode Agents documentation](https://opencode.ai/docs/agents/) for fu
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected output: 163+ tools listed.
+Expected output: 172+ tools listed.
 
 ### OpenCode plugin not loading
 

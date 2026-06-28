@@ -2,7 +2,7 @@
 
 ## If You Are an AI Agent
 
-This plugin provides 163+ cybersecurity MCP tools and 23 methodology skills for penetration testing, vulnerability assessment, and security reporting.
+This plugin provides 172+ cybersecurity MCP tools and 23 methodology skills for penetration testing, vulnerability assessment, and security reporting.
 
 Before using these tools against any target:
 
@@ -12,7 +12,7 @@ Before using these tools against any target:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 163+ security tools via stdio transport.
+The Cybersec MCP server provides 172+ security tools via stdio transport.
 
 ### Install Python dependencies
 
@@ -45,7 +45,7 @@ Add to your agent's MCP configuration:
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 163+ tools listed.
+Expected: 172+ tools listed.
 
 ## Skills
 

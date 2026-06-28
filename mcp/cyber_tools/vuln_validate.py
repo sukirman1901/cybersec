@@ -1,116 +1,142 @@
-"""Vulnerability validation — verify exploitability and filter false positives."""
-
+"""Vulnerability validation v2 — enhanced confidence engine, evidence scoring, reproducibility check."""
 import json
 from datetime import datetime
+import hashlib
 
-FP_PATTERNS = {
-    "sqli": [
-        "syntax error.*mysql",
-        "syntax error.*postgresql",
-        "warning.*mysqli",
-        "pdo.*syntax",
-    ],
-    "xss": [
-        "reflected.*input.*not.*found",
-        "payload.*encoded",
-        "waf.*blocked",
-    ],
-    "ssrf": [
-        "connection.*refused",
-        "timeout.*connect",
-        "dns.*not.*found",
-    ],
-    "lfi": [
-        "file.*not.*found",
-        "permission.*denied",
-        "no such file",
-    ],
-    "ssti": [
-        "template.*not.*found",
-        "syntax.*error.*template",
-    ],
-    "open_redirect": [
-        "redirect.*not.*followed",
-        "same.*page.*redirect",
-    ],
+SEVERITY_WEIGHTS = {"critical": 10, "high": 8, "medium": 5, "low": 2, "info": 0}
+MAX_CONFIDENCE = 99
+
+EVIDENCE_TYPES = {
+    "response_body": 15, "response_time": 10, "response_header": 12,
+    "error_message": 10, "status_code": 8, "callback_received": 20,
+    "data_extracted": 18, "command_output": 18, "file_read": 18,
+    "poc_generated": 15, "multiple_payloads": 10, "reproducible": 15,
 }
 
-CONFIRM_INDICATORS = {
-    "sqli": ["union select", "information_schema", "sleep(", "benchmark(", "extractvalue", "updatexml"],
-    "xss": ["<script>", "alert(", "onerror=", "onload=", "javascript:"],
-    "ssrf": ["169.254.169.254", "metadata", "instance-id", "iam"],
-    "lfi": ["root:", "daemon:", "bin:", "/etc/passwd", "/etc/shadow", "[boot loader]"],
-    "ssti": ["{{", "}}", "#{", "*{", "pwn", "49", "1337"],
-    "open_redirect": ["location:", "redirect:", "302", "301"],
-    "log4j": ["${jndi:", "${lower:", "${upper:", "${env:"],
-    "xxe": ["system", "entity", "file://", "<!ENTITY"],
-    "cmd_injection": ["uid=", "gid=", "root", "whoami", "id", "/bin/"],
+FP_SIGNALS = {
+    "sqli": ["syntax error.*mysql", "warning.*mysqli", "pdo.*syntax", "no such table", "column.*not found"],
+    "xss": ["waf.*blocked", "payload.*rejected", "input.*filtered", "request.*blocked"],
+    "ssrf": ["connection refused", "dns resolution failed", "timeout reached", "host unreachable"],
+    "lfi": ["no such file", "permission denied", "file not found", "not allowed", "path restricted"],
+    "cmd": ["command not found", "not recognized", "permission denied", "access denied"],
+    "ssti": ["template not found", "syntax error.*template", "invalid template", "template error"],
+    "xxe": ["parser error", "xml parsing failed", "entity not allowed", "doctype not allowed"],
+    "log4j": ["invalid jndi", "lookup failed", "not allowed"],
 }
-
 
 def vuln_validate(finding_json: str) -> str:
-    """Validate a vulnerability finding — confirm exploitability or flag as false positive.
-
-    Accepts JSON string with: type, host, port, description, evidence, response
-    Returns validation result with confidence score.
-    """
     try:
-        finding = json.loads(finding_json)
-    except json.JSONDecodeError:
-        return json.dumps({"error": "Invalid JSON input"}, indent=2)
+        finding = json.loads(finding_json) if isinstance(finding_json, str) else finding_json
+    except Exception:
+        return json.dumps({"error": "Invalid JSON"}, indent=2)
 
-    vuln_type = finding.get("type", "").lower()
-    evidence = finding.get("evidence", "")
-    response = finding.get("response", "")
+    vuln_type = finding.get("type", finding.get("vuln_type", "")).lower()
+    evidence = finding.get("evidence", finding.get("response", ""))
     description = finding.get("description", "")
-    combined = f"{evidence} {response} {description}".lower()
+    severity = finding.get("severity", "medium").lower()
+    combined = f"{evidence} {description}".lower()
 
     result = {
-        "finding_id": finding.get("id", "unknown"),
+        "finding_id": finding.get("id", finding.get("finding_id", "unknown")),
         "type": vuln_type,
-        "host": finding.get("host", "unknown"),
+        "target": finding.get("target", finding.get("host", "")),
         "validation": "unverified",
         "confidence": 0,
         "is_false_positive": False,
         "fp_reason": "",
-        "confirmed_indicators": [],
-        "fp_indicators": [],
-        "validated_at": datetime.now().isoformat(),
-        "recommendation": "",
+        "evidence_scored": [],
+        "fp_signals_detected": [],
+        "reproducible": False,
+        "vulnerability_hash": "",
     }
 
-    for pattern_set in FP_PATTERNS.values():
-        for pattern in pattern_set:
-            if pattern in combined:
-                result["fp_indicators"].append(pattern)
-                result["is_false_positive"] = True
-                result["fp_reason"] = f"Matched FP pattern: {pattern}"
+    score = 0
+    max_score = 0
 
-    confirm_patterns = CONFIRM_INDICATORS.get(vuln_type, [])
-    for pattern in confirm_patterns:
-        if pattern.lower() in combined:
-            result["confirmed_indicators"].append(pattern)
+    # 1. Score each evidence type
+    for etype, weight in EVIDENCE_TYPES.items():
+        max_score += weight
+        if etype == "response_body" and evidence and len(evidence) > 50:
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "response_time" and finding.get("response_time", 0) > 3:
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "status_code" and finding.get("status", finding.get("status_code", 0)) in (200, 500):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "error_message" and any(e in evidence.lower() for e in ["error", "warning", "exception", "fatal", "sql", "syntax"]):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "command_output" and any(e in evidence.lower() for e in ["uid=", "gid=", "www-data", "root:"]):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "file_read" and any(e in evidence.lower() for e in ["root:", "daemon:", "bin/bash", "/etc/"]):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "poc_generated" and evidence and finding.get("poc_url", finding.get("poc_link", "")):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "data_extracted" and finding.get("data", finding.get("extracted_data", "")):
+            score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
 
-    fp_count = len(result["fp_indicators"])
-    confirm_count = len(result["confirmed_indicators"])
+    # 2. Reproducibility check
+    if finding.get("reproducible", finding.get("repeatable", False)):
+        score += EVIDENCE_TYPES["reproducible"]
+        result["reproducible"] = True
+        result["evidence_scored"].append({"type": "reproducible", "score": EVIDENCE_TYPES["reproducible"]})
 
-    if confirm_count > 0 and fp_count == 0:
-        result["validation"] = "confirmed"
-        result["confidence"] = min(90 + confirm_count * 5, 99)
-        result["recommendation"] = "Vulnerability confirmed. Proceed with remediation."
-    elif confirm_count > 0 and fp_count > 0:
-        result["validation"] = "likely_confirmed"
-        result["confidence"] = 60 + confirm_count * 10 - fp_count * 15
-        result["confidence"] = max(result["confidence"], 30)
-        result["recommendation"] = "Likely confirmed but some FP indicators present. Manual review recommended."
-    elif fp_count > 0 and confirm_count == 0:
-        result["validation"] = "false_positive"
-        result["confidence"] = 80 + fp_count * 5
-        result["confidence"] = min(result["confidence"], 95)
-        result["recommendation"] = "Likely false positive. Review before reporting."
+    # 3. Multiple payloads tested
+    payloads = finding.get("payloads_tested", finding.get("payloads", []))
+    if isinstance(payloads, list) and len(payloads) >= 2:
+        score += EVIDENCE_TYPES["multiple_payloads"]
+        result["evidence_scored"].append({"type": "multiple_payloads", "score": EVIDENCE_TYPES["multiple_payloads"]})
+
+    # 4. FP signal detection
+    fp_score = 0
+    for ftype, signals in FP_SIGNALS.items():
+        for signal in signals:
+            import re
+            if re.search(signal, combined):
+                result["fp_signals_detected"].append({"type": ftype, "signal": signal})
+                fp_score += 15
+
+    # 5. Calculate confidence
+    if max_score > 0:
+        raw_conf = (score / max_score) * 100
     else:
+        raw_conf = 40
+
+    confidence = raw_conf - fp_score
+    confidence = max(confidence, 5)
+    confidence = min(confidence, MAX_CONFIDENCE)
+    result["confidence"] = round(confidence)
+
+    # 6. Determine validation state
+    if result["fp_signals_detected"] and confidence < 30:
+        result["validation"] = "false_positive"
+        result["is_false_positive"] = True
+        result["fp_reason"] = f"FP signals: {', '.join(s['signal'] for s in result['fp_signals_detected'][:3])}"
+    elif confidence >= 70 and result["reproducible"]:
+        result["validation"] = "confirmed"
+    elif confidence >= 60:
+        result["validation"] = "likely_confirmed"
+    elif confidence >= 30:
         result["validation"] = "unverified"
-        result["confidence"] = 50
-        result["recommendation"] = "No clear indicators. Manual verification required."
+    else:
+        result["validation"] = "false_positive"
+        result["is_false_positive"] = True
+
+    # 7. Severity-adjusted recommendation
+    sev_map = {
+        "critical": "Immediate remediation required within 24 hours",
+        "high": "Urgent remediation within 7 days",
+        "medium": "Schedule remediation within 30 days",
+        "low": "Optional — address during next sprint",
+        "info": "Informational — no action required"
+    }
+    result["recommendation"] = sev_map.get(severity, "Manual review required")
+    if result["is_false_positive"]:
+        result["recommendation"] = "Flagged as false positive — verify manually before discarding"
+    elif result["validation"] == "unverified":
+        result["recommendation"] = "Manual verification required — insufficient evidence"
+
+    # 8. Vulnerability hash (evidence chain integrity)
+    hash_input = f"{result['type']}{result['target']}{evidence[:500]}{datetime.utcnow().isoformat()}"
+    result["vulnerability_hash"] = hashlib.sha256(hash_input.encode()).hexdigest()[:16]
+    result["validated_at"] = datetime.utcnow().isoformat() + "Z"
 
     return json.dumps(result, indent=2)

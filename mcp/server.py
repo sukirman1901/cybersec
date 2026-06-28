@@ -164,6 +164,15 @@ from cyber_tools.branded_report import branded_report as _branded_report
 from cyber_tools.vuln_database import vuln_database as _vuln_database
 from cyber_tools.github_issue import github_issue as _github_issue
 from cyber_tools.custom_wordlist import custom_wordlist as _custom_wordlist
+from cyber_tools.auth_macro_runner import auth_macro_runner as _auth_macro_runner
+from cyber_tools.csrf_extract import csrf_extract as _csrf_extract
+from cyber_tools.idor_access_validation import idor_access_validation as _idor_access_validation
+from cyber_tools.injection_validator import injection_validator as _injection_validator
+from cyber_tools.oast_callback_server import oast_callback_server as _oast_callback_server
+from cyber_tools.upload_exploit_chain import upload_exploit_chain as _upload_exploit_chain
+from cyber_tools.cache_poison_check import cache_poison_check as _cache_poison_check
+from cyber_tools.cmd_oast_helper import cmd_oast_helper as _cmd_oast_helper
+from cyber_tools.report_schema_v2 import report_schema_v2 as _report_schema_v2
 
 def _run(coro):
     try:
@@ -1046,6 +1055,53 @@ def github_issue(finding_json: str, repo: str = "", token: str = "", labels: str
 def custom_wordlist(action: str, name: str = "", words: str = "", wordlist: str = "", source: str = "", ext: str = "") -> str:
     """Custom wordlist manager. Actions: create, list, show, delete, merge, generate, import, builtin, append."""
     return _custom_wordlist(action, name, words, wordlist, source, ext)
+
+# --- Upgraded Tools (10 new/improved) ---
+
+@mcp.tool()
+def auth_macro_runner(target: str, auth_type: str = "form", username: str = "", password: str = "", login_url: str = "", username_field: str = "username", password_field: str = "password", extra_fields: str = "", token_extract: str = "", steps_json: str = "") -> str:
+    """Multi-step auth macro runner — form login, basic auth, bearer token, custom step chains with cookie persistence."""
+    return _auth_macro_runner(target, auth_type, username, password, login_url, username_field, password_field, extra_fields, token_extract, steps_json)
+
+@mcp.tool()
+def csrf_extract(target: str, method: str = "get", param_hint: str = "") -> str:
+    """Extract and analyze anti-CSRF tokens from meta tags, hidden inputs, JS variables, cookies, headers."""
+    return _csrf_extract(target, method, param_hint)
+
+@mcp.tool()
+def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5", user_a_cookie: str = "", user_b_cookie: str = "", param: str = "id", method: str = "get", role_a_header: str = "", role_b_header: str = "") -> str:
+    """IDOR/BOLA access validation — sequential enumeration, cross-user access, negative IDs, array bypass."""
+    return _idor_access_validation(target, resource_ids, user_a_cookie, user_b_cookie, param, method, role_a_header, role_b_header)
+
+@mcp.tool()
+def injection_validator(target: str, types: str = "sqli,xss,nosql,cmd,ldap,ssti,xxe", param: str = "q", method: str = "get", technique: str = "basic") -> str:
+    """Unified injection validator — SQLi, XSS, NoSQL, CMD, LDAP, SSTI, XXE with multi-technique payloads."""
+    return _injection_validator(target, types, param, method, technique)
+
+@mcp.tool()
+def oast_callback_server(action: str, payload: str = "", callback_id: str = "", poll_url: str = "", max_wait: int = 15, platform: str = "auto") -> str:
+    """OAST callback server for blind SSRF/XXE/OOB correlation. Actions: generate, poll, status, clear."""
+    return _oast_callback_server(action, payload, callback_id, poll_url, max_wait, platform)
+
+@mcp.tool()
+def upload_exploit_chain(target: str, upload_url: str = "", file_type: str = "php", param_name: str = "file", content: str = "") -> str:
+    """Upload exploit-chain validation — upload (PHP/JSP/ASP/SVG/PY/SH) → verify accessibility → execute payload."""
+    return _upload_exploit_chain(target, upload_url, file_type, param_name, content)
+
+@mcp.tool()
+def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = "X-Forwarded-Host,X-Forwarded-For,X-Original-URL,X-Rewrite-URL,X-Custom-IP-Authorization,X-Real-IP") -> str:
+    """Web cache poisoning detection — header manipulation, cache key injection, cache deception, scheme bypass."""
+    return _cache_poison_check(target, cache_buster, test_headers)
+
+@mcp.tool()
+def cmd_oast_helper(target: str, param: str = "cmd", method: str = "get", test_type: str = "oob", oob_domain: str = "", callback_server: str = "") -> str:
+    """Command injection OAST helper — blind CMD testing with OOB callback correlation and time-based detection."""
+    return _cmd_oast_helper(target, param, method, test_type, oob_domain, callback_server)
+
+@mcp.tool()
+def report_schema_v2(action: str, findings_json: str = "", report_metadata: str = "", finding_id: str = "", filter_criteria: str = "") -> str:
+    """Report schema v2 — validate, convert v1→v2, merge, create standardized reports with evidence chain."""
+    return _report_schema_v2(action, findings_json, report_metadata, finding_id, filter_criteria)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
