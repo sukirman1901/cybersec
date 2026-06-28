@@ -4,7 +4,7 @@
 
 # Cybersec — AI Cybersecurity Plugin
 
-**172+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
+**180+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
 
 Works with: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **GitHub Copilot CLI**, **Kimi Code**, **OpenCode**, **Pi**.
 
@@ -265,7 +265,7 @@ The AI will:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 172+ security tools via stdio transport using FastMCP.
+The Cybersec MCP server provides 180+ security tools via stdio transport using FastMCP.
 
 ### For Non-OpenCode Platforms
 
@@ -289,7 +289,7 @@ On platforms that don't auto-register the MCP server (Claude Code, Cursor, Codex
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 172+ tools listed.
+Expected: 180+ tools listed.
 
 ---
 
@@ -549,6 +549,14 @@ Automated exploitation, workflow management, OSINT, reporting, and integrations.
 | `cmd_oast_helper` | Blind command injection OAST — OOB callback correlation + time-based detection |
 | `report_schema_v2` | Standardized report schema v2 — validate, convert v1→v2, merge, create with evidence chain hash |
 | `vuln_validate` | **[UPGRADED]** Confidence engine v2 — evidence scoring, FP signal detection, reproducibility check, severity-adjusted recommendations |
+| `engagement_gate` | Pre-flight scope validation, authorization check, engagement rules, target verification |
+| `approval_artifact` | Digital approval workflow — request/approve/deny for destructive actions with audit trail |
+| `session_verification` | Validate session cookies, JWT, bearer tokens, API keys — check expiry, format, security flags |
+| `http_ingest` | Import URLs, cURL commands, raw HTTP, HAR, Burp XML, OpenAPI specs into standardized findings |
+| `raw_replay` | Faithful raw HTTP replay — send exact bytes, capture full response, template preview |
+| `evidence_manifest` | SHA256 hash chain for court-admissible evidence — add, verify, diff, ledger integrity |
+| `cleanup_tracking` | Log modifications/uploads, generate cleanup scripts, track artifact state |
+| `vulnerable_fixture` | Local vulnerable app (SQLi, XSS, LFI, CMD, SSRF) for E2E tool validation |
 
 ---
 
@@ -597,7 +605,7 @@ OpenCode-compatible agents are included in `.opencode/agents/`. These agents hav
 **Color:** Red (`#DC2626`)
 **Permissions:** Full access (edit, bash, read, all MCP tools)
 
-The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 172+ MCP tools, can edit files, run bash commands, and dispatch subagents.
+The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 180+ MCP tools, can edit files, run bash commands, and dispatch subagents.
 
 **Usage:**
 1. Press **Tab** in OpenCode until you see **Pentester** (red)
@@ -736,7 +744,7 @@ See the [OpenCode Agents documentation](https://opencode.ai/docs/agents/) for fu
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected output: 172+ tools listed.
+Expected output: 180+ tools listed.
 
 ### OpenCode plugin not loading
 

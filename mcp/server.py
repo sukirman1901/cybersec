@@ -173,6 +173,14 @@ from cyber_tools.upload_exploit_chain import upload_exploit_chain as _upload_exp
 from cyber_tools.cache_poison_check import cache_poison_check as _cache_poison_check
 from cyber_tools.cmd_oast_helper import cmd_oast_helper as _cmd_oast_helper
 from cyber_tools.report_schema_v2 import report_schema_v2 as _report_schema_v2
+from cyber_tools.engagement_gate import engagement_gate as _engagement_gate
+from cyber_tools.approval_artifact import approval_artifact as _approval_artifact
+from cyber_tools.session_verification import session_verification as _session_verification
+from cyber_tools.http_ingest import http_ingest as _http_ingest
+from cyber_tools.raw_replay import raw_replay as _raw_replay
+from cyber_tools.evidence_manifest import evidence_manifest as _evidence_manifest
+from cyber_tools.cleanup_tracking import cleanup_tracking as _cleanup_tracking
+from cyber_tools.vulnerable_fixture import vulnerable_fixture as _vulnerable_fixture
 
 def _run(coro):
     try:
@@ -1102,6 +1110,48 @@ def cmd_oast_helper(target: str, param: str = "cmd", method: str = "get", test_t
 def report_schema_v2(action: str, findings_json: str = "", report_metadata: str = "", finding_id: str = "", filter_criteria: str = "") -> str:
     """Report schema v2 — validate, convert v1→v2, merge, create standardized reports with evidence chain."""
     return _report_schema_v2(action, findings_json, report_metadata, finding_id, filter_criteria)
+
+# --- 8 Gap Tools ---
+
+@mcp.tool()
+def engagement_gate(action: str, target: str = "", scope_json: str = "", rule: str = "", confirmation: str = "") -> str:
+    """Engagement gate — scope validation, authorization check, pre-flight approval rules."""
+    return _engagement_gate(action, target, scope_json, rule, confirmation)
+
+@mcp.tool()
+def approval_artifact(action: str, tool_name: str = "", target: str = "", rationale: str = "", approver: str = "", artifact_id: str = "", method: str = "json") -> str:
+    """Approval artifact — digital approval/signature before destructive actions."""
+    return _approval_artifact(action, tool_name, target, rationale, approver, artifact_id, method)
+
+@mcp.tool()
+def session_verification(action: str, session_data: str = "", session_type: str = "cookie", target: str = "") -> str:
+    """Session verification — validate session cookies, tokens, expiry before testing."""
+    return _session_verification(action, session_data, session_type, target)
+
+@mcp.tool()
+def http_ingest(action: str, data: str = "", format: str = "url", target: str = "", output: str = "json") -> str:
+    """HTTP ingest — parse URL, OpenAPI, HAR, Burp XML, raw HTTP, curl → standardized findings."""
+    return _http_ingest(action, data, format, target, output)
+
+@mcp.tool()
+def raw_replay(action: str, raw_request: str = "", target: str = "", url: str = "", method: str = "GET", headers_json: str = "", body: str = "", follow_redirects: bool = False, timeout: int = 15) -> str:
+    """Faithful raw HTTP request replay — send exact bytes, capture full response."""
+    return _raw_replay(action, raw_request, target, url, method, headers_json, body, follow_redirects, timeout)
+
+@mcp.tool()
+def evidence_manifest(action: str, evidence_json: str = "", manifest_id: str = "", filter_type: str = "", chain_depth: int = 0, verify_hash: str = "") -> str:
+    """Evidence manifest — SHA256 hash chain for court-admissible evidence integrity."""
+    return _evidence_manifest(action, evidence_json, manifest_id, filter_type, chain_depth, verify_hash)
+
+@mcp.tool()
+def cleanup_tracking(action: str, action_type: str = "", target: str = "", tool: str = "", description: str = "", artifact: str = "", cleanup_cmd: str = "", cleanup_status: str = "pending") -> str:
+    """Cleanup tracking — log modifications, generate cleanup scripts, track artifact state."""
+    return _cleanup_tracking(action, action_type, target, tool, description, artifact, cleanup_cmd, cleanup_status)
+
+@mcp.tool()
+def vulnerable_fixture(action: str, target: str = "127.0.0.1", port: int = 9999, vuln_types: str = "sqli,xss,lfi,cmd,ssrf,open_redirect", ssl: bool = False, reset: bool = False) -> str:
+    """Vulnerable fixture — local vulnerable app for E2E tool validation. Actions: start, stop, status, endpoints, e2e, cleanup."""
+    return _vulnerable_fixture(action, target, port, vuln_types, ssl, reset)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

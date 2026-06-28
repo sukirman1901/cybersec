@@ -4,7 +4,7 @@
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 172+ security tools. To use them in Claude Code, add the MCP server to your Claude Code configuration:
+The Cybersec MCP server provides 180+ security tools. To use them in Claude Code, add the MCP server to your Claude Code configuration:
 
 ### Option 1: Project-level MCP config
 
