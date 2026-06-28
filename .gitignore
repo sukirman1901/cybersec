@@ -8,3 +8,6 @@ __pycache__/
 docs/
 mcp/.findings_db.json
 mcp/.monitor_db.json
+mcp/.vuln_database.json
+mcp/logs/
+mcp/wordlists/

@@ -4,7 +4,7 @@
 
 # Cybersec — AI Cybersecurity Plugin
 
-**147+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
+**163+ pure-Python MCP security tools** + **23 pentesting methodology skills** for AI coding agents.
 
 Works with: **Claude Code**, **Cursor**, **Codex**, **Gemini CLI**, **GitHub Copilot CLI**, **Kimi Code**, **OpenCode**, **Pi**.
 
@@ -28,6 +28,7 @@ Empowers the AI to perform penetration testing, vulnerability assessment, reconn
 - [MCP Server Setup](#mcp-server-setup)
 - [MCP Tools Reference](#mcp-tools-reference)
   - [Enterprise Tools (HackerOne / Pentest-Tools.com inspired)](#enterprise-tools)
+  - [Advanced Tools](#advanced-tools-16-new)
 - [Agents (OpenCode)](#agents-opencode)
   - [Pentester (Primary)](#pentester-primary)
   - [Recon (Subagent)](#recon-subagent)
@@ -264,7 +265,7 @@ The AI will:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 147+ security tools via stdio transport using FastMCP.
+The Cybersec MCP server provides 163+ security tools via stdio transport using FastMCP.
 
 ### For Non-OpenCode Platforms
 
@@ -288,7 +289,7 @@ On platforms that don't auto-register the MCP server (Claude Code, Cursor, Codex
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 147+ tools listed.
+Expected: 163+ tools listed.
 
 ---
 
@@ -516,6 +517,29 @@ Inspired by HackerOne and Pentest-Tools.com — workflow orchestration, findings
 | `report_export` | Export to HTML, CSV, markdown, JSON. HTML includes styled executive summary |
 | `risk_score` | CVSS + business impact + likelihood scoring |
 
+### Advanced Tools (16 new)
+
+Automated exploitation, workflow management, OSINT, reporting, and integrations.
+
+| Tool | Description |
+|------|-------------|
+| `auto_exploit` | Auto-exploit chain: detect → verify → exploit (sqli, xss, lfi, ssrf, open_redirect) |
+| `scan_template` | Pre-defined tool combos: quick-recon, web-full, network-audit, api-security, cloud-audit, ad-pentest, code-audit, ctf |
+| `executive_summary` | Auto-generate executive summary — risk posture, severity breakdown, top findings, recommendations |
+| `compliance_map` | Map findings to SOC2, ISO27001, GDPR, PCI-DSS, NIST 800-53 control IDs |
+| `notify_webhook` | Send findings to Slack, Discord, or Microsoft Teams via webhook |
+| `jira_create` | Create Jira issue from security finding — custom project, labels, priority |
+| `people_osint` | Individual OSINT — GitHub profile, social media presence, email analysis |
+| `password_audit` | Multi-protocol password audit — SSH, FTP, SMTP, HTTP form, RDP with default wordlist |
+| `cloud_audit` | Comprehensive cloud audit — S3 public, K8s API, Docker socket, IAM, infra |
+| `sqli_exploit` | Generate PoC SQLi exploit payloads (error, union, boolean, time, stacked) |
+| `xss_exploit` | Generate PoC XSS exploit links (reflected, stored, DOM, WAF bypass, cookie steal) |
+| `http_logger` | Persistent HTTP request/response logger with search, stats, and export |
+| `branded_report` | White-label pentest reports — custom logo, colors, company name, disclaimer |
+| `vuln_database` | Local vulnerability database — add, search, update, delete, tags, import/export |
+| `github_issue` | Create GitHub issue from security finding — labels, severity, evidence |
+| `custom_wordlist` | Custom wordlist manager — create, merge, generate, import, upload |
+
 ---
 
 ## Skills Guide
@@ -563,7 +587,7 @@ OpenCode-compatible agents are included in `.opencode/agents/`. These agents hav
 **Color:** Red (`#DC2626`)
 **Permissions:** Full access (edit, bash, read, all MCP tools)
 
-The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 147+ MCP tools, can edit files, run bash commands, and dispatch subagents.
+The default pentesting agent. Load this when you want the AI to act as a security tester. It has access to all 163+ MCP tools, can edit files, run bash commands, and dispatch subagents.
 
 **Usage:**
 1. Press **Tab** in OpenCode until you see **Pentester** (red)
@@ -702,7 +726,7 @@ See the [OpenCode Agents documentation](https://opencode.ai/docs/agents/) for fu
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected output: 147+ tools listed.
+Expected output: 163+ tools listed.
 
 ### OpenCode plugin not loading
 

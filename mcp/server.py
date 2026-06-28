@@ -148,6 +148,22 @@ from cyber_tools.vuln_diff import vuln_diff as _vuln_diff
 from cyber_tools.authenticated_scan import authenticated_scan as _authenticated_scan
 from cyber_tools.report_export import report_export as _report_export
 from cyber_tools.risk_score import risk_score as _risk_score
+from cyber_tools.auto_exploit import auto_exploit as _auto_exploit
+from cyber_tools.scan_template import scan_template as _scan_template
+from cyber_tools.executive_summary import executive_summary as _executive_summary
+from cyber_tools.compliance_map import compliance_map as _compliance_map
+from cyber_tools.notify_webhook import notify_webhook as _notify_webhook
+from cyber_tools.jira_create import jira_create as _jira_create
+from cyber_tools.people_osint import people_osint as _people_osint
+from cyber_tools.password_audit import password_audit as _password_audit
+from cyber_tools.cloud_audit import cloud_audit as _cloud_audit
+from cyber_tools.sqli_exploit import sqli_exploit as _sqli_exploit
+from cyber_tools.xss_exploit import xss_exploit as _xss_exploit
+from cyber_tools.http_logger import http_logger as _http_logger
+from cyber_tools.branded_report import branded_report as _branded_report
+from cyber_tools.vuln_database import vuln_database as _vuln_database
+from cyber_tools.github_issue import github_issue as _github_issue
+from cyber_tools.custom_wordlist import custom_wordlist as _custom_wordlist
 
 def _run(coro):
     try:
@@ -948,6 +964,88 @@ def report_export(target: str, findings_json: str, format: str = "html") -> str:
 def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
     """Calculate risk score for a vulnerability finding. Combines CVSS severity, business impact, and exploitability likelihood. asset_value: low, medium, high, critical."""
     return _risk_score(finding_json, target_asset_value)
+
+# --- Advanced Tools (16 new) ---
+
+@mcp.tool()
+def auto_exploit(target: str, vuln_type: str = "auto", param: str = "") -> str:
+    """Auto-exploit chain: detect → verify → exploit. vuln_type: auto, sqli, xss, lfi, ssrf, open_redirect."""
+    return _auto_exploit(target, vuln_type, param)
+
+@mcp.tool()
+def scan_template(target: str, template: str = "quick-recon") -> str:
+    """Pre-defined scan template combos. Templates: quick-recon, web-full, network-audit, api-security, cloud-audit, ad-pentest, code-audit, ctf."""
+    return _scan_template(target, template)
+
+@mcp.tool()
+def executive_summary(target: str, findings_json: str) -> str:
+    """Auto-generate executive summary from findings JSON. Risk posture, severity breakdown, top findings, recommendations."""
+    return _executive_summary(target, findings_json)
+
+@mcp.tool()
+def compliance_map(findings_json: str, framework: str = "auto") -> str:
+    """Map findings to compliance frameworks: SOC2, ISO27001, GDPR, PCI-DSS, NIST 800-53."""
+    return _compliance_map(findings_json, framework)
+
+@mcp.tool()
+def notify_webhook(webhook_url: str, findings_json: str, platform: str = "auto", severity_filter: str = "high") -> str:
+    """Send finding notifications to Slack/Discord/Teams webhook. Auto-detects platform from URL."""
+    return _notify_webhook(webhook_url, findings_json, platform, severity_filter)
+
+@mcp.tool()
+def jira_create(finding_json: str, jira_url: str = "", email: str = "", api_token: str = "", project_key: str = "SEC") -> str:
+    """Create a Jira issue from a security finding. Requires Jira URL, email, and API token."""
+    return _jira_create(finding_json, jira_url, email, api_token, project_key)
+
+@mcp.tool()
+def people_osint(query: str, source: str = "auto") -> str:
+    """Individual OSINT — GitHub profile, LinkedIn/Twitter/search, email analysis with Gravatar."""
+    return _people_osint(query, source)
+
+@mcp.tool()
+def password_audit(target: str, protocol: str = "ssh", port: int = 0, username: str = "admin", password_list: str = "", max_attempts: int = 20) -> str:
+    """Multi-protocol password audit — SSH, FTP, SMTP, HTTP form, RDP. Default wordlist included."""
+    return _password_audit(target, protocol, port, username, password_list, max_attempts)
+
+@mcp.tool()
+def cloud_audit(provider: str = "aws", targets: str = "", company: str = "", buckets: str = "", project: str = "") -> str:
+    """Comprehensive cloud security audit — S3 public, K8s API, Docker socket, IAM, infra recommendations."""
+    return _cloud_audit(provider, targets, company, buckets, project)
+
+@mcp.tool()
+def sqli_exploit(target: str, param: str = "", method: str = "get", technique: str = "auto") -> str:
+    """Generate PoC SQL injection exploit payloads. Techniques: error-based, union-based, boolean, time-based, stacked."""
+    return _sqli_exploit(target, param, method, technique)
+
+@mcp.tool()
+def xss_exploit(target: str, param: str = "", xss_type: str = "auto") -> str:
+    """Generate PoC XSS exploit payloads and steal links. Types: reflected, stored, dom_based, bypass_waf, cookie_steal."""
+    return _xss_exploit(target, param, xss_type)
+
+@mcp.tool()
+def http_logger(action: str, request_data: str = "", response_data: str = "", request_id: str = "") -> str:
+    """Persistent HTTP request/response logger. Actions: log, list, search, stats, export, clear."""
+    return _http_logger(action, request_data, response_data, request_id)
+
+@mcp.tool()
+def branded_report(target: str, findings_json: str, company_name: str = "Security Assessment", company_logo: str = "", primary_color: str = "#1a1a2e", accent_color: str = "#e94556", report_title: str = "", footer_text: str = "", disclaimer: str = "", contact_info: str = "", format: str = "html") -> str:
+    """White-label pentest reports — custom logo, colors, company name, footer, disclaimer."""
+    return _branded_report(target, findings_json, company_name, company_logo, primary_color, accent_color, report_title, footer_text, disclaimer, contact_info, format)
+
+@mcp.tool()
+def vuln_database(action: str, entry_json: str = "", vuln_id: str = "", search_query: str = "", severity_filter: str = "", tag_filter: str = "") -> str:
+    """Local vulnerability database. Actions: add, get, search, list, update, delete, stats, export, import, tags, clear."""
+    return _vuln_database(action, entry_json, vuln_id, search_query, severity_filter, tag_filter)
+
+@mcp.tool()
+def github_issue(finding_json: str, repo: str = "", token: str = "", labels: str = "security,vulnerability") -> str:
+    """Create GitHub issue from security finding. Requires repo (owner/repo) and token with repo scope."""
+    return _github_issue(finding_json, repo, token, labels)
+
+@mcp.tool()
+def custom_wordlist(action: str, name: str = "", words: str = "", wordlist: str = "", source: str = "", ext: str = "") -> str:
+    """Custom wordlist manager. Actions: create, list, show, delete, merge, generate, import, builtin, append."""
+    return _custom_wordlist(action, name, words, wordlist, source, ext)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
