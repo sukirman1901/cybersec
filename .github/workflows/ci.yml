@@ -28,13 +28,42 @@ jobs:
         run: |
           cd mcp
           . .venv/bin/activate
-          echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python -m server | python -c "
-          import sys, json
-          data = json.load(sys.stdin)
-          tools = data.get('result', {}).get('tools', [])
-          assert len(tools) >= 100, f'Expected 100+ tools, got {len(tools)}'
-          print(f'PASS: {len(tools)} tools registered')
-          "
+          python -c "
+          import subprocess, json, time
+          proc = subprocess.Popen(
+              ['python', '-m', 'server'],
+              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+              text=True
+          )
+          # Initialize
+          req = json.dumps({'jsonrpc':'2.0','id':0,'method':'initialize','params':{'protocolVersion':'2024-11-05','capabilities':{},'clientInfo':{'name':'ci','version':'1.0'}}})
+          proc.stdin.write(req + '\n')
+          proc.stdin.flush()
+          # Notify initialized
+          proc.stdin.write(json.dumps({'jsonrpc':'2.0','method':'notifications/initialized','params':{}}) + '\n')
+          proc.stdin.flush()
+          # List tools
+          proc.stdin.write(json.dumps({'jsonrpc':'2.0','id':1,'method':'tools/list','params':{}}) + '\n')
+          proc.stdin.flush()
+          time.sleep(3)
+          proc.stdin.close()
+          out = proc.stdout.read()
+          proc.wait()
+          for line in out.strip().split('\n'):
+              try:
+                  d = json.loads(line)
+                  if 'result' in d and 'tools' in d.get('result', {}):
+                      tools = d['result']['tools']
+                      assert len(tools) >= 100, f'Expected 100+ tools, got {len(tools)}'
+                      print(f'PASS: {len(tools)} tools registered')
+                      break
+              except:
+                  pass
+          else:
+              print('FAIL: No tools/list response')
+              print('Output:', out[:1000])
+              exit(1)
+          " 2>&1 | tail -5
 
   validate-json:
     runs-on: ubuntu-latest
