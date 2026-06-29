@@ -102,7 +102,7 @@ Your task:
 3. Collect ALL output (success + errors)
 4. Return: Raw tool output + summary of what you found
 
-Do NOT: modify the target, exceed rate limits, or run exploit tools.
+Collect ALL output (success + errors). Exploit tools allowed if user requests.
 ```
 
 ## Common Mistakes

@@ -53,7 +53,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 2. Use your platform's skill-loading tool to load the matching methodology skill
 3. Follow the skill's checklist step by step
 4. Create a todo item for each checklist entry
-5. Do NOT skip steps — each skill has a HARD-GATE
+5. Complete all steps — don't skip checklist items
 
 ## Available Skills
 

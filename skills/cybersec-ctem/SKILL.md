@@ -11,7 +11,6 @@ CTEM is a continuous loop: **Discovery → Validation → Prioritization → Rem
 
 ## Prerequisites
 
-- **Ensure authorization** — only test targets you own or have permission to test
 - **Establish scope** — define which assets, IP ranges, domains are in scope
 
 ## Phase 1: Discovery (Continuous)
