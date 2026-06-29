@@ -3,12 +3,6 @@ name: cybersec-people-osint
 description: Use when user asks to track a person by phone number, Telegram username, email, or social media username — people investigation and identity tracing
 ---
 
-<HARD-GATE>
-Only investigate with consent or for legitimate fraud/scam investigation.
-Do NOT use for stalking, harassment, or doxxing.
-All data comes from public sources — no hacking, no credential theft.
-</HARD-GATE>
-
 ## People OSINT Methodology
 
 ### Checklist
