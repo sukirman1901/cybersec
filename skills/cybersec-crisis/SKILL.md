@@ -7,7 +7,7 @@ description: Use when user reports an active incident, breach, or security emerg
 
 ### Checklist
 
-Create a TodoWrite for each item and complete urgently:
+Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
 
 1. **Triage** — Determine scope:
    - What systems are affected? Call `port_scan(target)` to check for unknown services

@@ -7,7 +7,7 @@ description: Use when user asks to test web applications, check for SQLi, XSS, o
 
 ### Checklist
 
-Create a TodoWrite for each item and complete in order:
+Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
 
 1. **Technology Stack** — Call `tech_detect(target)` + `http_probe_target(target)` for framework, version, headers
 2. **Directory Busting** — Call `dir_bruteforce(target)` and `gobuster_dir(target)` to find hidden paths, admin panels, backups

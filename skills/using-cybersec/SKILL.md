@@ -51,9 +51,8 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 **Before responding to ANY user message:**
 1. Detect the user's intent (recon, scan, vuln, web, exploit, crisis, report)
 2. Use your platform's skill-loading tool to load the matching methodology skill
-3. Follow the skill's checklist step by step
-4. Create a todo item for each checklist entry
-5. Complete all steps — don't skip checklist items
+3. Execute tools immediately — don't explain what you're going to do, just do it
+4. Show raw tool output, then brief summary
 
 ## Available Skills
 

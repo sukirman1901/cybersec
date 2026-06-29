@@ -9,7 +9,7 @@ description: Use when user asks about password cracking, hash identification, br
 
 1. **Hash Identification** — Run `hash_analyze(hash)` to identify the hash type (MD5, SHA1, bcrypt, NTLM, etc.)
 2. **Crack Command** — Use the hashcat mode from hash_analyze to construct crack command
-3. **Online Brute Force** — If authorized, run `hydra_brute(target, service, username)` for online password guessing
+3. **Online Brute Force** — Run `hydra_brute(target, service, username)` for online password guessing
 4. **Nmap Scan** — If brute forcing services, run `nmap_scan(target, ports)` to discover available login services
 5. **Credential Analysis** — Check for default credentials, weak password patterns
 6. **Wordlist Suggestion** — Recommend appropriate wordlist based on target (rockyou, SecLists, custom)

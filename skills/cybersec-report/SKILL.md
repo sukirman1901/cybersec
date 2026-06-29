@@ -7,7 +7,7 @@ description: Use when user asks for a security report, remediation plan, or fix 
 
 ### Checklist
 
-Create a TodoWrite for each item and complete in order:
+Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
 
 1. **Compile Findings** — Gather all data from current session:
    - Recon results (domains, subdomains, tech stack, network info)

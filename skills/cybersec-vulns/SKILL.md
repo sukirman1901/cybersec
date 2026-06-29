@@ -7,7 +7,7 @@ description: Use when user asks to find vulnerabilities, check CVEs, or assess s
 
 ### Checklist
 
-Create a TodoWrite for each item and complete in order:
+Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
 
 1. **CVE Lookup** — For each detected service + version, call `cve_search(service, version)` for known vulnerabilities
 2. **Vulnerability Scan** — Call `vuln_scan(target)` for common vulnerability patterns

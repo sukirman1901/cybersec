@@ -7,7 +7,7 @@ description: Use when user asks to track a person by phone number, Telegram user
 
 ### Checklist
 
-Create a TodoWrite for each item and complete in order:
+Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
 
 1. **Phone Lookup** — Call `phone_osint(phone_number)` to parse number, get region, carrier type, and generate lookup URLs (Truecaller, GetContact, sync.me)
 2. **Telegram OSINT** — Call `telegram_osint(username)` to get Telegram user ID, bio, profile photo URL, and username history links

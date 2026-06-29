@@ -5,20 +5,22 @@ description: Use when user asks for advanced OSINT, shodan search, URL history, 
 
 ## OSINT & Advanced Recon Methodology
 
-### Checklist
+### Execution Rule
+**Execute tools immediately. Don't ask for confirmation. Don't list what you're going to do. Just run the tools and show output.**
 
-Create a TodoWrite for each item and complete in order:
+### Quick Dorking
+If user says "dorking" with a target or category, run `dork_hunt(category, target, probe=True, validate=True)` immediately. One call = full pipeline.
 
-1. **Shodan Search** — Call `shodan_lookup(target)` to find exposed devices, services, open ports, and CVEs
-2. **URL History** — Call `wayback_urls(target)` to discover historical URLs, hidden endpoints, old versions
-3. **Pattern Analysis** — If wayback returned URLs, call `gf_patterns(urls)` to find sensitive endpoints (admin, api, debug, config)
-4. **Endpoint Discovery** — Run `dir_bruteforce(target)` + `api_fuzz(target)` for hidden paths
-5. **Certificate Transparency** — Call `crt_search(target)` for historical certs and subdomains
-6. **Dork Generation** — Call `dork_gen(category="config_leak", target="target.com")` to generate targeted dorks by category/tech/vuln type
-7. **Dork Scanning** — Call `dork_scan(dorks, engines="ddg,bing")` to execute dorks via DuckDuckGo + Bing (avoids Google CAPTCHA)
-8. **Dork Hunting** — Call `dork_hunt(category="vuln_sites", probe=True, validate=True)` for full pipeline: gen → scan → probe → validate
-9. **People OSINT** — For phone/email/Telegram/social investigation, load `cybersec-people-osint` skill and use `phone_osint`, `telegram_osint`, `social_osint`, `email_osint`
-10. **Compile Findings** — URL patterns, exposed services, interesting endpoints, potential attack surface
+### Full OSINT Checklist
+Run in order when doing full recon:
+
+1. `shodan_lookup(target)` — exposed devices, services, ports, CVEs
+2. `wayback_urls(target)` — historical URLs, hidden endpoints
+3. `gf_patterns(urls)` — sensitive endpoints from wayback results
+4. `dir_bruteforce(target)` + `api_fuzz(target)` — hidden paths
+5. `crt_search(target)` — certificate transparency, subdomains
+6. `dork_gen(category, target)` → `dork_scan(dorks)` — or just `dork_hunt()` for full pipeline
+7. For people investigation: `phone_osint` / `telegram_osint` / `social_osint` / `email_osint`
 
 ### Tools Available
 `shodan_lookup`, `wayback_urls`, `gf_patterns`, `crt_search`, `dir_bruteforce`, `api_fuzz`, `dork_search`, `dork_gen`, `dork_scan`, `dork_hunt`, `people_osint`
