@@ -7,7 +7,7 @@ description: Use when user asks to perform reconnaissance, enumerate subdomains,
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **Target Validation** — Validate target resolves via `dns_lookup(target)` (A, AAAA, MX, NS, TXT, CNAME records)
 2. **WHOIS Lookup** — Call `whois_lookup(target)` for domain registration, registrar, dates

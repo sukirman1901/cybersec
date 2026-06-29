@@ -7,7 +7,7 @@ description: Use when user asks to scan ports, detect services, or fingerprint a
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **Port Scan** — Call `port_scan(target)` with common ports (21,22,23,25,53,80,110,143,443,445,3306,3389,5432,5900,8080,8443)
 2. **Service Detection** — For each open port, identify service name and version

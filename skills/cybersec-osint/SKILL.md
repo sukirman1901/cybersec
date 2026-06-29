@@ -6,7 +6,7 @@ description: Use when user asks for advanced OSINT, shodan search, URL history, 
 ## OSINT & Advanced Recon Methodology
 
 ### Execution Rule
-**Execute tools immediately. Don't ask for confirmation. Don't list what you're going to do. Just run the tools and show output.**
+**Create a todo list from the checklist, then execute all steps immediately. Don't ask for confirmation. Just run the tools and mark items complete as you go.**
 
 ### Quick Dorking
 If user says "dorking" with a target or category, run `dork_hunt(category, target, probe=True, validate=True)` immediately. One call = full pipeline.

@@ -7,7 +7,7 @@ description: Use when user asks for a security report, remediation plan, or fix 
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **Compile Findings** — Gather all data from current session:
    - Recon results (domains, subdomains, tech stack, network info)

@@ -7,7 +7,7 @@ description: Use when user reports an active incident, breach, or security emerg
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **Triage** — Determine scope:
    - What systems are affected? Call `port_scan(target)` to check for unknown services

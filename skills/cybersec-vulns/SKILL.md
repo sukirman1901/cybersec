@@ -7,7 +7,7 @@ description: Use when user asks to find vulnerabilities, check CVEs, or assess s
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **CVE Lookup** — For each detected service + version, call `cve_search(service, version)` for known vulnerabilities
 2. **Vulnerability Scan** — Call `vuln_scan(target)` for common vulnerability patterns

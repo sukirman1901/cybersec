@@ -7,7 +7,7 @@ description: Use when user asks for bug bounty specific testing, nuclei scanning
 
 ### Checklist
 
-Execute tools immediately. Don't ask for confirmation. Just run the tools and show output.
+Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
 
 1. **Nuclei Scan** — Run `nuclei_scan(target, severity="critical")` for critical templates first, then expand
 2. **403 Bypass** — If any endpoints return 403, call `bypass_403(url)` to test bypass techniques
