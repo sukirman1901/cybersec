@@ -11,41 +11,31 @@ Security review requires technical verification, not agreement theater.
 
 **Core principle:** Verify findings before reporting. Question assumptions. False positives waste time, false negatives miss breaches.
 
-## The Response Pattern
+## Response Pattern
 
 ```
 WHEN receiving review of security findings:
 
-1. READ: Complete feedback without reacting
-2. UNDERSTAND: Restate the finding/concern
-3. VERIFY: Re-run the tool or check the output
-4. EVALUATE: Is this a real finding or false positive?
-5. RESPOND: Technical acknowledgment or reasoned pushback
-6. IMPLEMENT: Fix methodology, re-scan, or document limitation
+1. READ: Complete feedback
+2. VERIFY: Re-run the tool or check the output
+3. EVALUATE: Real finding or false positive?
+4. RESPOND: Technical acknowledgment or pushback with evidence
+5. IMPLEMENT: Fix methodology, re-scan, or document
 ```
 
-## Forbidden Responses
+## Good Responses
 
-**NEVER:**
-- "You're right, it's vulnerable!" (without re-running tool)
-- "Good catch!" (performative — re-run the scan instead)
-- "Let me report that now" (before verification)
-
-**INSTEAD:**
 - Restate the technical finding
 - Re-run the tool to confirm
 - Push back with evidence if false positive
-- Just re-scan and show the actual output
+- Re-scan and show the actual output
 
 ## Handling Unclear Findings
 
 ```
 IF any finding is unclear:
-  STOP - do not report anything yet
   RE-RUN the tool with more parameters
-  ASK: "Finding on port X is ambiguous. Output shows Y. Should I investigate further?"
-
-WHY: Reporting unverified findings pollutes the report.
+  DOCUMENT: "Ambiguous finding. Re-ran [tool] — output shows [X]. Marking as tested."
 ```
 
 **Example:**
@@ -54,16 +44,14 @@ Reviewer: "Port 8080 looks vulnerable to path traversal"
 You: Re-run lfi_detect on port 8080
 Output: No LFI detected (all requests returned 403)
 ✅ "Re-ran lfi_detect on 8080 — all requests returned 403. False positive. Marking as tested."
-❌ "You're right! Let me add that to the report."
 ```
 
 ## Source-Specific Handling
 
 ### From Peer Security Team
-- **Verify independently** — don't trust their output, re-run yourself
-- **Still question** if methodology is sound
-- **No performative agreement**
-- **Share counter-evidence** if finding differs
+- Verify independently — re-run yourself
+- Question if methodology is sound
+- Share counter-evidence if finding differs
 
 ### From Automated Tools (nuclei, nikto)
 ```
@@ -72,18 +60,14 @@ BEFORE reporting:
   2. Verify: Re-run with --validate or manual check
   3. Check: False positive rate for this template
   4. Document: Confidence level based on verification
-
-IF medium/low confidence:
-  Manual verification required before reporting
 ```
 
 ### From AI Agent / Previous Session
 ```
-ALWAYS re-verify previous session findings:
+Re-verify previous session findings:
   1. Result may be stale (target changed)
   2. Tool may have false positive
   3. Context may be different now
-  4. Never trust "we found this before"
 ```
 
 ## False Positive Verification

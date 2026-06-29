@@ -23,7 +23,7 @@ You write test cases (security pressure scenarios with subagents), watch them fa
 | **Production code** | Skill document (SKILL.md) |
 | **Test fails (RED)** | Agent skips security steps without skill |
 | **Test passes (GREEN)** | Agent follows methodology with skill |
-| **Refactor** | Close loopholes (agent bypasses security gates) |
+| **Refactor** | Close loopholes (agent bypasses security steps) |
 
 ## When to Create a Cybersec Skill
 
@@ -31,7 +31,6 @@ You write test cases (security pressure scenarios with subagents), watch them fa
 - New security testing methodology isn't covered by existing skills
 - Agent keeps skipping important security steps
 - Pattern applies across multiple testing scenarios
-- HARD-GATE needed to prevent dangerous actions
 
 **Don't create for:**
 - Tool documentation (put in MCP tool description)
@@ -45,10 +44,6 @@ You write test cases (security pressure scenarios with subagents), watch them fa
 name: cybersec-skill-name
 description: Use when [specific security scenario triggers]
 ---
-
-<HARD-GATE>
-Security boundaries: what agent MUST NOT do without authorization.
-</HARD-GATE>
 
 ## [Security Methodology Name]
 
@@ -75,9 +70,6 @@ Load `cybersec-next-phase` when this phase is complete.
 
 **Description (trigger only, no workflow):**
 ```yaml
-# ❌ BAD: Summarizes workflow
-description: Use for web app testing - run dork_search, then http_probe, then check for SQLi
-
 # ✅ GOOD: Trigger conditions only
 description: Use when user asks about web application testing, SQL injection, XSS, or API security
 ```
@@ -88,14 +80,11 @@ description: Use when user asks about web application testing, SQL injection, XS
 
 Run pressure scenario WITHOUT the skill. Document:
 - Did agent skip recon? Jump straight to exploit?
-- Run tools without authorization?
-- Report findings without verification?
 - What rationalizations used?
 
 ### GREEN: Write Minimal Skill
 
 Write skill addressing those specific failures. Include:
-- HARD-GATE for safety boundaries
 - Checklist with tool names + parameters
 - Verification requirement before claims
 
@@ -111,7 +100,6 @@ Agent found exception path? Add explicit counter. Re-test.
 - [ ] YAML frontmatter: `name` + `description` only (max 1024 chars)
 - [ ] Description starts with "Use when..." + security triggers
 - [ ] Description does NOT summarize workflow
-- [ ] HARD-GATE block for safety boundaries
 - [ ] Checklist with numbered steps referencing MCP tools
 - [ ] Tools Available section with backtick names
 - [ ] Next Skill transition
@@ -124,7 +112,7 @@ Agent found exception path? Add explicit counter. Re-test.
 | Mistake | Fix |
 |---------|-----|
 | Description summarizes methodology | Trigger conditions only |
-| No HARD-GATE | Always include safety boundaries |
+| No HARD-GATE | Focus on methodology steps, not permission checks |
 | Vague step: "Scan the target" | Specific: "Run nmap_scan(target, ports='21,22,80')" |
 | No tool references | List exact MCP tool names in backticks |
 | No next-skill transition | Always chain to next methodology phase |

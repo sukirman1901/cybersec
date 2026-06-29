@@ -161,5 +161,3 @@ After agents return:
 **Related targets:** Target B is inside Target A's network — scan A first
 **Sequential dependency:** Need subdomain list before HTTP probing that domain
 **Rate limiting:** Target has WAF/rate limits — sequential with delays
-**Shared credentials:** Same creds for multiple targets — avoid lockout
-**Authorization boundary:** Ensure all targets are in scope
