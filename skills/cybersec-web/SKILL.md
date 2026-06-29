@@ -47,6 +47,8 @@ Create a TodoWrite for each item and complete in order:
 36. **SQLi / XSS** — If user input found: call `sqli_detect(target)` and `sqlmap_check(target)` for SQLi. Call `xss_detect(target)` and `xsstrike_check(target)` for XSS.
 37. **Injection Validator** — Call `injection_validator(target)` for unified injection validation across 7 types
 38. **Web Shell Detection** — Call `webshell_detect(target, deep_scan=True)` to scan for existing web shells (c99, r57, weevely, china chopper, etc.)
+39. **Dork Target Discovery** — Call `dork_gen(category="vuln_sites", target="target.com")` to generate dorks, then `dork_scan(dorks)` to find exposed pages
+40. **Dork Hunting** — Call `dork_hunt(category="shell_upload", target="target.com", validate=True)` for one-call vuln discovery
 
 ### Auto-CAPTCHA Protocol
 
@@ -76,6 +78,7 @@ Create a TodoWrite for each item and complete in order:
 `wordpress_scan` `wpscan_check` `joomla_scan` `drupal_scan` `magento_scan` `cmseek_check` `sharepoint_scan`
 `php_deserialize` `java_deserialize` `log4j_scan` `supply_chain`
 `webshell_detect`
+`dork_gen` `dork_scan` `dork_hunt`
 
 ### Output
 Web application assessment with: discovered paths, API endpoints, misconfigurations, input validation issues, CMS vulnerabilities, CAPTCHA bypass results, and exploit potential.
