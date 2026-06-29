@@ -17,10 +17,11 @@ Create a TodoWrite for each item and complete in order:
 6. **Dork Generation** — Call `dork_gen(category="config_leak", target="target.com")` to generate targeted dorks by category/tech/vuln type
 7. **Dork Scanning** — Call `dork_scan(dorks, engines="ddg,bing")` to execute dorks via DuckDuckGo + Bing (avoids Google CAPTCHA)
 8. **Dork Hunting** — Call `dork_hunt(category="vuln_sites", probe=True, validate=True)` for full pipeline: gen → scan → probe → validate
-9. **Compile Findings** — URL patterns, exposed services, interesting endpoints, potential attack surface
+9. **People OSINT** — For phone/email/Telegram/social investigation, load `cybersec-people-osint` skill and use `phone_osint`, `telegram_osint`, `social_osint`, `email_osint`
+10. **Compile Findings** — URL patterns, exposed services, interesting endpoints, potential attack surface
 
 ### Tools Available
-`shodan_lookup`, `wayback_urls`, `gf_patterns`, `crt_search`, `dir_bruteforce`, `api_fuzz`, `dork_search`, `dork_gen`, `dork_scan`, `dork_hunt`
+`shodan_lookup`, `wayback_urls`, `gf_patterns`, `crt_search`, `dir_bruteforce`, `api_fuzz`, `dork_search`, `dork_gen`, `dork_scan`, `dork_hunt`, `people_osint`
 
 ### Output
 OSINT report: exposed services, historical URLs, sensitive endpoints, leaked info, attack surface expansion.

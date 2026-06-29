@@ -196,6 +196,10 @@ from cyber_tools.webshell_detect import webshell_detect as _webshell_detect
 from cyber_tools.dork_gen import dork_gen as _dork_gen
 from cyber_tools.dork_scan import dork_scan as _dork_scan
 from cyber_tools.dork_hunt import dork_hunt as _dork_hunt
+from cyber_tools.social_osint import social_osint as _social_osint
+from cyber_tools.telegram_osint import telegram_osint as _telegram_osint
+from cyber_tools.phone_osint import phone_osint as _phone_osint
+from cyber_tools.email_osint import email_osint as _email_osint
 
 def _run(coro):
     try:
@@ -1248,6 +1252,26 @@ def dork_scan(dorks: str = "", engines: str = "ddg,bing", max_results: int = 20,
 def dork_hunt(category: str = "vuln_sites", tech: str = "", vuln_type: str = "", target: str = "", engines: str = "ddg,bing", max_dorks: int = 10, max_results: int = 15, probe: bool = True, validate: bool = True, delay: float = 1.0, timeout: int = 15) -> str:
     """Full dorking pipeline: generate dorks → scan engines → HTTP probe → validate vulnerabilities. One-call target discovery — give a category, get back validated vulnerable URLs."""
     return json.dumps(_run(_dork_hunt(category, tech, vuln_type, target, engines, max_dorks, max_results, probe, validate, delay, timeout)), indent=2)
+
+@mcp.tool()
+def social_osint(username: str, timeout: int = 10, concurrent: int = 20) -> str:
+    """Search for a username across 100+ social media platforms (Instagram, Twitter, TikTok, GitHub, Telegram, etc.). Sherlock-style — no API keys required. Returns found accounts with URLs and status codes."""
+    return json.dumps(_run(_social_osint(username, timeout, concurrent)), indent=2)
+
+@mcp.tool()
+def telegram_osint(username: str, timeout: int = 15) -> str:
+    """Gather public info about a Telegram user via t.me scraping — user ID, bio, profile photo, username history links (SangMata, TGStat). No Telegram API required."""
+    return json.dumps(_run(_telegram_osint(username, timeout)), indent=2)
+
+@mcp.tool()
+def phone_osint(phone_number: str, default_region: str = "") -> str:
+    """Phone number intelligence — parse carrier, region, line type, timezones (offline via phonenumbers lib). Generates lookup URLs for Truecaller, GetContact, sync.me, and Google search."""
+    return json.dumps(_phone_osint(phone_number, default_region), indent=2)
+
+@mcp.tool()
+def email_osint(email: str, check_breach_urls: bool = True) -> str:
+    """Email intelligence — validate format, check MX records, domain reputation, Gravatar profile, and generate breach lookup URLs (HIBP, GhostProject, IntelligenceX). No paid APIs."""
+    return json.dumps(_run(_email_osint(email, check_breach_urls)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
