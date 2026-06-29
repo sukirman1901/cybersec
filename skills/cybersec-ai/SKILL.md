@@ -3,11 +3,6 @@ name: cybersec-ai
 description: AI/LLM security testing methodology — prompt injection, guardrails, model DoS, data exposure, agent hijack
 ---
 
-<HARD-GATE>
-You MUST load this skill using the `skill` tool before any AI/LLM security testing.
-Create a TodoWrite item for each step below. Do NOT skip steps.
-</HARD-GATE>
-
 ## AI/LLM Testing Methodology
 
 ### 1. Reconnaissance

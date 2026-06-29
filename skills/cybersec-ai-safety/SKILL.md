@@ -3,11 +3,6 @@ name: cybersec-ai-safety
 description: AI Safety Bug Bounty methodology — OpenAI Safety BB scope covering prompt injection, agent hijack, MCP abuse, data exfiltration, anti-automation
 ---
 
-<HARD-GATE>
-You MUST load this skill using the `skill` tool before any AI safety bug bounty testing.
-Create a TodoWrite item for each step below. Do NOT skip steps.
-</HARD-GATE>
-
 ## AI Safety Bug Bounty Methodology
 
 Scope covers OpenAI Safety BB + general AI safety scenarios.

@@ -3,13 +3,6 @@ name: cybersec-crisis
 description: Use when user reports an active incident, breach, or security emergency — override normal workflow
 ---
 
-<HARD-GATE>
-This is an EMERGENCY skill. Override normal pentest workflow.
-Priority: CONTAINMENT over investigation. Investigation over remediation.
-Do NOT run destructive tools during incident response.
-Do NOT ask for permission for containment actions — do them immediately.
-</HARD-GATE>
-
 ## Incident Response Methodology
 
 ### Checklist

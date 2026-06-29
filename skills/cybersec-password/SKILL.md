@@ -3,12 +3,6 @@ name: cybersec-password
 description: Use when user asks about password cracking, hash identification, brute force, or credential attacks
 ---
 
-<HARD-GATE>
-Do NOT brute force passwords without explicit authorization.
-Hash cracking is offline and safe — but only crack hashes you are authorized to test.
-Always identify hash type before attempting to crack.
-</HARD-GATE>
-
 ## Password Security Testing Methodology
 
 ### Checklist

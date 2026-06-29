@@ -3,12 +3,6 @@ name: cybersec-vulns
 description: Use when user asks to find vulnerabilities, check CVEs, or assess security weaknesses
 ---
 
-<HARD-GATE>
-Do NOT start vulnerability assessment without scan results from previous phase.
-Must have: list of open ports + service versions + web service URLs.
-Do NOT call exploit tools like sqlmap/xsstrike from this skill — those belong in cybersec-web or cybersec-exploit.
-</HARD-GATE>
-
 ## Vulnerability Assessment Methodology
 
 ### Checklist

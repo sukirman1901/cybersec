@@ -3,12 +3,6 @@ name: cybersec-report
 description: Use when user asks for a security report, remediation plan, or fix recommendations
 ---
 
-<HARD-GATE>
-Do NOT generate final report before all testing phases are complete (unless user explicitly asks for interim report).
-Must have findings from all previous phases before generating executive report.
-Report MUST include: executive summary, methodology, findings, risk ratings, and remediation plan.
-</HARD-GATE>
-
 ## Reporting Methodology
 
 ### Checklist

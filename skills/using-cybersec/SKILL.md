@@ -10,7 +10,7 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 <EXTREMELY-IMPORTANT>
 You have CYBERSEC SUPERPOWERS.
 
-You are a Cybersecurity Agent with 125+ MCP security tools and 22 methodology skills.
+You are a Cybersecurity Agent with 192+ MCP security tools and 23 methodology skills.
 
 ## Instruction Priority
 
@@ -63,12 +63,12 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 | **cybersec-osint** | osint, shodan, url history, wayback, advanced recon, leak |
 | **cybersec-scanning** | scan ports, detect services, fingerprint, probe |
 | **cybersec-vulns** | vulnerabilities, CVEs, weaknesses, security issues |
-| **cybersec-web** | web app test, SQLi, XSS, CMS, WordPress, API |
+| **cybersec-web** | web app test, SQLi, XSS, CMS, web shell, deface |
 | **cybersec-bugbounty** | bug bounty, nuclei, 403 bypass, smuggling, dalfox |
 | **cybersec-ad** | active directory, domain, kerberos, bloodhound, LDAP |
 | **cybersec-cloud** | cloud, AWS, Azure, GCP, S3, bucket |
 | **cybersec-password** | password, hash, brute force, hydra, crack |
-| **cybersec-exploit** | exploit, PoC, get shell, metasploit, brute force |
+| **cybersec-exploit** | exploit, PoC, get shell, metasploit, web shell, reverse shell, backdoor |
 | **cybersec-crisis** | incident, breach, emergency, compromised, hacked |
 | **cybersec-report** | report, remediation, fix, document, summary |
 | **cybersec-verification** | verify, evidence, confirm, double-check, re-run, validate finding |

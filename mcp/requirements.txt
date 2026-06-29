@@ -1,1 +1,4 @@
 fastmcp>=0.4.0
+impacket>=0.12.0
+certipy-ad>=5.1.0
+# certipy-ad (ADCS abuse tool) at https://github.com/ly4k/Certipy

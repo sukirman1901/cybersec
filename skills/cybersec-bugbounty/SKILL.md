@@ -3,11 +3,6 @@ name: cybersec-bugbounty
 description: Use when user asks for bug bounty specific testing, nuclei scanning, 403 bypass, or request smuggling
 ---
 
-<HARD-GATE>
-Do NOT run active scanning (nuclei) without completing passive recon and web testing first.
-Always start with non-intrusive checks before running nuclei with critical templates.
-</HARD-GATE>
-
 ## Bug Bounty Hunting Methodology
 
 ### Checklist

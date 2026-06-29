@@ -3,11 +3,6 @@ name: cybersec-ctf
 description: Capture The Flag methodology — OWASP Juice Shop style challenges covering OWASP Top 10, API Security, and real-world vulns
 ---
 
-<HARD-GATE>
-You MUST load this skill using the `skill` tool before any CTF challenge engagement.
-Create a TodoWrite item for each step below. Do NOT skip steps.
-</HARD-GATE>
-
 ## CTF Testing Methodology
 
 ### 1. Reconnaissance

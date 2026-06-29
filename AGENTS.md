@@ -2,7 +2,7 @@
 
 ## If You Are an AI Agent
 
-This plugin provides 180+ cybersecurity MCP tools and 23 methodology skills for penetration testing, vulnerability assessment, and security reporting.
+This plugin provides 192+ cybersecurity MCP tools and 23 methodology skills for penetration testing, vulnerability assessment, and security reporting.
 
 Before using these tools against any target:
 
@@ -12,7 +12,7 @@ Before using these tools against any target:
 
 ## MCP Server Setup
 
-The Cybersec MCP server provides 180+ security tools via stdio transport.
+The Cybersec MCP server provides 192+ security tools via stdio transport.
 
 ### Install Python dependencies
 
@@ -45,7 +45,7 @@ Add to your agent's MCP configuration:
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/bin/python3 -m server
 ```
 
-Expected: 180+ tools listed.
+Expected: 192+ tools listed.
 
 ## Skills
 
@@ -57,12 +57,12 @@ This plugin includes 23 cybersecurity methodology skills:
 | cybersec-osint | "osint", "shodan", "url history", "wayback" |
 | cybersec-scanning | "scan ports", "service detection", "fingerprint" |
 | cybersec-vulns | "find vulnerabilities", "CVEs", "weaknesses" |
-| cybersec-web | "web app test", "SQLi", "XSS", "CMS" |
+| cybersec-web | "web app test", "SQLi", "XSS", "CMS", "web shell", "deface" |
 | cybersec-bugbounty | "bug bounty", "nuclei", "403 bypass", "smuggling" |
-| cybersec-ad | "active directory", "domain", "kerberos", "bloodhound" |
+| cybersec-ad | "active directory", "domain", "kerberos", "bloodhound", "DCSync", "Kerberoast", "Pass-the-Hash", "NTLM relay", "AD CS", "Certipy" |
 | cybersec-cloud | "cloud", "AWS", "Azure", "GCP", "S3", "bucket" |
 | cybersec-password | "password", "hash", "brute force", "hydra" |
-| cybersec-exploit | "exploit", "PoC", "get shell", "metasploit" |
+| cybersec-exploit | "exploit", "PoC", "get shell", "metasploit", "web shell", "reverse shell", "backdoor" |
 | cybersec-crisis | "incident", "breach", "emergency", "compromised" |
 | cybersec-report | "report", "remediation", "fix", "document" |
 | cybersec-ai | "AI", "LLM", "prompt injection", "guardrails" |

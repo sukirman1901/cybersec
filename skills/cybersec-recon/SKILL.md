@@ -3,12 +3,6 @@ name: cybersec-recon
 description: Use when user asks to perform reconnaissance, enumerate subdomains, check DNS, or discover target infrastructure
 ---
 
-<HARD-GATE>
-Do NOT proceed to scanning or any other phase until reconnaissance is complete.
-You MUST run ALL relevant recon tools before concluding the recon phase.
-At minimum: dns_lookup + whois_lookup + http_probe_target + crt_search.
-</HARD-GATE>
-
 ## Reconnaissance Methodology
 
 ### Checklist

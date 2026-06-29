@@ -3,11 +3,6 @@ name: cybersec-osint
 description: Use when user asks for advanced OSINT, shodan search, URL history, or deep reconnaissance
 ---
 
-<HARD-GATE>
-Do NOT skip OSINT phase — run shodan_lookup + wayback_urls before concluding recon.
-OSINT findings feed into scanning and vulnerability assessment.
-</HARD-GATE>
-
 ## OSINT & Advanced Recon Methodology
 
 ### Checklist

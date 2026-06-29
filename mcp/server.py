@@ -181,6 +181,18 @@ from cyber_tools.raw_replay import raw_replay as _raw_replay
 from cyber_tools.evidence_manifest import evidence_manifest as _evidence_manifest
 from cyber_tools.cleanup_tracking import cleanup_tracking as _cleanup_tracking
 from cyber_tools.vulnerable_fixture import vulnerable_fixture as _vulnerable_fixture
+from cyber_tools.ad_enum import ad_enum as _ad_enum
+from cyber_tools.ad_kerberoast import ad_kerberoast as _ad_kerberoast
+from cyber_tools.ad_asrep_roast import ad_asrep_roast as _ad_asrep_roast
+from cyber_tools.ad_dcsync import ad_dcsync as _ad_dcsync
+from cyber_tools.ad_passthehash import ad_passthehash as _ad_passthehash
+from cyber_tools.ad_certipy import ad_certipy as _ad_certipy
+from cyber_tools.ad_spray import ad_spray as _ad_spray
+from cyber_tools.ad_ntlm_relay import ad_ntlm_relay as _ad_ntlm_relay
+from cyber_tools.webshell_gen import webshell_gen as _webshell_gen
+from cyber_tools.webshell_upload import webshell_upload as _webshell_upload
+from cyber_tools.webshell_connect import webshell_connect as _webshell_connect
+from cyber_tools.webshell_detect import webshell_detect as _webshell_detect
 
 def _run(coro):
     try:
@@ -1152,6 +1164,70 @@ def cleanup_tracking(action: str, action_type: str = "", target: str = "", tool:
 def vulnerable_fixture(action: str, target: str = "127.0.0.1", port: int = 9999, vuln_types: str = "sqli,xss,lfi,cmd,ssrf,open_redirect", ssl: bool = False, reset: bool = False) -> str:
     """Vulnerable fixture — local vulnerable app for E2E tool validation. Actions: start, stop, status, endpoints, e2e, cleanup."""
     return _vulnerable_fixture(action, target, port, vuln_types, ssl, reset)
+
+# --- Active Directory Attack Suite ---
+
+@mcp.tool()
+def ad_enum(domain: str, dc_ip: str, username: str = "", password: str = "", enum_users: bool = True, enum_groups: bool = True, enum_computers: bool = True, enum_trusts: bool = True) -> str:
+    """Comprehensive Active Directory enumeration via LDAP — users, groups, computers, trusts, password policy."""
+    return json.dumps(_run(_ad_enum(domain, dc_ip, username, password, enum_users, enum_groups, enum_computers, enum_trusts)), indent=2)
+
+@mcp.tool()
+def ad_kerberoast(domain: str, dc_ip: str, username: str = "", password: str = "", output_format: str = "hashcat") -> str:
+    """Kerberoasting — request TGS tickets for SPN accounts and return crackable hashes (hashcat format)."""
+    return json.dumps(_run(_ad_kerberoast(domain, dc_ip, username, password, output_format)), indent=2)
+
+@mcp.tool()
+def ad_asrep_roast(domain: str, dc_ip: str, username: str = "", password: str = "", output_format: str = "hashcat") -> str:
+    """ASREP Roasting — request AS-REP tickets for accounts with DONT_REQUIRE_PREAUTH and return crackable hashes."""
+    return json.dumps(_run(_ad_asrep_roast(domain, dc_ip, username, password, output_format)), indent=2)
+
+@mcp.tool()
+def ad_dcsync(domain: str, dc_ip: str, username: str, password: str = "", target_user: str = "krbtgt", all_users: bool = False) -> str:
+    """DCSync — extract password hashes from domain controller via DRSUAPI replication. Requires Domain Admin privileges."""
+    return json.dumps(_run(_ad_dcsync(domain, dc_ip, username, password, target_user, all_users)), indent=2)
+
+@mcp.tool()
+def ad_passthehash(target: str, username: str, nt_hash: str, domain: str = "", lm_hash: str = "", command: str = "", protocol: str = "smbexec") -> str:
+    """Pass-the-Hash — execute commands on remote targets using NTLM hash authentication. Protocols: smbexec, wmiexec, atexec, psexec."""
+    return json.dumps(_run(_ad_passthehash(target, username, nt_hash, domain, lm_hash, command, protocol)), indent=2)
+
+@mcp.tool()
+def ad_certipy(action: str, target: str, username: str = "", password: str = "", domain: str = "", dc_ip: str = "", ca: str = "", template: str = "", alt_name: str = "", cert_path: str = "", account: str = "") -> str:
+    """AD CS abuse via Certipy — enumerate certificate services (ESC1-15), request certificates, PKINIT auth, shadow credentials. Actions: find, req, auth, shadow."""
+    return json.dumps(_run(_ad_certipy(action, target, username, password, domain, dc_ip, ca, template, alt_name, cert_path, account)), indent=2)
+
+@mcp.tool()
+def ad_spray(domain: str, dc_ip: str, password: str, usernames: str = "", username_file: str = "", delay: int = 0, max_attempts: int = 0) -> str:
+    """Password spraying — test a single password against multiple AD accounts while respecting lockout policy."""
+    return json.dumps(_run(_ad_spray(domain, dc_ip, password, usernames, username_file, delay, max_attempts)), indent=2)
+
+@mcp.tool()
+def ad_ntlm_relay(target: str = "", targets_file: str = "", command: str = "", socks_mode: bool = False, smb_server: bool = True, http_server: bool = True, smb2support: bool = True, loot_dir: str = "/tmp/ntlmrelayx_loot", timeout: int = 60) -> str:
+    """NTLM Relay — set up relay server to capture and relay NTLM authentications to target systems via ntlmrelayx."""
+    return json.dumps(_run(_ad_ntlm_relay(target, targets_file, command, socks_mode, smb_server, http_server, smb2support, loot_dir, timeout)), indent=2)
+
+# --- Web Shell Suite ---
+
+@mcp.tool()
+def webshell_gen(language: str = "php", shell_type: str = "cmd", obfuscate: bool = False, password: str = "", param_name: str = "cmd", reverse_host: str = "", reverse_port: int = 4444) -> str:
+    """Generate a web shell payload (PHP/JSP/ASP/ASPX). Types: cmd (command exec), eval (eval code), reverse (reverse shell). Optional obfuscation and password protection."""
+    return json.dumps(_run(_webshell_gen(language, shell_type, obfuscate, password, param_name, reverse_host, reverse_port)), indent=2)
+
+@mcp.tool()
+def webshell_upload(target_url: str, shell_code: str = "", param_name: str = "file", filename: str = "shell.php", content_type: str = "application/x-php", language: str = "php", auto_gen: bool = True) -> str:
+    """Upload a web shell to a target via file upload vulnerability. Auto-discovers upload endpoints and verifies shell accessibility."""
+    return json.dumps(_run(_webshell_upload(target_url, shell_code, param_name, filename, content_type, language, auto_gen)), indent=2)
+
+@mcp.tool()
+def webshell_connect(shell_url: str, command: str = "", method: str = "get", param_name: str = "cmd", password: str = "", auth_param: str = "auth", extra_params: str = "", timeout: int = 15) -> str:
+    """Connect to an uploaded web shell and execute commands. Supports GET/POST, password auth, and extra parameters."""
+    return json.dumps(_run(_webshell_connect(shell_url, command, method, param_name, password, auth_param, extra_params, timeout)), indent=2)
+
+@mcp.tool()
+def webshell_detect(target_url: str, deep_scan: bool = False, timeout: int = 10) -> str:
+    """Detect web shells on a target via signature scanning. Checks common filenames and content patterns (c99, r57, weevely, china chopper, etc.)."""
+    return json.dumps(_run(_webshell_detect(target_url, deep_scan, timeout)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

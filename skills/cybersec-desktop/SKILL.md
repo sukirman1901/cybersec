@@ -3,11 +3,6 @@ name: cybersec-desktop
 description: Desktop application security testing methodology — static analysis, binaries, configs, Electron
 ---
 
-<HARD-GATE>
-You MUST load this skill using the `skill` tool before any desktop app security review.
-Create a TodoWrite item for each step below. Do NOT skip steps.
-</HARD-GATE>
-
 ## Desktop App Testing Methodology
 
 ### 1. Static Analysis

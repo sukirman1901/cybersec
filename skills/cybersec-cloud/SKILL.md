@@ -3,11 +3,6 @@ name: cybersec-cloud
 description: Use when user asks about cloud security, AWS, Azure, GCP, S3 buckets, or cloud enumeration
 ---
 
-<HARD-GATE>
-Do NOT access cloud resources without explicit authorization.
-Cloud enumeration is passive (checking bucket existence, not accessing content) unless user confirms authorization.
-</HARD-GATE>
-
 ## Cloud Security Testing Methodology
 
 ### Checklist

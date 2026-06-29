@@ -3,11 +3,6 @@ name: cybersec-code-audit
 description: Code security audit methodology — SAST, secret scanning, manual review patterns
 ---
 
-<HARD-GATE>
-You MUST load this skill using the `skill` tool before any source code security review.
-Create a TodoWrite item for each step below. Do NOT skip steps.
-</HARD-GATE>
-
 ## Code Security Audit Methodology
 
 ### 1. Secret Discovery

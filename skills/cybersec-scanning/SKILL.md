@@ -3,12 +3,6 @@ name: cybersec-scanning
 description: Use when user asks to scan ports, detect services, or fingerprint a target
 ---
 
-<HARD-GATE>
-Do NOT start scanning without a validated target from recon phase.
-Must have at minimum: target IP/domain + list of subdomains from recon.
-Do NOT skip to vulnerability assessment before completing port scanning.
-</HARD-GATE>
-
 ## Port Scanning & Service Detection Methodology
 
 ### Checklist
