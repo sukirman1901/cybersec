@@ -193,6 +193,9 @@ from cyber_tools.webshell_gen import webshell_gen as _webshell_gen
 from cyber_tools.webshell_upload import webshell_upload as _webshell_upload
 from cyber_tools.webshell_connect import webshell_connect as _webshell_connect
 from cyber_tools.webshell_detect import webshell_detect as _webshell_detect
+from cyber_tools.dork_gen import dork_gen as _dork_gen
+from cyber_tools.dork_scan import dork_scan as _dork_scan
+from cyber_tools.dork_hunt import dork_hunt as _dork_hunt
 
 def _run(coro):
     try:
@@ -1228,6 +1231,23 @@ def webshell_connect(shell_url: str, command: str = "", method: str = "get", par
 def webshell_detect(target_url: str, deep_scan: bool = False, timeout: int = 10) -> str:
     """Detect web shells on a target via signature scanning. Checks common filenames and content patterns (c99, r57, weevely, china chopper, etc.)."""
     return json.dumps(_run(_webshell_detect(target_url, deep_scan, timeout)), indent=2)
+
+# --- Dork Suite ---
+
+@mcp.tool()
+def dork_gen(category: str = "", tech: str = "", vuln_type: str = "", target: str = "", limit: int = 50) -> str:
+    """Generate Google dorks for target discovery. Categories: vuln_sites, config_leak, admin_panels, db_dumps, backup_files, git_exposed, api_keys, iot_devices, login_portals, phpinfo, error_messages, upload_forms, exposed_cms, shell_upload, deface_target, s3_buckets, exposed_docs. Tech: wordpress, laravel, django, spring, nodejs, jenkins, gitlab, kibana, grafana. Vuln: sqli, lfi, xss, rce."""
+    return json.dumps(_run(_dork_gen(category, tech, vuln_type, target, limit)), indent=2)
+
+@mcp.tool()
+def dork_scan(dorks: str = "", engines: str = "ddg,bing", max_results: int = 20, delay: float = 1.0, timeout: int = 15) -> str:
+    """Execute dork queries via multiple search engines (DuckDuckGo, Bing, Google). Returns URLs found. Avoids CAPTCHA by using DDG HTML version + Bing."""
+    return json.dumps(_run(_dork_scan(dorks, engines, max_results, delay, timeout)), indent=2)
+
+@mcp.tool()
+def dork_hunt(category: str = "vuln_sites", tech: str = "", vuln_type: str = "", target: str = "", engines: str = "ddg,bing", max_dorks: int = 10, max_results: int = 15, probe: bool = True, validate: bool = True, delay: float = 1.0, timeout: int = 15) -> str:
+    """Full dorking pipeline: generate dorks → scan engines → HTTP probe → validate vulnerabilities. One-call target discovery — give a category, get back validated vulnerable URLs."""
+    return json.dumps(_run(_dork_hunt(category, tech, vuln_type, target, engines, max_dorks, max_results, probe, validate, delay, timeout)), indent=2)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
