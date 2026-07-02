@@ -29,7 +29,15 @@ async def _run_cli(cmd: list, timeout: int = 120) -> Dict[str, Any]:
 
 
 def _check(tool: str) -> bool:
-    return shutil.which(tool) is not None
+    return _which(tool) is not None
+
+
+def _which(tool: str) -> str | None:
+    for name in {"testssl": ["testssl", "testssl.sh"]}.get(tool, [tool]):
+        path = shutil.which(name)
+        if path:
+            return path
+    return None
 
 
 def _err(tool: str) -> Dict:
@@ -184,7 +192,7 @@ async def testssl_check(target: str, port: int = 443) -> Dict:
     """SSL/TLS server testing using testssl CLI."""
     if not _check("testssl"):
         return _err("testssl")
-    r = await _run_cli(["testssl", "--quiet", "--jsonfile", "/dev/stdout", f"{target}:{port}"])
+    r = await _run_cli([_which("testssl"), "--quiet", "--jsonfile", "/dev/stdout", f"{target}:{port}"])
     findings = []
     for line in r.get("stdout", "").split("\n"):
         if line.strip():

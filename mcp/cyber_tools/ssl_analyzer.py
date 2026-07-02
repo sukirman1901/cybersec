@@ -1,15 +1,38 @@
 """SSL/TLS analysis using Python ssl module."""
 
+import re
 import ssl
 import socket
+from urllib.parse import urlparse
 
 WEAK_CIPHERS = [
     "RC4", "DES", "3DES", "MD5", "EXPORT", "NULL", "aNULL",
     "LOW", "SSLv2", "SSLv3",
 ]
 
+
+def _normalize_host(target: str, port: int = 443) -> tuple[str, int]:
+    """Strip scheme, path, and explicit port from target."""
+    target = target.strip()
+    if target.startswith(("http://", "https://")):
+        parsed = urlparse(target)
+        host = parsed.hostname or target
+        if parsed.port:
+            port = parsed.port
+        return host, port
+
+    # bare host:port or host/path
+    if "/" in target:
+        target = target.split("/", 1)[0]
+    m = re.match(r"^([^:]+):(\d+)$", target)
+    if m:
+        return m.group(1), int(m.group(2))
+    return target, port
+
+
 def ssl_analyze(host: str, port: int = 443) -> dict:
     """Analyze SSL/TLS configuration."""
+    host, port = _normalize_host(host, port)
     result = {
         "host": host,
         "port": port,

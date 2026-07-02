@@ -4,6 +4,21 @@ Cybersec MCP Server — provides penetration testing tools for OpenCode AI agent
 
 import asyncio
 import json
+import logging
+import sys
+
+
+def _mcp_stdio_logging_guard() -> None:
+    """MCP stdio transport requires stdout to carry JSON-RPC only."""
+    for logger in (logging.getLogger(), *[
+        logging.getLogger(name)
+        for name in logging.root.manager.loggerDict
+    ]):
+        for handler in logger.handlers[:]:
+            if isinstance(handler, logging.StreamHandler) and handler.stream is sys.stdout:
+                logger.removeHandler(handler)
+
+
 from fastmcp import FastMCP
 from cyber_tools.port_scanner import scan_ports, detect_service
 from cyber_tools.dns_enum import dns_enum
@@ -11,6 +26,7 @@ from cyber_tools.http_probe import http_probe
 from cyber_tools.web_fuzz import dir_bust
 from cyber_tools.ssl_analyzer import ssl_analyze
 from cyber_tools.vuln_db import cve_lookup
+from cyber_tools.tool_health import check_tool_health
 from cyber_tools.waf_detect import waf_detect
 from cyber_tools.google_dork import google_dork
 from cyber_tools.report import gen_report
@@ -196,6 +212,7 @@ from cyber_tools.webshell_detect import webshell_detect as _webshell_detect
 from cyber_tools.dork_gen import dork_gen as _dork_gen
 from cyber_tools.dork_scan import dork_scan as _dork_scan
 from cyber_tools.dork_hunt import dork_hunt as _dork_hunt
+from cyber_tools.dork_pipeline import dork_and_scan as _dork_and_scan
 from cyber_tools.social_osint import social_osint as _social_osint
 from cyber_tools.telegram_osint import telegram_osint as _telegram_osint
 from cyber_tools.phone_osint import phone_osint as _phone_osint
@@ -236,6 +253,11 @@ def dir_bruteforce(target: str, wordlist: str = "common") -> str:
     common = ["admin", "login", "wp-admin", "backup", ".git", "config", "api", "uploads", "robots.txt", "sitemap.xml"]
     results = dir_bust(target, common)
     return json.dumps({"target": target, "found": results, "count": len(results)}, indent=2)
+
+@mcp.tool()
+def tool_health(include_optional: bool = True) -> str:
+    """Check which CLI dependencies are installed for MCP cyber tools."""
+    return json.dumps(check_tool_health(include_optional=include_optional), indent=2)
 
 @mcp.tool()
 def ssl_check(target: str, port: int = 443) -> str:
@@ -1254,6 +1276,30 @@ def dork_hunt(category: str = "vuln_sites", tech: str = "", vuln_type: str = "",
     return json.dumps(_run(_dork_hunt(category, tech, vuln_type, target, engines, max_dorks, max_results, probe, validate, delay, timeout)), indent=2)
 
 @mcp.tool()
+def dork_and_scan(
+    category: str = "vuln_sites",
+    vuln_type: str = "",
+    target: str = "",
+    urls: str = "",
+    engines: str = "ddg",
+    max_dorks: int = 5,
+    max_results: int = 10,
+    max_scan: int = 30,
+    scan_mode: str = "hosts",
+    tools: str = "vuln_scan,tech_detect",
+    concurrent: int = 5,
+    delay: float = 1.0,
+) -> str:
+    """Bulk dork pipeline: generate dorks → search → list ALL websites → parallel vuln_scan/tech_detect/sqli_detect. scan_mode=hosts (unique domains) or urls (every URL). max_scan up to 50."""
+    return json.dumps(
+        _run(_dork_and_scan(
+            category, vuln_type, target, urls, engines,
+            max_dorks, max_results, max_scan, scan_mode, tools, concurrent, delay,
+        )),
+        indent=2,
+    )
+
+@mcp.tool()
 def social_osint(username: str, timeout: int = 10, concurrent: int = 20) -> str:
     """Search for a username across 100+ social media platforms (Instagram, Twitter, TikTok, GitHub, Telegram, etc.). Sherlock-style — no API keys required. Returns found accounts with URLs and status codes."""
     return json.dumps(_run(_social_osint(username, timeout, concurrent)), indent=2)
@@ -1273,5 +1319,7 @@ def email_osint(email: str, check_breach_urls: bool = True) -> str:
     """Email intelligence — validate format, check MX records, domain reputation, Gravatar profile, and generate breach lookup URLs (HIBP, GhostProject, IntelligenceX). No paid APIs."""
     return json.dumps(_run(_email_osint(email, check_breach_urls)), indent=2)
 
+_mcp_stdio_logging_guard()
+
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    mcp.run(transport="stdio", show_banner=False, log_level="ERROR")

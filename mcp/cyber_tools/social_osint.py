@@ -126,6 +126,47 @@ _PLATFORMS: list[tuple[str, str, str, str]] = [
 _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 _HEADERS = {"User-Agent": _UA, "Accept": "text/html", "Accept-Language": "en-US,en;q=0.9"}
 
+# Substrings that indicate a profile/page does NOT exist
+_NOT_FOUND_MARKERS = (
+    "page not found",
+    "doesn't exist",
+    "does not exist",
+    "user not found",
+    "profile isn't available",
+    "this account",
+    "sorry, this page",
+    "couldn't find",
+    "no user",
+    "404 error",
+    "sign up for",
+    "create an account",
+)
+
+
+def _profile_exists(username: str, url: str, status_code: int, body: str) -> bool:
+    """Heuristic: avoid counting generic 200/403 pages as existing profiles."""
+    if status_code in (404, 410, 451):
+        return False
+    if status_code == 429:
+        return False
+
+    body_lower = body[:8000].lower()
+    if any(marker in body_lower for marker in _NOT_FOUND_MARKERS):
+        return False
+
+    if status_code == 403:
+        # Protected but may exist — require username in body/title
+        return username.lower() in body_lower
+
+    if status_code != 200:
+        return False
+
+    # Require username mention or platform-specific profile signals
+    if username.lower() in body_lower:
+        return True
+    profile_signals = ("followers", "following", "posts", "joined", "member since", "profile")
+    return any(sig in body_lower for sig in profile_signals)
+
 
 async def social_osint(
     username: str,
@@ -172,9 +213,7 @@ async def social_osint(
             async with semaphore:
                 try:
                     resp = await client.get(url)
-                    # 200 = likely exists, 403/401 = might exist (protected),
-                    # 404/410 = definitely doesn't exist
-                    exists = resp.status_code in (200, 403, 401)
+                    exists = _profile_exists(username, url, resp.status_code, resp.text)
                     return name, url, exists, resp.status_code
                 except Exception:
                     return name, url, False, 0
