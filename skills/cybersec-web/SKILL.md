@@ -27,28 +27,33 @@ Create a todo list from the checklist below, then execute all steps immediately.
 16. **Command Injection** — If shell interaction likely, call `cmd_injection(target)` and `cmd_oast_helper(target)` for blind OS command injection
 17. **NoSQL Injection** — If MongoDB/NoSQL detected, call `nosql_inject(target)`
 18. **CSRF Detection** — Call `csrf_detect(target)` to check forms for CSRF tokens. Call `csrf_extract(target)` to analyze token patterns.
-19. **IDOR Testing** — Call `idor_detect(target)` for Insecure Direct Object References, then `idor_access_validation(target)` for validation
-20. **WebSocket Testing** — If WebSocket endpoints found, call `websocket_test(target)`
-21. **Prototype Pollution** — If JavaScript SPA detected, call `prototype_pollution(target)`
-22. **Cache Poisoning** — Call `cache_poison_check(target)` for web cache poisoning
-23. **Host Header Injection** — Call `host_header_injection(target)` for host header attacks
-24. **File Upload Bypass** — If file upload forms found, call `upload_bypass(target)` and `upload_exploit_chain(target)`
-25. **OAuth Testing** — If OAuth flows detected, call `oauth_scan(target)`
-26. **API Auth Testing** — If API endpoints found, call `api_auth(target)` for auth bypass
-27. **Cookie Security** — Call `cookie_audit(target)` to audit cookie security flags, call `cookie_editor(target)` to test cookie manipulation
-28. **Security Headers** — Call `csp_analyze(target)` for CSP and security header analysis
-29. **Race Condition** — If concurrent requests likely, call `race_condition(target)`
-30. **VHost Discovery** — Call `vhost_discovery(target)` to find virtual hosts
-31. **Deserialization** — If PHP detected: `php_deserialize(target)`. If Java: `java_deserialize(target)`.
-32. **Log4J Scan** — Call `log4j_scan(target)` for Log4j JNDI injection
-33. **Supply Chain** — Call `supply_chain(target)` for exposed manifests and dependency CVEs
-34. **CAPTCHA Detection** — Call `captcha_test(target, action="detect")` to identify captcha type on forms
-35. **CAPTCHA Bypass** — If captcha detected: call `captcha_test(target, action="all")` to test all bypass vectors (token reuse, empty values, OCR, math solving, header/cookie manipulation)
-36. **SQLi / XSS** — If user input found: call `sqli_detect(target)` and `sqlmap_check(target)` for SQLi. Call `xss_detect(target)` and `xsstrike_check(target)` for XSS.
-37. **Injection Validator** — Call `injection_validator(target)` for unified injection validation across 7 types
-38. **Web Shell Detection** — Call `webshell_detect(target, deep_scan=True)` to scan for existing web shells (c99, r57, weevely, china chopper, etc.)
-39. **Dork Target Discovery** — Call `dork_gen(category="vuln_sites", target="target.com")` to generate dorks, then `dork_scan(dorks)` to find exposed pages
-40. **Dork Hunting** — Call `dork_hunt(category="shell_upload", target="target.com", validate=True)` for one-call vuln discovery
+19. **CRLF Injection** — Call `crlf_inject(target)` for HTTP header injection, response splitting, and log forgery
+20. **LDAP Injection** — If LDAP endpoints found, call `ldap_inject(target)` for LDAP query manipulation
+21. **IDOR Testing** — Call `idor_detect(target)` for Insecure Direct Object References, then `idor_access_validation(target)` for validation
+22. **WebSocket Testing** — If WebSocket endpoints found, call `websocket_test(target)`
+23. **Prototype Pollution** — If JavaScript SPA detected, call `prototype_pollution(target)`
+24. **Cache Poisoning** — Call `cache_poison_check(target)` for web cache poisoning
+25. **Host Header Injection** — Call `host_header_injection(target)` for host header attacks
+26. **File Upload Bypass** — If file upload forms found, call `upload_bypass(target)` and `upload_exploit_chain(target)`
+27. **OAuth Testing** — If OAuth flows detected, call `oauth_scan(target)`
+28. **API Auth Testing** — If API endpoints found, call `api_auth(target)` for auth bypass
+29. **Cookie Security** — Call `cookie_audit(target)` to audit cookie security flags, call `cookie_editor(target)` to test cookie manipulation
+30. **Security Headers** — Call `csp_analyze(target)` for CSP and security header analysis
+31. **Race Condition** — If concurrent requests likely, call `race_condition(target)`
+32. **VHost Discovery** — Call `vhost_discovery(target)` to find virtual hosts
+33. **Deserialization** — If PHP detected: `php_deserialize(target)`. If Java: `java_deserialize(target)`. If Python: `pickle_deserialize(target)`
+34. **Log4J Scan** — Call `log4j_scan(target)` for Log4j JNDI injection
+35. **Supply Chain** — Call `supply_chain(target)` for exposed manifests and dependency CVEs
+36. **CAPTCHA Detection** — Call `captcha_test(target, action="detect")` to identify captcha type on forms
+37. **CAPTCHA Bypass** — If captcha detected: call `captcha_test(target, action="all")` to test all bypass vectors (token reuse, empty values, OCR, math solving, header/cookie manipulation)
+38. **SQLi / XSS** — If user input found: call `sqli_detect(target)` and `sqlmap_check(target)` for SQLi. Call `xss_detect(target)` and `xsstrike_check(target)` for XSS.
+39. **Injection Validator** — Call `injection_validator(target)` for unified injection validation across 7 types
+40. **Web Shell Detection** — Call `webshell_detect(target, deep_scan=True)` to scan for existing web shells (c99, r57, weevely, china chopper, etc.)
+41. **Dork Target Discovery** — Call `dork_gen(category="vuln_sites", target="target.com")` to generate dorks, then `dork_scan(dorks)` to find exposed pages
+42. **Dork Hunting** — Call `dork_hunt(category="shell_upload", target="target.com", validate=True)` for one-call vuln discovery
+43. **Mass Assignment** — If API endpoints found, call `mass_assignment(target)` for parameter overwriting / privilege escalation
+44. **HTTP Request Splitting** — Call `http_request_splitting(target)` for CRLF injection in HTTP request headers
+45. **GraphQL Depth Bypass** — If GraphQL found, call `graphql_depth_bypass(target)` for depth limit bypass, batching, alias attacks
 
 ### Auto-CAPTCHA Protocol
 
@@ -76,9 +81,10 @@ Create a todo list from the checklist below, then execute all steps immediately.
 `oast_callback_server` `cmd_oast_helper` `captcha_test` `auth_macro_runner` `session_verification`
 `spring_scan` `nextjs_scan` `django_scan` `express_scan` `rails_scan` `laravel_scan`
 `wordpress_scan` `wpscan_check` `joomla_scan` `drupal_scan` `magento_scan` `cmseek_check` `sharepoint_scan`
-`php_deserialize` `java_deserialize` `log4j_scan` `supply_chain`
+`php_deserialize` `java_deserialize` `pickle_deserialize` `log4j_scan` `supply_chain`
 `webshell_detect`
 `dork_gen` `dork_scan` `dork_hunt`
+`crlf_inject` `ldap_inject` `mass_assignment` `http_request_splitting` `graphql_depth_bypass`
 
 ### Output
 Web application assessment with: discovered paths, API endpoints, misconfigurations, input validation issues, CMS vulnerabilities, CAPTCHA bypass results, and exploit potential.

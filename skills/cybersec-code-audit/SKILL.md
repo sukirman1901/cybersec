@@ -19,6 +19,7 @@ description: Code security audit methodology — SAST, secret scanning, manual r
 - Check for injection vectors (SQLi, NoSQL, command injection)
 - Review authentication logic, session handling, authorization checks
 - Look for insecure deserialization, SSRF, path traversal
+- Check Python pickle deserialization: `pickle_deserialize(target)` for RCE via pickle
 - Review file upload handling, input validation
 
 ### 4. Dependency Audit
@@ -33,4 +34,4 @@ description: Code security audit methodology — SAST, secret scanning, manual r
 - Transition to `cybersec-report`
 
 ## Tools
-- `secret_scanner`, `sast_review`, `bandit_scan`, `semgrep_scan`, `supply_chain`, `exposed_git`
+- `secret_scanner`, `sast_review`, `bandit_scan`, `semgrep_scan`, `supply_chain`, `exposed_git`, `pickle_deserialize`

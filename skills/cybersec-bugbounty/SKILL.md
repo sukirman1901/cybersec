@@ -13,14 +13,17 @@ Create a todo list from the checklist below, then execute all steps immediately.
 2. **403 Bypass** — If any endpoints return 403, call `bypass_403(url)` to test bypass techniques
 3. **Request Smuggling** — Call `smuggling_check(target)` to test CL.TE and TE.CL smuggling
 4. **OOB Testing** — Call `oob_test(target)` for blind SSRF, blind RCE, template injection
-5. **CORS Misconfig** — Call `cors_check(target)` for CORS bypass opportunities
-6. **Open Redirect** — Call `open_redirect(target)` for redirect chains (OAuth phishing)
-7. **GraphQL Audit** — Call `graphql_introspect(target)` for introspection + batching attacks
-8. **JWT Analysis** — If JWT tokens found, call `jwt_analyze(token)` for alg confusion, none alg, weak key
-9. **Duplicate Check** — Cross-reference findings with known bug bounty reports
+5. **CRLF Injection** — Call `crlf_inject(target)` for header injection and response splitting
+6. **CORS Misconfig** — Call `cors_check(target)` for CORS bypass opportunities
+7. **Open Redirect** — Call `open_redirect(target)` for redirect chains (OAuth phishing)
+8. **GraphQL Audit** — Call `graphql_introspect(target)` for introspection + `graphql_depth_bypass(target)` for batching/depth attacks
+9. **JWT Analysis** — If JWT tokens found, call `jwt_analyze(token)` for alg confusion, none alg, weak key
+10. **Mass Assignment** — If API endpoints found, call `mass_assignment(target)` for privilege escalation via parameter overwriting
+11. **HTTP Request Splitting** — Call `http_request_splitting(target)` for request splitting and cache poisoning
+12. **Duplicate Check** — Cross-reference findings with known bug bounty reports
 
 ### Tools Available
-`nuclei_scan`, `bypass_403`, `smuggling_check`, `oob_test`, `cors_check`, `open_redirect`, `graphql_introspect`, `jwt_analyze`, `dir_bruteforce`, `ffuf_fuzz`, `sqlmap_check`, `xsstrike_check`
+`nuclei_scan`, `bypass_403`, `smuggling_check`, `oob_test`, `cors_check`, `open_redirect`, `graphql_introspect`, `graphql_depth_bypass`, `jwt_analyze`, `dir_bruteforce`, `ffuf_fuzz`, `sqlmap_check`, `xsstrike_check`, `crlf_inject`, `mass_assignment`, `http_request_splitting`
 
 ### Output
 Bug bounty report with: nuclei findings, bypass results, smuggling status, OOB callback info, and priority rankings based on bounty potential.

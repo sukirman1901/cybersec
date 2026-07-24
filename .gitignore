@@ -11,3 +11,6 @@ mcp/.monitor_db.json
 mcp/.vuln_database.json
 mcp/logs/
 mcp/wordlists/
+
+# Node.js
+node_modules/

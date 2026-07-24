@@ -17,7 +17,8 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Test template injection: `ssti_detect`
 - Test XXE: `xxe_detect`
 - Test SSRF: `ssrf_detect`
-- Test LDAP/LFI: `ldap_enum`, `lfi_detect`
+- Test LDAP/LFI: `ldap_enum`, `lfi_detect`, `ldap_inject`
+- Test CRLF injection: `crlf_inject`
 - Test prompt injection (AI challenges): `prompt_injection`, `llm_agent_hijack`
 
 ### 3. Authentication & Session
@@ -28,7 +29,7 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Session manipulation, 2FA bypass
 
 ### 4. Access Control
-- Test privilege escalation: `bypass_403`, `idor_detect`
+- Test privilege escalation: `bypass_403`, `idor_detect`, `mass_assignment`
 - CSRF: `csrf_detect`
 - Basket manipulation, admin registration, deluxe fraud
 - SSRF for internal access: `ssrf_detect`
@@ -38,11 +39,14 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Parameter pollution, coupon forgery, quantity manipulation
 - Race conditions: `race_condition`
 - CAPTCHA bypass: `captcha_test`
+- Mass assignment / privilege escalation: `mass_assignment`
+- Python deserialization: `pickle_deserialize`
 
 ### 6. XSS & Client-Side
 - Test reflected/stored/DOM XSS: `csp_analyze`, `cookie_audit`
 - CSP bypass, DOM manipulation
 - HTTP header injection XSS
+- HTTP request splitting: `http_request_splitting`
 
 ### 7. Cryptography & Obscurity
 - JWT attacks: `jwt_forgery`
@@ -56,6 +60,7 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Check exposed configs: `misplaced_files`, `desktop_config`
 - CORS: `cors_check`
 - Security headers: `csp_analyze`
+- GraphQL depth/batching bypass: `graphql_depth_bypass`
 
 ### 9. Sensitive Data Exposure
 - Log analysis: `log_exposure`
@@ -71,10 +76,10 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 
 ## Tools
 - Recon: `http_probe`, `tech_detect`, `waf_detect`, `dir_bust`, `param_discovery`, `misplaced_files`
-- Injection: `nosql_inject`, `cmd_injection`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `lfi_detect`, `prompt_injection`
+- Injection: `nosql_inject`, `cmd_injection`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `lfi_detect`, `ldap_inject`, `crlf_inject`, `prompt_injection`
 - Auth: `jwt_analyze`, `jwt_forgery`, `oauth_scan`, `api_auth`, `hydra_brute`
-- Access: `bypass_403`, `idor_detect`, `csrf_detect`, `race_condition`
-- Input: `upload_bypass`, `captcha_test`, `graphql_introspect`, `api_fuzz`
+- Access: `bypass_403`, `idor_detect`, `csrf_detect`, `race_condition`, `mass_assignment`
+- Input: `upload_bypass`, `captcha_test`, `graphql_introspect`, `api_fuzz`, `pickle_deserialize`
 - Crypto: `jwt_forgery`, `ssl_analyzer`, `stego_detect`
 - Exposure: `metrics_check`, `log_exposure`, `secret_scanner`, `exposed_git`, `exposed_backup`
-- Web: `csp_analyze`, `cookie_audit`, `cors_check`, `open_redirect`
+- Web: `csp_analyze`, `cookie_audit`, `cors_check`, `open_redirect`, `http_request_splitting`, `graphql_depth_bypass`

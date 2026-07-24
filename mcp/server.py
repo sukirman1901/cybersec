@@ -148,6 +148,12 @@ from cyber_tools.vhost_discovery import vhost_discovery as _vhost
 from cyber_tools.joomla_scan import joomla_scan as _joomla
 from cyber_tools.sharepoint_scan import sharepoint_scan as _sharepoint
 from cyber_tools.ghdb_search import ghdb_search as _ghdb
+from cyber_tools.crlf_inject import crlf_inject as _crlf
+from cyber_tools.ldap_inject import ldap_inject as _ldap_inject
+from cyber_tools.pickle_deserialize import pickle_deserialize as _pickle
+from cyber_tools.mass_assignment import mass_assignment as _massassign
+from cyber_tools.graphql_depth_bypass import graphql_depth_bypass as _graphql_bypass
+from cyber_tools.http_request_splitting import http_request_splitting as _http_split
 mcp = FastMCP("cybersec")
 
 from cyber_tools.exploit_db import exploit_db_search as _exploit_search
@@ -1318,6 +1324,38 @@ def phone_osint(phone_number: str, default_region: str = "") -> str:
 def email_osint(email: str, check_breach_urls: bool = True) -> str:
     """Email intelligence — validate format, check MX records, domain reputation, Gravatar profile, and generate breach lookup URLs (HIBP, GhostProject, IntelligenceX). No paid APIs."""
     return json.dumps(_run(_email_osint(email, check_breach_urls)), indent=2)
+
+# --- Injection & Deserialization Tools ---
+
+@mcp.tool()
+def crlf_inject(target: str) -> str:
+    """CRLF injection — inject HTTP headers via \\r\\n in parameters, response splitting, log forgery, redirect injection."""
+    return json.dumps(_run(_crlf(target)), indent=2)
+
+@mcp.tool()
+def ldap_inject(target: str) -> str:
+    """LDAP injection — test for LDAP query manipulation, auth bypass, error-based, boolean-blind, time-blind."""
+    return json.dumps(_run(_ldap_inject(target)), indent=2)
+
+@mcp.tool()
+def pickle_deserialize(target: str) -> str:
+    """Python pickle deserialization — detect and test for insecure deserialization, RCE confirmation."""
+    return json.dumps(_run(_pickle(target)), indent=2)
+
+@mcp.tool()
+def mass_assignment(target: str) -> str:
+    """Mass assignment / overposting — test for parameter overwriting in APIs, privilege escalation."""
+    return json.dumps(_run(_massassign(target)), indent=2)
+
+@mcp.tool()
+def graphql_depth_bypass(target: str) -> str:
+    """GraphQL depth limit bypass — batching, alias attacks, circular fragments, resource exhaustion."""
+    return json.dumps(_run(_graphql_bypass(target)), indent=2)
+
+@mcp.tool()
+def http_request_splitting(target: str) -> str:
+    """HTTP request splitting — CRLF injection in headers, request line splitting, chunked encoding abuse."""
+    return json.dumps(_run(_http_split(target)), indent=2)
 
 _mcp_stdio_logging_guard()
 

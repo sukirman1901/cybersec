@@ -1,0 +1,12 @@
+{
+  "name": "siphr-nextauth-poc",
+  "private": true,
+  "description": "Local read-only verifier for NextAuth secret leak on sipgn-siphr.bgn.go.id",
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "next-auth": "^4.24.11"
+  }
+}

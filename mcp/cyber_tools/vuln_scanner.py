@@ -1,16 +1,11 @@
-"""
-Vulnerability scanner via security header checks, path probes, and CVE pattern matching.
-Pure Python, no external binaries.
-
-Findings include a ``confidence`` field:
-- verified: path/content probe matched real exposure
-- probable: version/CVE correlation from response headers only
-- info: misconfiguration or informational
-"""
+"""Deep vulnerability scanner — security headers, path probes, CVE patterns, tech-specific checks, default creds."""
 
 import re
-from typing import Dict, List, Optional
+import httpx
+import asyncio
+from typing import Dict, List
 
+# --- Security Header Checks ---
 SECURITY_CHECKS = {
     "missing-x-frame-options": {
         "name": "Missing X-Frame-Options Header",
@@ -54,13 +49,77 @@ SECURITY_CHECKS = {
         "description": "X-Powered-By header reveals technology information.",
         "check": lambda h: "x-powered-by" in {k.lower() for k in h},
     },
+    "missing-referrer-policy": {
+        "name": "Missing Referrer-Policy Header",
+        "severity": "low",
+        "description": "Referrer-Policy header not set — may leak URLs to third parties.",
+        "check": lambda h: "referrer-policy" not in {k.lower() for k in h},
+    },
+    "missing-permissions-policy": {
+        "name": "Missing Permissions-Policy Header",
+        "severity": "low",
+        "description": "Permissions-Policy header not set — browser features unrestricted.",
+        "check": lambda h: "permissions-policy" not in {k.lower() for k in h} and "feature-policy" not in {k.lower() for k in h},
+    },
+    "missing-x-content-security-policy": {
+        "name": "Missing X-Content-Security-Policy Header",
+        "severity": "info",
+        "description": "Legacy CSP header not set.",
+        "check": lambda h: "x-content-security-policy" not in {k.lower() for k in h},
+    },
+    "missing-x-permitted-cross-domain": {
+        "name": "Missing X-Permitted-Cross-Domain-Policies Header",
+        "severity": "low",
+        "description": "Cross-domain policy header not set.",
+        "check": lambda h: "x-permitted-cross-domain-policies" not in {k.lower() for k in h},
+    },
+    "missing-cross-origin-embedder": {
+        "name": "Missing Cross-Origin-Embedder-Policy Header",
+        "severity": "info",
+        "description": "COEP header not set — cross-origin isolation disabled.",
+        "check": lambda h: "cross-origin-embedder-policy" not in {k.lower() for k in h},
+    },
+    "missing-cross-origin-opener": {
+        "name": "Missing Cross-Origin-Opener-Policy Header",
+        "severity": "info",
+        "description": "COOP header not set.",
+        "check": lambda h: "cross-origin-opener-policy" not in {k.lower() for k in h},
+    },
+    "missing-cross-origin-resource": {
+        "name": "Missing Cross-Origin-Resource-Policy Header",
+        "severity": "info",
+        "description": "CORP header not set.",
+        "check": lambda h: "cross-origin-resource-policy" not in {k.lower() for k in h},
+    },
+    "weak-csp": {
+        "name": "Weak Content-Security-Policy",
+        "severity": "medium",
+        "description": "CSP uses unsafe-inline or unsafe-eval.",
+        "check": lambda h: any(
+            "unsafe-inline" in h.get("content-security-policy", "").lower() or
+            "unsafe-eval" in h.get("content-security-policy", "").lower()
+            for _ in [1]
+        ),
+    },
+    "weak-hsts": {
+        "name": "Weak HSTS Configuration",
+        "severity": "medium",
+        "description": "HSTS max-age is too short (< 6 months).",
+        "check": lambda h: any(
+            int(re.search(r"max-age=(\d+)", h.get("strict-transport-security", "")).group(1) or 0) < 15768000
+            for _ in [1] if re.search(r"max-age=(\d+)", h.get("strict-transport-security", ""))
+        ),
+    },
 }
 
+# --- Path Probes ---
 PATH_CHECKS = [
     {"path": "/.git/config", "name": "Git Config Exposure", "severity": "high",
      "pattern": r"\[core\]|\[remote"},
+    {"path": "/.git/HEAD", "name": "Git HEAD Exposure", "severity": "high",
+     "pattern": r"ref:"},
     {"path": "/.env", "name": "Environment File Exposure", "severity": "critical",
-     "pattern": r"(DB_|API_|SECRET|PASSWORD|KEY)="},
+     "pattern": r"(DB_|API_|SECRET|PASSWORD|KEY=|APP_|MAIL_|AWS_)"},
     {"path": "/robots.txt", "name": "Robots.txt Exposure", "severity": "info",
      "pattern": r"^User-agent:|^Disallow:|^Sitemap:", "content_type": "text/plain"},
     {"path": "/.htaccess", "name": "Htaccess File Exposure", "severity": "medium",
@@ -81,9 +140,55 @@ PATH_CHECKS = [
      "pattern": r'("password"|"secret"|"api_key")'},
     {"path": "/.DS_Store", "name": "DS_Store File Exposure", "severity": "low",
      "pattern": r"Bud1"},
+    {"path": "/.svn/entries", "name": "SVN Entries Exposure", "severity": "high",
+     "pattern": r"dir|file|svn"},
+    {"path": "/.hg/store/data", "name": "Mercurial Store Exposure", "severity": "high",
+     "pattern": r"data/"},
+    {"path": "/WEB-INF/web.xml", "name": "Java Web Config Exposure", "severity": "high",
+     "pattern": r"<web-app|<servlet"},
+    {"path": "/crossdomain.xml", "name": "Flash Cross-Domain Policy", "severity": "medium",
+     "pattern": r"cross-domain-policy|allow-access-from"},
+    {"path": "/clientaccesspolicy.xml", "name": "Silverlight Cross-Domain Policy", "severity": "medium",
+     "pattern": r"cross-domain-access-policy"},
+    {"path": "/sitemap.xml", "name": "Sitemap Exposure", "severity": "info",
+     "pattern": r"<urlset|<loc>", "content_type": "text/xml"},
+    {"path": "/.well-known/security.txt", "name": "Security.txt Contact", "severity": "info",
+     "pattern": r"Contact:|Expires:", "content_type": "text/plain"},
+    {"path": "/readme.html", "name": "CMS Readme Exposure", "severity": "info",
+     "pattern": r"readme|installation|setup"},
+    {"path": "/CHANGELOG.md", "name": "Changelog Exposure", "severity": "info",
+     "pattern": r"# Changelog|## \[", "content_type": "text"},
+    {"path": "/composer.json", "name": "Composer.json Exposure", "severity": "high",
+     "pattern": r'"name"|"require"|"php"'},
+
+    # --- Sensitive Directories ---
+    {"path": "/backup/", "name": "Backup Directory Listing", "severity": "high",
+     "pattern": r"\.(sql|gz|zip|tar|bak|old|dump)"},
+    {"path": "/uploads/", "name": "Uploads Directory Listing", "severity": "medium",
+     "pattern": r"\.(jpg|png|gif|pdf|doc|php|jsp)"},
+    {"path": "/temp/", "name": "Temp Directory Listing", "severity": "medium",
+     "pattern": r"\.(tmp|temp|log)"},
+    {"path": "/logs/", "name": "Logs Directory Listing", "severity": "high",
+     "pattern": r"\.(log|txt)"},
+    {"path": "/debug/", "name": "Debug Directory Listing", "severity": "medium",
+     "pattern": r"\.(json|xml|log)"},
+
+    # --- Framework-Specific ---
+    {"path": "/.aws/credentials", "name": "AWS Credentials Exposure", "severity": "critical",
+     "pattern": r"\[default\]|aws_access_key"},
+    {"path": "/.docker/config.json", "name": "Docker Config Exposure", "severity": "critical",
+     "pattern": r"auth|email|username"},
+    {"path": "/kubeconfig", "name": "Kubernetes Config Exposure", "severity": "critical",
+     "pattern": r"apiVersion|clusters|contexts"},
+    {"path": "/.ssh/authorized_keys", "name": "SSH Keys Exposure", "severity": "critical",
+     "pattern": r"ssh-rsa|ssh-ed25519"},
+    {"path": "/etc/passwd", "name": "Path Traversal to /etc/passwd", "severity": "critical",
+     "pattern": r"root:x:0:0"},
+    {"path": "/proc/self/environ", "name": "Proc Environ Exposure", "severity": "high",
+     "pattern": r"PATH=|HOME="},
 ]
 
-# Match only against Server / X-Powered-By headers (not page body noise)
+# --- CVE Patterns (Header-Based) ---
 CVE_PATTERNS = [
     {"pattern": r"Apache/2\.4\.(?:[0-9]|[1-4][0-9]|5[01])\b",
      "cve": "CVE-2021-44790", "name": "Apache HTTP Server Buffer Overflow",
@@ -106,21 +211,85 @@ CVE_PATTERNS = [
     {"pattern": r"PHP/8\.[01]\.",
      "cve": "EOL", "name": "PHP 8.0/8.1 Approaching EOL",
      "severity": "medium", "description": "PHP 8.0/8.1 EOL; plan upgrade to 8.2+."},
+    {"pattern": r"Microsoft-IIS/[56]\.",
+     "cve": "EOL", "name": "IIS 5/6 End-of-Life",
+     "severity": "critical", "description": "IIS 5/6 reached EOL; critical vulnerabilities."},
+    {"pattern": r"Microsoft-IIS/7\.0",
+     "cve": "EOL", "name": "IIS 7.0 End-of-Life",
+     "severity": "high", "description": "IIS 7.0 reached EOL; upgrade to latest version."},
+    {"pattern": r"Tomcat/[6789]\.",
+     "cve": "Multiple", "name": "Apache Tomcat (Older Version)",
+     "severity": "high", "description": "Older Tomcat versions have known vulnerabilities."},
+    {"pattern": r"Apache-Coyote",
+     "cve": "info", "name": "Apache Tomcat Detected",
+     "severity": "info", "description": "Tomcat server detected — check for default manager access."},
 ]
 
+# --- Default Credential Checks ---
 DEFAULT_CRED_CHECKS = [
     {
         "name": "GeoServer Default Credentials",
         "path": "/geoserver/rest/about/version.xml",
-        "username": "admin",
-        "password": "geoserver",
+        "username": "admin", "password": "geoserver",
         "severity": "critical",
         "pattern": r"<Version>",
+    },
+    {
+        "name": "WordPress Default Credentials",
+        "path": "/wp-login.php",
+        "username": "admin", "password": "admin",
+        "severity": "critical",
+        "pattern": r"dashboard|Logged in",
+    },
+    {
+        "name": "phpMyAdmin Default Credentials",
+        "path": "/phpmyadmin/",
+        "username": "root", "password": "",
+        "severity": "critical",
+        "pattern": r"phpMyAdmin|mysql",
+    },
+    {
+        "name": "Jenkins Default Credentials",
+        "path": "/manage",
+        "username": "admin", "password": "admin",
+        "severity": "critical",
+        "pattern": r"Jenkins|Manage Jenkins",
+    },
+    {
+        "name": "Kibana Default Access",
+        "path": "/app/kibana",
+        "username": "", "password": "",
+        "severity": "high",
+        "pattern": r"Kibana",
+    },
+    {
+        "name": "Grafana Default Credentials",
+        "path": "/api/health",
+        "username": "admin", "password": "admin",
+        "severity": "critical",
+        "pattern": r"ok|database",
+    },
+    {
+        "name": "SonarQube Default Credentials",
+        "path": "/api/system/status",
+        "username": "admin", "password": "admin",
+        "severity": "high",
+        "pattern": r"UP|RUNNING",
+    },
+    {
+        "name": "Redis Unauthenticated",
+        "path": "",
+        "username": "", "password": "",
+        "severity": "critical",
+        "pattern": r"",
+        "port": 6379,
+        "protocol": "redis",
     },
 ]
 
 
 def _version_banner(headers) -> str:
+    """Extract version info from headers."""
     parts = []
     for key in ("server", "x-powered-by"):
         val = headers.get(key)
@@ -129,10 +298,8 @@ def _version_banner(headers) -> str:
     return " ".join(parts)
 
 
-async def scan_vulnerabilities(target: str) -> Dict:
-    """Scan a target for common vulnerabilities (header checks, path probes, CVE patterns)."""
-    import httpx
-
+async def vuln_scanner(target: str) -> Dict:
+    """Deep vulnerability scanner with header checks, path probes, CVE patterns, tech-specific checks, default creds."""
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 
@@ -140,21 +307,26 @@ async def scan_vulnerabilities(target: str) -> Dict:
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
+            # --- Security Header Checks ---
             try:
                 response = await client.get(target)
                 headers = response.headers
 
-                for check in SECURITY_CHECKS.values():
-                    if check["check"](headers):
-                        vulnerabilities.append({
-                            "name": check["name"],
-                            "severity": check["severity"],
-                            "description": check["description"],
-                            "matched_at": target,
-                            "type": "misconfiguration",
-                            "confidence": "info",
-                        })
+                for check_id, check in SECURITY_CHECKS.items():
+                    try:
+                        if check["check"](headers):
+                            vulnerabilities.append({
+                                "name": check["name"],
+                                "severity": check["severity"],
+                                "description": check["description"],
+                                "matched_at": target,
+                                "type": "misconfiguration",
+                                "confidence": "info",
+                            })
+                    except Exception:
+                        continue
 
+                # Version/CVE detection
                 banner = _version_banner(headers)
                 for cve in CVE_PATTERNS:
                     if banner and re.search(cve["pattern"], banner, re.IGNORECASE):
@@ -171,6 +343,7 @@ async def scan_vulnerabilities(target: str) -> Dict:
             except httpx.HTTPError:
                 pass
 
+            # --- Path Probes ---
             for pc in PATH_CHECKS:
                 try:
                     path_url = target.rstrip("/") + pc["path"]
@@ -197,15 +370,17 @@ async def scan_vulnerabilities(target: str) -> Dict:
                 except httpx.HTTPError:
                     continue
 
-            # Default credential probes (read-only GET)
+            # --- Default Credential Probes ---
             for dc in DEFAULT_CRED_CHECKS:
+                if dc.get("protocol") == "redis":
+                    continue  # Skip non-HTTP checks here
                 try:
                     cred_url = target.rstrip("/") + dc["path"]
-                    auth = httpx.BasicAuth(dc["username"], dc["password"])
+                    auth = httpx.BasicAuth(dc["username"], dc["password"]) if dc["username"] else None
                     no_auth = await client.get(cred_url)
                     if no_auth.status_code == 200:
                         continue
-                    with_auth = await client.get(cred_url, auth=auth)
+                    with_auth = await client.get(cred_url, auth=auth) if auth else no_auth
                     if with_auth.status_code == 200 and re.search(
                         dc["pattern"], with_auth.text, re.IGNORECASE
                     ):
@@ -225,9 +400,126 @@ async def scan_vulnerabilities(target: str) -> Dict:
                 except httpx.HTTPError:
                     continue
 
+            # --- Technology-Specific Checks ---
+            try:
+                body = response.text.lower()
+                headers_dict = {k.lower(): v.lower() for k, v in response.headers.items()}
+
+                # WordPress checks
+                if "wp-content" in body or "wordpress" in body:
+                    vuln_paths = ["/wp-json/wp/v2/users", "/xmlrpc.php", "/wp-login.php"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200:
+                                vulnerabilities.append({
+                                    "name": f"WordPress {vp} Accessible",
+                                    "severity": "medium",
+                                    "description": f"WordPress endpoint {vp} is accessible",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "verified",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+                # Laravel checks
+                if "laravel" in body or "laravel_session" in str(headers_dict):
+                    vuln_paths = ["/.env", "/telescope", "/horizon", "/_ignition/health-check"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200 and len(vr.text) > 100:
+                                vulnerabilities.append({
+                                    "name": f"Laravel {vp} Accessible",
+                                    "severity": "critical" if ".env" in vp else "high",
+                                    "description": f"Laravel endpoint {vp} is accessible",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "verified",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+                # Spring Boot checks
+                if "whitelabel error" in body or "spring" in body:
+                    vuln_paths = ["/actuator", "/actuator/env", "/actuator/health", "/env", "/beans", "/mappings"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200 and ("actuator" in vr.text.lower() or "beans" in vr.text.lower()):
+                                vulnerabilities.append({
+                                    "name": f"Spring Boot Actuator {vp} Exposed",
+                                    "severity": "critical" if "/env" in vp else "high",
+                                    "description": f"Spring Boot actuator endpoint {vp} is exposed",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "verified",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+                # Django checks
+                if "csrfmiddlewaretoken" in body or "django" in body:
+                    vuln_paths = ["/admin/", "/static/admin/", "/api/v1/"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200:
+                                vulnerabilities.append({
+                                    "name": f"Django {vp} Accessible",
+                                    "severity": "info",
+                                    "description": f"Django endpoint {vp} is accessible",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "info",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+                # Next.js checks
+                if "_next/static" in body or "nextjs" in body:
+                    vuln_paths = ["/_next/data/", "/api/", "/__nextjs_original-stack-frame"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200:
+                                vulnerabilities.append({
+                                    "name": f"Next.js {vp} Accessible",
+                                    "severity": "info",
+                                    "description": f"Next.js endpoint {vp} is accessible",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "info",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+                # Express.js checks
+                if "x-powered-by: express" in str(headers_dict):
+                    vuln_paths = ["/api/v1/", "/graphql", "/health", "/debug"]
+                    for vp in vuln_paths:
+                        try:
+                            vr = await client.get(target.rstrip("/") + vp)
+                            if vr.status_code == 200:
+                                vulnerabilities.append({
+                                    "name": f"Express.js {vp} Accessible",
+                                    "severity": "info",
+                                    "description": f"Express.js endpoint {vp} is accessible",
+                                    "matched_at": target.rstrip("/") + vp,
+                                    "type": "exposure",
+                                    "confidence": "info",
+                                })
+                        except httpx.HTTPError:
+                            continue
+
+            except Exception:
+                pass
+
     except Exception as e:
         return {"vulnerabilities": [], "error": str(e)}
 
+    # Summary
     by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
     by_confidence = {"verified": 0, "probable": 0, "info": 0}
     for v in vulnerabilities:
@@ -249,3 +541,7 @@ async def scan_vulnerabilities(target: str) -> Dict:
             "confidence=probable means version/CVE correlation only, not exploited."
         ),
     }
+
+
+# Backward-compatible alias
+scan_vulnerabilities = vuln_scanner
