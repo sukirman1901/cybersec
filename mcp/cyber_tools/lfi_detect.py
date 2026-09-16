@@ -222,7 +222,7 @@ async def lfi_detect(target: str, param: str = "") -> dict:
                 continue  # Skip if we already found a working param
 
             # --- Basic Traversal ---
-            for name, payload in LINUX_TRAVERSALS + WINDOWS_TRAVERSALS:
+            for name, payload in LINUX_TRAVERSAL + WINDOWS_TRAVERSAL:
                 variants = _waf_bypass_variants(payload)
                 for variant in variants[:3]:
                     try:

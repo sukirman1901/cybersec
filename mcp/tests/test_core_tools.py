@@ -96,5 +96,46 @@ class TestFixtureIntegration(unittest.IsolatedAsyncioTestCase):
         json.loads(vulnerable_fixture("stop", port=9999))
 
 
+class TestDetectorRegression(unittest.IsolatedAsyncioTestCase):
+    """Regression tests for measured detector failures against the fixture."""
+
+    async def asyncSetUp(self):
+        from cyber_tools.vulnerable_fixture import vulnerable_fixture
+        start = json.loads(vulnerable_fixture("start", port=9999))
+        self.assertEqual(start.get("status"), "started")
+        self.base = start.get("base_url", "http://127.0.0.1:9999")
+
+    async def asyncTearDown(self):
+        from cyber_tools.vulnerable_fixture import vulnerable_fixture
+        try:
+            json.loads(vulnerable_fixture("stop", port=9999))
+        except Exception:
+            pass
+
+    async def test_lfi_detect_finds_traversal(self):
+        from cyber_tools.lfi_detect import lfi_detect
+        r = await lfi_detect(f"{self.base}/lfi?file=x")
+        self.assertTrue(r["vulnerable"], f"expected traversal found, got: {r}")
+
+    def test_http_probe_respects_custom_port(self):
+        from cyber_tools.http_probe import http_probe
+        r = http_probe("http://127.0.0.1:9999")
+        self.assertGreaterEqual(len(r["probes"]), 1)
+
+    async def test_vuln_scan_no_svn_false_positive(self):
+        from cyber_tools.vuln_scanner import scan_vulnerabilities
+        vulns = await scan_vulnerabilities(self.base)
+        names = [v["name"] for v in vulns["vulnerabilities"]]
+        self.assertNotIn("SVN Entries Exposure", names)
+
+    async def test_cmd_injection_finishes_under_30s(self):
+        from cyber_tools.cmd_injection import cmd_injection
+        await asyncio.wait_for(cmd_injection(f"{self.base}/cmd", param="host"), timeout=30)
+
+    async def test_open_redirect_finishes_under_30s(self):
+        from cyber_tools.open_redirect import open_redirect
+        await asyncio.wait_for(open_redirect(f"{self.base}/redirect"), timeout=30)
+
+
 if __name__ == "__main__":
     unittest.main()

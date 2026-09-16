@@ -3,6 +3,7 @@
 import http.client
 import ssl
 import re
+from urllib.parse import urlparse
 
 TECH_PATTERNS = {
     "Apache": [r"Apache", r"mod_"],
@@ -47,11 +48,23 @@ def _probe(host: str, port: int, use_ssl: bool) -> dict:
     return result
 
 def http_probe(target: str) -> dict:
-    """Probe HTTP/HTTPS service."""
-    target = target.replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]
-    results = {"target": target, "probes": []}
-    for port, use_ssl in [(443, True), (80, False), (8080, False), (8443, True)]:
-        probe = _probe(target, port, use_ssl)
+    """Probe HTTP/HTTPS service, honoring an explicit port in the target."""
+    try:
+        parsed = urlparse(target if "://" in target else f"http://{target}")
+        host = parsed.hostname or ""
+        explicit_port = parsed.port
+    except ValueError:
+        explicit_port = None
+        host = target.replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]
+
+    results = {"target": host, "probes": []}
+    if explicit_port:
+        # User gave a specific port — probe exactly that (scheme decides SSL).
+        ports = [(explicit_port, parsed.scheme == "https")]
+    else:
+        ports = [(443, True), (80, False), (8080, False), (8443, True)]
+    for port, use_ssl in ports:
+        probe = _probe(host, port, use_ssl)
         if probe["status"] > 0 or (probe["error"] and "refused" not in probe["error"].lower()):
             results["probes"].append(probe)
     return results

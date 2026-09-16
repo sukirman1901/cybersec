@@ -6,6 +6,8 @@ import re
 import time
 import asyncio
 
+BUDGET_SECONDS = 20
+
 # --- Basic Command Injection Payloads ---
 BASIC_PAYLOADS = [
     ("semicolon", "; id", "uid=", "Linux basic"),
@@ -159,6 +161,9 @@ def _extract_evidence(body: str, indicator: str) -> str:
 
 
 async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> dict:
+    deadline = time.monotonic() + BUDGET_SECONDS
+    budget_exhausted = False
+    _left = lambda: max(0.05, deadline - time.monotonic())
     """Deep command injection detection with encoding bypass, OOB, time-based blind, nested commands."""
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
@@ -188,11 +193,14 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
             pass
 
         for p in test_params:
+            if time.monotonic() >= deadline:
+                budget_exhausted = True
+                break
             # --- Basic Payloads ---
             for name, payload, indicator, description in BASIC_PAYLOADS + WINDOWS_PAYLOADS:
                 try:
                     url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
-                    resp = await client.get(url)
+                    resp = await asyncio.wait_for(client.get(url), timeout=_left())
                     body = resp.text
                     found = bool(re.search(indicator, body, re.I)) if indicator else (len(body) > baseline_size + 50)
 
@@ -218,7 +226,7 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
                 for name, payload, indicator, description in ENCODE_PAYLOADS:
                     try:
                         url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
-                        resp = await client.get(url)
+                        resp = await asyncio.wait_for(client.get(url), timeout=_left())
                         body = resp.text
                         found = bool(re.search(indicator, body, re.I)) if indicator else False
 
@@ -244,7 +252,7 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
                 for name, payload, indicator, description in NESTED_PAYLOADS:
                     try:
                         url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
-                        resp = await client.get(url)
+                        resp = await asyncio.wait_for(client.get(url), timeout=_left())
                         body = resp.text
                         found = bool(re.search(indicator, body, re.I)) if indicator else False
 
@@ -267,10 +275,12 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
 
             # --- Time-Based Blind ---
             for name, payload, expected_delay, description in TIME_PAYLOADS:
+                if time.monotonic() + 6 >= deadline:
+                    break
                 try:
                     url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
                     start_time = time.time()
-                    resp = await client.get(url)
+                    resp = await asyncio.wait_for(client.get(url), timeout=_left())
                     elapsed = time.time() - start_time
 
                     if elapsed >= expected_delay - 1:
@@ -307,7 +317,7 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
                     try:
                         payload = payload_template.replace("{oob}", oob_domain).replace("{marker}", oob_marker)
                         url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
-                        resp = await client.get(url)
+                        resp = await asyncio.wait_for(client.get(url), timeout=_left())
 
                         if marker and marker in resp.text:
                             oob_hits.append({
@@ -330,7 +340,7 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
                     for variant in _generate_bypasses(payload)[:5]:
                         try:
                             url = f"{base}?{p}={urllib.parse.quote(variant, safe='')}"
-                            resp = await client.get(url)
+                            resp = await asyncio.wait_for(client.get(url), timeout=_left())
                             body = resp.text
                             found = bool(re.search(indicator, body, re.I)) if indicator else False
 
@@ -362,6 +372,8 @@ async def cmd_injection(target: str, param: str = "", oob_domain: str = "") -> d
         "vulnerable": len(results) > 0 or len(oob_hits) > 0,
         "total_findings": len(results) + len(oob_hits),
         "techniques_found": list(set(r["technique"] for r in results + oob_hits)),
+        "budget_seconds": BUDGET_SECONDS,
+        "budget_exhausted": budget_exhausted,
         "risk_summary": {
             "critical": sum(1 for r in results + oob_hits if r.get("risk") == "CRITICAL"),
             "high": sum(1 for r in results + oob_hits if r.get("risk") == "HIGH"),

@@ -3,6 +3,10 @@
 import httpx
 from urllib.parse import urlparse, parse_qs, urlencode, urljoin
 from typing import Optional
+import time
+import asyncio
+
+BUDGET_SECONDS = 20
 
 
 REDIRECT_PARAMS = [
@@ -125,6 +129,10 @@ async def open_redirect(target: str) -> dict:
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 
+    deadline = time.monotonic() + BUDGET_SECONDS
+    budget_exhausted = False
+    _left = lambda: max(0.05, deadline - time.monotonic())
+
     results = []
     risk = "info"
     confidence = "high"
@@ -138,10 +146,16 @@ async def open_redirect(target: str) -> dict:
         headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
     ) as client:
         for param in REDIRECT_PARAMS:
+            if time.monotonic() >= deadline:
+                budget_exhausted = True
+                break
             for payload in PAYLOADS:
+                if time.monotonic() >= deadline:
+                    budget_exhausted = True
+                    break
                 try:
                     url = _build_url_with_param(target, param, payload)
-                    resp = await client.get(url)
+                    resp = await asyncio.wait_for(client.get(url), timeout=_left())
                     loc = resp.headers.get("location", "")
 
                     if loc and (EXTERNAL_HOST in loc or "evil" in loc.lower()):
@@ -150,7 +164,7 @@ async def open_redirect(target: str) -> dict:
                             current = loc
                             for _ in range(5):
                                 if current.startswith("http"):
-                                    r2 = await client.get(current, follow_redirects=False)
+                                    r2 = await asyncio.wait_for(client.get(current, follow_redirects=False), timeout=_left())
                                     next_loc = r2.headers.get("location", "")
                                     if next_loc:
                                         chain.append(next_loc)
@@ -188,18 +202,24 @@ async def open_redirect(target: str) -> dict:
                         redirect_chains.append({"param": param, "chain": chain})
                         break
 
-                except httpx.HTTPError:
+                except (httpx.HTTPError, asyncio.TimeoutError):
                     continue
 
         for param in REDIRECT_PARAMS[:20]:
+            if time.monotonic() >= deadline:
+                budget_exhausted = True
+                break
             for payload in PAYLOADS[:20]:
+                if time.monotonic() >= deadline:
+                    budget_exhausted = True
+                    break
                 try:
                     url = _build_url_with_param(target, param, payload)
-                    resp = await client.post(
+                    resp = await asyncio.wait_for(client.post(
                         url,
                         data={param: payload},
                         headers={"Content-Type": "application/x-www-form-urlencoded"},
-                    )
+                    ), timeout=_left())
                     loc = resp.headers.get("location", "")
 
                     if loc and (EXTERNAL_HOST in loc or "evil" in loc.lower()):
@@ -222,14 +242,20 @@ async def open_redirect(target: str) -> dict:
                         )
                         break
 
-                except httpx.HTTPError:
+                except (httpx.HTTPError, asyncio.TimeoutError):
                     continue
 
         for param in REDIRECT_PARAMS[:15]:
+            if time.monotonic() >= deadline:
+                budget_exhausted = True
+                break
             for payload in [f"https://{EXTERNAL_HOST}", f"//{EXTERNAL_HOST}", f"/\\{EXTERNAL_HOST}"]:
+                if time.monotonic() >= deadline:
+                    budget_exhausted = True
+                    break
                 try:
                     url = _build_url_with_param(target, param, payload)
-                    resp = await client.get(url)
+                    resp = await asyncio.wait_for(client.get(url), timeout=_left())
                     loc = resp.headers.get("location", "")
                     body = resp.text[:5000]
 
@@ -263,10 +289,13 @@ async def open_redirect(target: str) -> dict:
                             )
                             break
 
-                except httpx.HTTPError:
+                except (httpx.HTTPError, asyncio.TimeoutError):
                     continue
 
         for param in REDIRECT_PARAMS[:10]:
+            if time.monotonic() >= deadline:
+                budget_exhausted = True
+                break
             payloads_special = [
                 f"https://{EXTERNAL_HOST}%2f%2f",
                 f"//{EXTERNAL_HOST}%2f%2f",
@@ -287,9 +316,12 @@ async def open_redirect(target: str) -> dict:
                 f"file://{EXTERNAL_HOST}",
             ]
             for payload in payloads_special:
+                if time.monotonic() >= deadline:
+                    budget_exhausted = True
+                    break
                 try:
                     url = _build_url_with_param(target, param, payload)
-                    resp = await client.get(url)
+                    resp = await asyncio.wait_for(client.get(url), timeout=_left())
                     loc = resp.headers.get("location", "")
 
                     if loc and (EXTERNAL_HOST in loc or "evil" in loc.lower()):
@@ -312,11 +344,11 @@ async def open_redirect(target: str) -> dict:
                         )
                         break
 
-                except httpx.HTTPError:
+                except (httpx.HTTPError, asyncio.TimeoutError):
                     continue
 
         try:
-            resp = await client.get(target)
+            resp = await asyncio.wait_for(client.get(target), timeout=_left())
             body = resp.text[:10000]
             meta_refresh_patterns = [
                 f"url={EXTERNAL_HOST}",
@@ -335,7 +367,7 @@ async def open_redirect(target: str) -> dict:
                     risk = max_risk(risk, "high")
                     evidence_items.append(f"Meta refresh redirect: {pattern}")
                     break
-        except httpx.HTTPError:
+        except (httpx.HTTPError, asyncio.TimeoutError):
             pass
 
     unique_vulns = [r for r in results if r.get("vulnerable")]
@@ -351,6 +383,8 @@ async def open_redirect(target: str) -> dict:
         "technique": "Open redirect — parameter pollution, filter bypass, DOM/JS redirect",
         "evidence": evidence_items[:20],
         "redirect_chains": redirect_chains[:10],
+        "budget_seconds": BUDGET_SECONDS,
+        "budget_exhausted": budget_exhausted,
         "findings": unique_vulns[:50],
     }
 
