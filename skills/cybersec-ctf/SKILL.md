@@ -6,8 +6,8 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 ## CTF Testing Methodology
 
 ### 1. Reconnaissance
-- Probe target with `http_probe`, `tech_detect`, `waf_detect`
-- Discover hidden endpoints with `dir_bust`, `param_discovery`
+- Probe target with `http_probe_target`, `tech_detect`, `waf_detection`
+- Discover hidden endpoints with `dir_bruteforce`, `param_discovery`
 - Check for exposed files: `misplaced_files`, `exposed_git`, `exposed_backup`
 - Map API surface: `graphql_introspect`, `api_fuzz`
 - Score Board / admin panel discovery
@@ -52,7 +52,7 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - JWT attacks: `jwt_forgery`
 - Steganography: `stego_detect` (images, metadata, hidden strings)
 - Hidden endpoints, easter eggs, obfuscated code analysis
-- SSL analysis: `ssl_analyzer`
+- SSL analysis: `ssl_check`
 
 ### 8. Security Misconfiguration
 - Check exposed metrics: `metrics_check`
@@ -75,11 +75,11 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Transition to `cybersec-report`
 
 ## Tools
-- Recon: `http_probe`, `tech_detect`, `waf_detect`, `dir_bust`, `param_discovery`, `misplaced_files`
+- Recon: `http_probe_target`, `tech_detect`, `waf_detection`, `dir_bruteforce`, `param_discovery`, `misplaced_files`
 - Injection: `nosql_inject`, `cmd_injection`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `lfi_detect`, `ldap_inject`, `crlf_inject`, `prompt_injection`
 - Auth: `jwt_analyze`, `jwt_forgery`, `oauth_scan`, `api_auth`, `hydra_brute`
 - Access: `bypass_403`, `idor_detect`, `csrf_detect`, `race_condition`, `mass_assignment`
 - Input: `upload_bypass`, `captcha_test`, `graphql_introspect`, `api_fuzz`, `pickle_deserialize`
-- Crypto: `jwt_forgery`, `ssl_analyzer`, `stego_detect`
+- Crypto: `jwt_forgery`, `ssl_check`, `stego_detect`
 - Exposure: `metrics_check`, `log_exposure`, `secret_scanner`, `exposed_git`, `exposed_backup`
 - Web: `csp_analyze`, `cookie_audit`, `cors_check`, `open_redirect`, `http_request_splitting`, `graphql_depth_bypass`
