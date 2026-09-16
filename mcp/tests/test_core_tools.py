@@ -136,6 +136,16 @@ class TestDetectorRegression(unittest.IsolatedAsyncioTestCase):
         from cyber_tools.open_redirect import open_redirect
         await asyncio.wait_for(open_redirect(f"{self.base}/redirect"), timeout=30)
 
+    async def test_xss_detect_finds_reflected(self):
+        from cyber_tools.xss_detect import xss_detect
+        r = await xss_detect(f"{self.base}/xss/reflected?q=x")
+        self.assertTrue(r["vulnerable"], f"expected reflected XSS, got: {r}")
+
+    async def test_ssrf_detect_finds_localhost_probe(self):
+        from cyber_tools.ssrf_detect import ssrf_detect
+        r = await ssrf_detect(f"{self.base}/ssrf?url=x")
+        self.assertTrue(r["vulnerable"], f"expected SSRF via localhost probe, got: {r}")
+
 
 if __name__ == "__main__":
     unittest.main()
