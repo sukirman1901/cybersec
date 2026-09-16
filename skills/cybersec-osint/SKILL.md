@@ -19,11 +19,11 @@ Run in order when doing full recon:
 3. `gf_patterns(urls)` — sensitive endpoints from wayback results
 4. `dir_bruteforce(target)` + `api_fuzz(target)` — hidden paths
 5. `crt_search(target)` — certificate transparency, subdomains
-6. `dork_gen(category, target)` → `dork_scan(dorks)` — or just `dork_hunt()` for full pipeline
+6. `dork_gen(category, target)` → `dork_scan(dorks)` — or just `dork_hunt()` for full pipeline; `dork_and_scan(category="vuln_sites")` for one-call target discovery
 7. For people investigation: `phone_osint` / `telegram_osint` / `social_osint` / `email_osint`
 
 ### Tools Available
-`shodan_lookup`, `wayback_urls`, `gf_patterns`, `crt_search`, `dir_bruteforce`, `api_fuzz`, `dork_search`, `dork_gen`, `dork_scan`, `dork_hunt`, `people_osint`
+`shodan_lookup`, `wayback_urls`, `gf_patterns`, `crt_search`, `dir_bruteforce`, `api_fuzz`, `dork_search`, `dork_gen`, `dork_scan`, `dork_hunt`, `dork_and_scan`, `people_osint`
 
 ### Output
 OSINT report: exposed services, historical URLs, sensitive endpoints, leaked info, attack surface expansion.

@@ -27,11 +27,15 @@ description: Code security audit methodology — SAST, secret scanning, manual r
 - Look for known vulnerable versions, supply chain risks
 - Use `supply_chain` tool for manifest analysis
 
-### 5. Reporting
+### 5. CI/CD Pipeline Audit
+- Scan CI/CD configs (GitHub Actions, GitLab CI, Jenkins, CircleCI) via `ci_cd_scan`
+- Look for secrets exposure, insecure environment injection, privileged runners
+
+### 6. Reporting
 - Prioritize findings by severity (CRITICAL → INFO)
 - Include exact file:line references, code snippets
 - Suggest remediation per finding
 - Transition to `cybersec-report`
 
 ## Tools
-- `secret_scanner`, `sast_review`, `bandit_scan`, `semgrep_scan`, `supply_chain`, `exposed_git`, `pickle_deserialize`
+- `secret_scanner`, `sast_review`, `bandit_scan`, `semgrep_scan`, `supply_chain`, `exposed_git`, `pickle_deserialize`, `ci_cd_scan`

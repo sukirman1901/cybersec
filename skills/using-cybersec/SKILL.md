@@ -109,6 +109,16 @@ For emergencies: **Crisis** is a parallel path (jump directly if breach reported
 
 **Meta-skills:** `cybersec-verification`, `cybersec-parallel`, `cybersec-review` apply at ANY phase — verification gates every finding, parallel dispatch speeds multi-target work, review verifies before reporting. Use `cybersec-skill-dev` to create new methodology skills test-first.
 
+## Repository Tools (Support & Ops)
+
+These tools support the testing workflow itself (authorization, evidence, lab, integrations) rather than a single pentest phase:
+
+- **Authorization/Scope** — `engagement_gate` (scope validation, authorization check, pre-flight approval rules), `approval_artifact` (recorded approval before destructive actions)
+- **Lab/Validation** — `vulnerable_fixture` (local vulnerable app, actions: start, stop, status, endpoints — for E2E tool validation), `tool_health` (which CLI dependencies are installed)
+- **Traffic/Replay** — `http_ingest` (parse URL, OpenAPI, HAR, Burp XML, raw HTTP, curl → standardized findings), `http_logger` (persistent request/response logger: log, list, search, stats, export, clear), `raw_replay` (faithful raw HTTP replay, exact bytes)
+- **Reporting Integrations** — `vuln_database` (local CVE/finding DB: add, get, search, update, export, import, tags), `scan_template` (pre-defined combos: quick-recon, web-full, network-audit, api-security, cloud-audit), `notify_webhook` (Slack/Discord/Teams notifications), `github_issue` (create issue from finding), `jira_create` (create Jira issue from finding), `cleanup_tracking` (log modifications, generate cleanup scripts)
+- Use `engagement_gate` before any test, `vulnerable_fixture` + `tool_health` to validate tooling, and `create issue / notify` tools to close the loop after reporting.
+
 ## Tool Mapping by Platform
 
 When a Cybersec skill references an action, use your platform's equivalent:

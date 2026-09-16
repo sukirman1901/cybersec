@@ -60,8 +60,12 @@ Create a todo list from the checklist below, then execute all steps immediately.
    - Medium-term (2 weeks): Medium vulnerabilities, config hardening
    - Long-term (1 month): Low vulnerabilities, best practices
 
+7. **Compliance Mapping** — Map findings to frameworks (SOC2, ISO27001, GDPR, PCI-DSS, NIST 800-53) via `compliance_map`
+8. **Schema & Packaging** — Validate/convert/meld findings with `report_schema_v2` (v1→v2, evidence chain); batch-team or client variants via `branded_report` (white-label logo/colors/company)
+9. **Executive Summary** — Auto-generate risk posture, severity breakdown, top findings with `executive_summary`
+
 ### Tools Available
-`generate_report`, `cve_search`, `dork_search`
+`generate_report`, `cve_search`, `dork_search`, `compliance_map`, `report_schema_v2`, `branded_report`, `executive_summary`
 
 ### Output
 Professional security report with: executive summary, methodology, detailed findings with evidence, risk ratings, prioritized remediation plan, and copy-pasteable fix code per vulnerability.

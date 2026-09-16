@@ -29,10 +29,18 @@ description: Desktop application security testing methodology — static analysi
 - Review Windows manifest, Linux capabilities
 - Document excessive or unnecessary permissions
 
-### 6. Reporting
+### 6. Mobile Apps (APK/IPA/iOS)
+- Analyze Android APK: `apk_analyze` — permissions, exported activities, package name, suspicious files
+- Analyze iOS IPA: `ipa_analyze` — metadata, entitlements, plist, permissions
+- iOS data at rest: `ios_data_storage` — insecure local storage patterns
+- iOS runtime: `ios_frida` (SSL pinning bypass, method tracing, process list), `ios_objection` (keychain dump, sqlite, nsuserdefaults)
+- iOS signing: `ios_signing` — provisioning profile, team ID, ad-hoc vs distribution
+- Mobile TLS: `ssl_pinning_check` — cert verification behavior, HSTS
+
+### 7. Reporting
 - Use `report` to generate findings
 - Include evidence (file paths, strings, config content)
 - Transition to `cybersec-report`
 
 ## Tools
-- `desktop_strings`, `desktop_electron`, `desktop_config`, `desktop_packages`, `desktop_entitlements`
+- `desktop_strings`, `desktop_electron`, `desktop_config`, `desktop_packages`, `desktop_entitlements`, `binary_checksec`, `apk_analyze`, `ipa_analyze`, `ios_data_storage`, `ios_frida`, `ios_objection`, `ios_signing`, `ssl_pinning_check`
