@@ -38,6 +38,7 @@ def _make_fixture_code(vuln_types, port):
 import json
 import os
 import subprocess
+import sqlite3
 import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -68,10 +69,19 @@ class VulnHandler(BaseHTTPRequestHandler):
         # --- SQLi endpoint ---
         if path == "/sqli" and "sqli" in VULN_TYPES:
             uid = params.get("id", "1")
-            if "'" in uid or "union" in uid.lower() or "or" in uid.lower():
-                self._send(200, json.dumps({"query": f"SELECT * FROM users WHERE id = {uid}", "rows": [{"id": 1, "username": "admin", "password": "flag{SQLi_Success}"}]}))
-            else:
-                self._send(200, json.dumps({"query": f"SELECT * FROM users WHERE id = {uid}", "rows": [{"id": 1, "username": "guest"}]}))
+            # Intentionally unsafe SQL against synthetic in-memory data. This
+            # fixture must exercise a database, not emulate SQLi using keywords.
+            with sqlite3.connect(":memory:") as db:
+                db.row_factory = sqlite3.Row
+                db.execute("CREATE TABLE users (id INTEGER, username TEXT, password TEXT)")
+                db.executemany("INSERT INTO users VALUES (?, ?, ?)", [
+                    (1, "guest", "fixture-only"), (2, "admin", "flag{SQLi_Success}")])
+                query = f"SELECT * FROM users WHERE id = {uid}"
+                try:
+                    rows = [dict(row) for row in db.execute(query).fetchall()]
+                    self._send(200, json.dumps({"query": query, "rows": rows}))
+                except sqlite3.Error as exc:
+                    self._send(500, "[SQLITE_ERROR] " + str(exc), "text/plain")
 
         # --- XSS endpoint ---
         elif path == "/xss" and "xss" in VULN_TYPES:

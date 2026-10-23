@@ -95,7 +95,7 @@ class TestSqliObserveFirst(unittest.IsolatedAsyncioTestCase):
         from cyber_tools.sqli_detect import sqli_detect
 
         def handler(request):
-            q = str(request.url.query)
+            q = request.url.params.get("id", "")
             if "'" in q or "OR" in q.upper():
                 return httpx.Response(200, text="You have an error in your SQL syntax; check MySQL")
             return httpx.Response(200, text="ok")
