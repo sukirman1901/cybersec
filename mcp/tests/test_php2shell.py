@@ -49,7 +49,7 @@ class TestPhp2ShellScanner(unittest.IsolatedAsyncioTestCase):
                     findings = [v for v in result["vulnerabilities"] if v.get("cve") in CVES]
                     self.assertEqual({v["cve"] for v in findings}, CVES if affected else set())
                     for finding in findings:
-                        self.assertEqual(finding["confidence"], "probable")
+                        self.assertIn(finding["confidence"], ("HIGH", "MEDIUM", "LOW"))
                         self.assertEqual(finding["severity"], "critical")
                         self.assertIn(version, finding["evidence"])
                         self.assertTrue(finding["references"])
@@ -68,6 +68,8 @@ class TestPhp2ShellScanner(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.get("php2shell", {}).get("status"), "potentially_affected")
         self.assertIn("backport", " ".join(result["php2shell"]["limitations"]).lower())
         self.assertEqual(result["php2shell"]["evidence"][0]["source"], "header:server")
+        self.assertEqual(result["php2shell"]["confidence"], "LOW")
+        self.assertTrue(any("backport" in n.lower() for n in result["php2shell"]["confidence_notes"]))
 
     async def test_conflicting_versions_are_unknown(self):
         for headers in ({"Server": "PHP/8.4.26", "X-Powered-By": "PHP/8.4.27"},
@@ -96,13 +98,19 @@ class TestPhp2ShellScanner(unittest.IsolatedAsyncioTestCase):
 
     async def test_summary_contract_preserves_probable_not_verified(self):
         result, _ = await self.scan({"X-Powered-By": "PHP/8.4.26"})
+        self.assertEqual(result["by_confidence"]["MEDIUM"], 2)
         self.assertEqual(result["by_confidence"]["probable"], 2)
         self.assertEqual(result["by_severity"]["critical"], 2)
         self.assertEqual(result["verified_count"], 0)
         self.assertEqual(result["count"], len(result["vulnerabilities"]))
-        self.assertEqual(sum(result["by_confidence"].values()), result["count"])
+        # HIGH/MEDIUM/LOW also roll into probable — do not double-count in the sum gate.
+        graded = sum(result["by_confidence"][k] for k in ("verified", "probable", "info"))
+        self.assertEqual(graded, result["count"])
         for finding in result["vulnerabilities"]:
             self.assertTrue({"name", "severity", "description", "matched_at", "type", "confidence"} <= finding.keys())
+        php2shell_findings = [f for f in result["vulnerabilities"] if f.get("cve") in CVES]
+        self.assertEqual(len(php2shell_findings), 2)
+        self.assertTrue(all(f["confidence"] == "MEDIUM" for f in php2shell_findings))
 
 
 class TestPhp2ShellLookup(unittest.TestCase):
@@ -119,7 +127,7 @@ class TestPhp2ShellLookup(unittest.TestCase):
                     self.assertEqual(found, CVES if number < fixed else set())
                     for finding in result:
                         if finding["id"] in CVES:
-                            self.assertEqual(finding["confidence"], "probable")
+                            self.assertIn(finding["confidence"], ("probable", "HIGH", "MEDIUM", "LOW"))
 
     def test_no_php2shell_match_for_other_service_or_constraint(self):
         for service, version in (("nginx", "8.4.26"), ("php", "^8.4"),
@@ -139,7 +147,8 @@ class TestPhp2ShellLookup(unittest.TestCase):
                     result = cve_lookup("php", version)
                 records = [v for v in result if v["id"] in CVES]
                 self.assertEqual(len(records), 2 if version == "8.4.26" else 0)
-                self.assertTrue(all(v["confidence"] == "probable" for v in records))
+                self.assertTrue(all(v.get("confidence") in ("probable", "HIGH", "MEDIUM", "LOW")
+                                    for v in records))
                 self.assertIn("CVE-OTHER", {v["id"] for v in result})
 
 

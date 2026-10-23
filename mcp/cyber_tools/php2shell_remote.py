@@ -1,7 +1,12 @@
-"""Bounded PHP2SHELL remote identification inspired by the supplied scanners.
+"""Bounded PHP2SHELL remote identification for an authorized single origin.
 
-Uses normal HTTP methods and exposed phpinfo only. No source from either
-reference is executed: no race, load, malformed requests or origin bypass.
+SAFE techniques (stronger banner/header fingerprint, expanded GET-only phpinfo
+paths, confidence grades, SAPI/proxy caveats, optional local host check) are
+inspired by JoasASantos/php2shell-scanner and reimplemented under the cybersec
+MCP safety contract. No Joas source is executed or pasted wholesale.
+
+Not adopted here: --probe/multipart DoS, origin-IP/CDN bypass, subdomain
+fan-out, Shodan/Censys, secrets-file discovery, or malformed-request probes.
 """
 
 import asyncio
@@ -11,14 +16,36 @@ from urllib.parse import urljoin, urlsplit
 
 import httpx
 
-from .php2shell import assess_headers, assess_version, cve_records
+from .php2shell import (
+    assess_version,
+    cve_records,
+    detect_proxy,
+    finalize_assessment,
+    scan_local_php,
+)
 
-PHPINFO_PATHS = ("/phpinfo.php", "/info.php", "/php_info.php", "/phpversion.php", "/version.php")
+# Default allowlist (fits default max_requests=8 with GET+HEAD/OPTIONS headroom).
+PHPINFO_PATHS = (
+    "/phpinfo.php", "/info.php", "/php_info.php", "/phpversion.php", "/version.php",
+)
+# Expanded GET-only paths when deep_version=True (still no .env / secrets files).
+PHPINFO_PATHS_DEEP = PHPINFO_PATHS + (
+    "/phpinfo().php", "/test.php", "/p.php", "/pi.php", "/i.php",
+    "/php.php", "/server-info.php", "/phpinfo.txt",
+)
+# Credits egg only (version leak when expose_php=On). Logos omitted — presence-only.
+PHP_CREDITS_EGG = "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000"
 BODY_LIMIT = 200_000
 CONFIG_FIELDS = {name.lower(): name for name in (
     "Server API", "PHP API", "memory_limit", "post_max_size", "upload_max_filesize",
     "max_input_vars", "session.upload_progress.enabled", "fatal_error_backtraces",
 )}
+PHP_ERROR_MARKERS = (
+    re.compile(r"\bPHP (?:Notice|Warning|Fatal error|Parse error|Deprecated)\b", re.I),
+    re.compile(r"Call Stack", re.I),
+    re.compile(r"\.php on line \d+", re.I),
+    re.compile(r"\bXdebug\b", re.I),
+)
 
 
 class _PhpInfoParser(HTMLParser):
@@ -73,6 +100,20 @@ def _phpinfo(body: str) -> tuple[list[str], dict]:
     return versions, parser.values if versions else {}
 
 
+def _error_page_versions(body: str) -> list[str]:
+    """Extract versions only when the body looks like a PHP/SAPI error page."""
+    if not body or not any(marker.search(body) for marker in PHP_ERROR_MARKERS):
+        return []
+    found = re.findall(r"\bPHP/?([0-9]+\.[0-9]+\.[0-9]+[^\s<,;]*)", body, re.IGNORECASE)
+    return found[:5]
+
+
+def _credits_versions(body: str) -> list[str]:
+    if "PHP Credits" not in body and "PHP Group" not in body:
+        return []
+    return re.findall(r"\bPHP\s+([0-9]+\.[0-9]+\.[0-9]+)", body)[:5]
+
+
 def _origin(url: str) -> tuple:
     parts = urlsplit(url)
     port = parts.port if parts.port is not None else (443 if parts.scheme == "https" else 80)
@@ -90,22 +131,33 @@ def _safe_url(url: str) -> str:
         return "[invalid URL]"
 
 
+def _header_assessment(headers) -> dict:
+    """Local import path keeps assess_headers available for header fingerprint."""
+    from .php2shell import assess_headers
+    return assess_headers(headers)
+
+
 async def scan_php2shell(target: str, phpinfo_paths: bool = True,
-                        max_requests: int = 8, timeout: float = 8.0) -> dict:
+                         max_requests: int = 8, timeout: float = 8.0,
+                         deep_version: bool = False, local: bool = False) -> dict:
     """GET/HEAD/OPTIONS plus optional phpinfo discovery, confined to one origin.
 
     max_requests must be 1..12, timeout 0.1..15 seconds/request, with an
     independent 30-second whole-scan deadline. No request body is ever sent.
+    deep_version expands allowlisted GET paths (and one credits egg); default off.
+    local runs php -v / php -i on the MCP host only; default off.
     """
     result = {
-        "target": target, "php2shell": assess_headers({}), "php_detected": False,
+        "target": target, "php2shell": assess_version(""), "php_detected": False,
         "presence_signals": [], "configuration": [], "requests": [],
         "redirects_not_followed": [], "findings": [], "coverage": "no_php_evidence",
+        "deep_version": bool(deep_version), "local": None,
         "limitations": [
             "Remote evidence only; no exploit or RCE is verified. Hidden versions do not mean safe.",
             "Static/stale phpinfo and proxy headers may differ from serving workers; verify origin packages and vendor backports.",
-            "No OOM/race/load/malformed probes, uploads, secrets-file discovery or origin bypass.",
+            "No OOM/race/load/malformed probes, uploads, secrets-file discovery or origin/CDN bypass.",
             "PHP settings describe observed configuration only; disabled upload progress does not prove either CVE is fixed.",
+            "Unknown/blocked/proxy-hidden evidence is not a clean bill of health.",
         ],
     }
     try:
@@ -118,25 +170,35 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
         origin = _origin(target)
         if not isinstance(max_requests, int) or not 1 <= max_requests <= 12 or not 0.1 <= timeout <= 15:
             raise ValueError("max_requests must be 1..12; timeout must be 0.1..15 seconds")
+        if not isinstance(deep_version, bool) or not isinstance(local, bool):
+            raise ValueError("deep_version and local must be booleans")
     except (ValueError, TypeError) as error:
         result.update(target=None, coverage="invalid_target", error=str(error))
+        if local is True:
+            result["local"] = scan_local_php()
         return result
 
     result["target"] = _safe_url(target)
     versions = set()
     evidence = []
+    response_headers = {}
     halted = False
     budget_exhausted = False
     timed_out = False
 
     def consume(headers, body, url, method, status):
-        assessment = assess_headers(headers)
+        nonlocal response_headers
+        # Keep the freshest header map for proxy/SAPI inference at finalize.
+        response_headers = {k.lower(): v for k, v in headers.items()}
+        assessment = _header_assessment(headers)
         versions.update(assessment["observed_versions"])
         for item in assessment["evidence"]:
             evidence.append({**item, "url": _safe_url(url), "method": method})
         signals = result["presence_signals"]
         if assessment["evidence"] and "header:PHP" not in signals:
             signals.append("header:PHP")
+        if detect_proxy(headers) and "proxy:edge" not in signals:
+            signals.append("proxy:edge")
         if re.search(r"(?:^|[,;]\s*)PHPSESSID=", headers.get("set-cookie", ""), re.IGNORECASE):
             if "cookie:PHPSESSID" not in signals:
                 signals.append("cookie:PHPSESSID")
@@ -154,6 +216,19 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
                 result["configuration"].append({"source": _safe_url(url), "values": config})
                 if "body:phpinfo" not in signals:
                     signals.append("body:phpinfo")
+            else:
+                for version in _error_page_versions(body):
+                    versions.add(version)
+                    evidence.append({"source": "body:errorpage", "url": _safe_url(url),
+                                     "method": method, "value": version[:128]})
+                    if "body:errorpage" not in signals:
+                        signals.append("body:errorpage")
+                for version in _credits_versions(body):
+                    versions.add(version)
+                    evidence.append({"source": "egg:credits", "url": _safe_url(url),
+                                     "method": method, "value": version[:128]})
+                    if "body:credits" not in signals:
+                        signals.append("body:credits")
 
     def has_version():
         return len(versions) == 1 and assess_version(next(iter(versions)))["status"] != "unknown"
@@ -215,8 +290,9 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
                 result["coverage"] = "network_error"
 
     async def collect():
+        paths = PHPINFO_PATHS_DEEP if deep_version else PHPINFO_PATHS
         async with httpx.AsyncClient(timeout=timeout, verify=True, follow_redirects=False,
-                                     headers={"User-Agent": "cybersec-php2shell-audit/2.0 (authorized-identification)",
+                                     headers={"User-Agent": "cybersec-php2shell-audit/2.1 (authorized-identification)",
                                               "Accept-Encoding": "identity"}) as client:
             await request(client, "GET", target)
             if not has_version() and not halted:
@@ -225,10 +301,14 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
                     if has_version() or halted:
                         break
             if phpinfo_paths and not halted and not result["configuration"]:
-                for path in PHPINFO_PATHS:
+                for path in paths:
                     await request(client, "GET", urljoin(target, path))
-                    if result["configuration"] or halted:
+                    if result["configuration"] or halted or has_version():
                         break
+            # One GET-only credits egg when deep_version and still no classified version.
+            if deep_version and not halted and not has_version() and not result["configuration"]:
+                egg_url = urljoin(target, f"?={PHP_CREDITS_EGG}")
+                await request(client, "GET", egg_url)
 
     try:
         # wait_for supports the project's Python 3.10 baseline.
@@ -236,13 +316,26 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
     except asyncio.TimeoutError:
         timed_out = True
 
+    server_api = None
+    for block in result["configuration"]:
+        values = block.get("values") or {}
+        api = values.get("Server API")
+        if api:
+            server_api = api[0] if isinstance(api, list) else api
+            break
+
     assessment = assess_version(next(iter(versions)) if len(versions) == 1 else "")
     assessment.update(observed_versions=sorted(versions), evidence=evidence)
     if len(versions) > 1:
         assessment["reason"] = "Conflicting remote PHP versions; verify serving runtime before reporting."
+    assessment = finalize_assessment(
+        assessment, evidence=evidence, observed_versions=sorted(versions),
+        headers=response_headers, server_api=server_api)
     result["php2shell"] = assessment
     result["findings"] = cve_records(assessment)
     result["php_detected"] = bool(result["presence_signals"] or versions)
+    if local:
+        result["local"] = scan_local_php()
     if len(versions) > 1:
         result["coverage"] = "conflicting_evidence"
     elif timed_out:
