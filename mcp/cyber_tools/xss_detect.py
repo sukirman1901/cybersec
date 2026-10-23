@@ -506,10 +506,18 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
             except Exception as e:
                 results.append({"type": "browser_xss", "error": str(e)[:80], "risk": "INFO"})
 
-    if any(r.get("confidence") == "confirmed" for r in results):
+    from .finding_contract import attach_contract_fields, normalize_confidence
+
+    for r in results:
+        r["confidence"] = normalize_confidence(r.get("confidence")) or "MEDIUM"
+        r.setdefault("coverage", f"preset={preset}")
+        r.setdefault("severity", (r.get("risk") or "medium").lower())
+        r.setdefault("target", target)
+
+    if any(r.get("confidence") == "HIGH" and r.get("type") == "browser_confirmed" for r in results):
         confidence = "HIGH"
     elif any(r.get("risk") in ("CRITICAL", "HIGH") for r in results):
-        confidence = "HIGH" if any(r.get("confidence") == "high" for r in results) else "MEDIUM"
+        confidence = "HIGH" if any(r.get("confidence") == "HIGH" for r in results) else "MEDIUM"
     elif results:
         confidence = "MEDIUM"
     else:
@@ -518,11 +526,12 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
         coverage_notes.append("deadline_reached — remaining probes skipped")
     coverage_notes.append(f"findings={len(results)}")
 
-    return {
+    return attach_contract_fields({
         "target": target,
         "preset": preset,
         "waf_detected": waf_detected,
         "results": results,
+        "findings": results,
         "vulnerable": any(r.get("risk") in ["CRITICAL", "HIGH"] for r in results),
         "total_findings": len(results),
         "types_found": list(set(r["type"] for r in results if "type" in r)),
@@ -534,4 +543,4 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
             "medium": sum(1 for r in results if r.get("risk") == "MEDIUM"),
             "low": sum(1 for r in results if r.get("risk") == "LOW"),
         },
-    }
+    }, finding_type="xss")

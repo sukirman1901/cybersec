@@ -101,6 +101,13 @@ Before reporting, classify with `findings_manager(action="novelty")` or `vuln_di
 
 IDOR/BOLA: dual-role cookies/headers required for HIGH confidence. Single-role enum alone is LOW.
 
+### Detector accuracy rules
+
+- CMS/path scanners (wordpress/joomla/drupal/magento): HIGH disclosure only with **body markers**, never status 403 alone.
+- `sqli_detect` / `xss_detect`: default `preset=observe-first` (bounded). Use `staging-deep` only with approval.
+- CLI wrappers (`nikto`, `sqlmap`, …): `coverage=cli_missing` means the tool did **not** run — do not report clean.
+- `auto_exploit`: requires approved `approval_id`; `exploited=true` only after `vuln_validate` confidence ≥ 60 and dual-proof evidence.
+
 ## When To Apply
 
 Before reporting findings, moving to next phase, or writing final report. Load this skill before `report-writer` / `branded_report`.

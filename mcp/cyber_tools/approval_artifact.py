@@ -98,3 +98,23 @@ def _audit_log():
         "total_entries": len(AUDIT),
         "audit_log": AUDIT[-50:],
     }, indent=2)
+
+
+def is_approved(tool_name: str, target: str = "", artifact_id: str = "") -> bool:
+    """True if an approved artifact exists for this tool (and optional target/id)."""
+    if not artifact_id:
+        return False
+    for entry in PENDING:
+        if entry.get("status") != "approved":
+            continue
+        if entry.get("artifact_id") != artifact_id:
+            continue
+        tool = entry.get("tool") or ""
+        if tool and tool not in (tool_name, "unknown"):
+            continue
+        entry_target = (entry.get("target") or "").rstrip("/")
+        want = (target or "").rstrip("/")
+        if entry_target and want and entry_target not in want and want not in entry_target:
+            continue
+        return True
+    return False
