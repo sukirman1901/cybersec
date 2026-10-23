@@ -312,6 +312,7 @@ Expected: 180+ tools listed.
 | `param_discovery` | HTTP parameter discovery |
 | `tech_detect` | Web technology detection (CMS, frameworks, CDN) |
 | `vuln_scan` | Common vulnerability scan (headers, paths, CVEs), including PHP2SHELL version assessment |
+| `php2shell_scan` | Dedicated PHP2SHELL identification: bounded banner methods, phpinfo discovery, PHP presence and configuration evidence |
 | `whois_lookup` | Query WHOIS for domain registration |
 | `asn_lookup` | ASN information lookup (Team Cymru) |
 | `reverse_ip` | Find domains on same IP |
@@ -335,9 +336,16 @@ Expected: 180+ tools listed.
 
 ### PHP2SHELL detection
 
-Existing MCP tools identify CVE-2026-109618 and CVE-2026-109619 without
-PHP2SHELL exploit/load probes:
+MCP tools identify CVE-2026-109618 and CVE-2026-109619 without PHP2SHELL
+exploit/load probes. The current server registers **208 tools**.
 
+- **Recommended for PHP2SHELL-only checks:**
+  `php2shell_scan(target="https://your-authorized-host.example")` performs normal
+  GET/HEAD/OPTIONS and optional discovery of five common phpinfo pages. It is not
+  the broad `vuln_scan`; no credential checks run. Default 8 requests (hard max 12),
+  200 KB decoded body limit per response, TLS verified, 30-second whole-scan deadline.
+  Redirects must keep the same scheme, host and port (max 2 hops); HTTP 429 stops
+  scanning. Use `phpinfo_paths=false` to disable diagnostic-page discovery.
 - `vuln_scan(target="https://your-authorized-host.example")` adds a `php2shell`
   assessment from existing response headers. Existing unrelated scan checks still run.
 - `cve_search(service="php", version="8.4.26")` includes offline version-based
@@ -351,17 +359,32 @@ Neither a banner nor a Composer PHP constraint proves the deployed runtime.
 Check vendor backports and actual serving workers before reporting affectedness
 or remediation. A hidden version is not evidence of safety.
 
+The dedicated tool also returns `coverage`, per-request method/URL/status/error,
+`presence_signals`, and allowlisted phpinfo `configuration` with source URLs. It
+distinguishes `access_blocked`, `php_detected_version_hidden`,
+`redirect_out_of_scope`, `network_error`, `rate_limited`, `budget_exhausted`,
+`timeout`, `conflicting_evidence`, `no_php_evidence` and `version_identified`.
+`version_unclassified` means version evidence exists but its branch/build cannot
+be classified by the advisory table. These are collection outcomes, separate from
+the CVE version assessment. Query strings, fragments and URL credentials are
+removed from exported URLs. Requests ask for identity encoding; unexpectedly
+compressed bodies are skipped and marked in the request record, not decompressed.
+No raw phpinfo pages, cookie values, environment variables or secrets are exported.
+`session.upload_progress.enabled=Off` does not mean either CVE is patched.
+
 The `cybersec-vulns` and `cybersec-verification` skills describe these evidence
 limits. Restart the MCP server/client after updating. If your client uses an
 installed plugin/cache rather than this checkout, update that installation too;
 editing this source tree does not update an already-running server or cached skills.
 
-Validation: `mcp/.venv/bin/python -m unittest discover -s mcp/tests -p test_php2shell.py -v`.
+Validation: `mcp/.venv/bin/python -m unittest discover -s mcp/tests -p 'test_php2shell*.py' -v`.
 References: [PHP advisory](https://www.php.net/archive/2026.php#2026-10-21-5),
 [VulnCheck](https://www.vulncheck.com/blog/php2shell-vulnerabilities),
 [Ramikan](https://github.com/Ramikan/PHP2SHELL-Scanner),
 [JoasASantos](https://github.com/JoasASantos/php2shell-scanner).
-Reference exploit/race code is not incorporated or executed.
+The reference source was reviewed for banner/diagnostic/presence techniques;
+it is not executed or blindly wrapped. Exploit/race/malformed probes, uploads,
+secrets-file probing, automatic subdomain expansion and origin bypass are excluded.
 
 ### CLI Wrapper Tools
 

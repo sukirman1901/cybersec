@@ -50,11 +50,14 @@ def assess_headers(headers) -> dict:
     normalized = {key.lower(): value for key, value in headers.items()}
     evidence = []
     versions = []
-    for key in ("server", "x-powered-by"):
+    for key in ("server", "x-powered-by", "x-php-version"):
         value = normalized.get(key, "")
-        if re.search(r"\bPHP\b", value, re.IGNORECASE):
+        if re.search(r"\bPHP\b", value, re.IGNORECASE) or key == "x-php-version" and value:
             evidence.append({"source": f"header:{key}", "value": value[:500]})
-        versions.extend(re.findall(r"\bPHP/([^\s,;()]+)", value, re.IGNORECASE))
+        matches = re.findall(r"\bPHP(?:/|\s+)([0-9][^\s,;()]+)", value, re.IGNORECASE)
+        if key == "x-php-version" and not matches:
+            matches = [part.strip() for part in value.split(",") if part.strip()]
+        versions.extend(matches)
     versions = sorted(set(versions))
     result = assess_version(versions[0] if len(versions) == 1 else "")
     if len(versions) > 1:
