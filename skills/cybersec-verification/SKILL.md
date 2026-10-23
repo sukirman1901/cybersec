@@ -79,12 +79,25 @@ Never publish raw phpinfo, environment secrets or session-cookie values.
 
 ## Quality fields (required before report)
 
-Every finding handed to `report_schema_v2` / `branded_report` must include:
+Every finding handed to `report_schema_v2` / `branded_report` / `findings_manager` must include:
 
 | Field | Meaning |
 |-------|---------|
 | `confidence` | HIGH / MEDIUM / LOW (or numeric from `vuln_validate`) |
 | `coverage` | What was tested vs skipped (preset, dual-role gap, 429, blocked, budget) |
+
+### Novelty triage
+
+Before reporting, classify with `findings_manager(action="novelty")` or `vuln_diff`:
+
+| Label | Meaning |
+|-------|---------|
+| `novel` | New fingerprint vs findings DB / prior scan |
+| `duplicate` | Same fingerprint still open |
+| `regression` | Fingerprint returned after fixed/retested/wont_fix/false_positive |
+| `changed` | Same fingerprint, severity/confidence/status shifted |
+
+`findings_manager(action="add")` rejects missing confidence/coverage by default (`require_quality=true`).
 
 IDOR/BOLA: dual-role cookies/headers required for HIGH confidence. Single-role enum alone is LOW.
 

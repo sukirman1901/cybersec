@@ -1007,9 +1007,15 @@ def attack_surface_map(scan_results: str) -> str:
     return _attack_surface(scan_results)
 
 @mcp.tool()
-def findings_manager(action: str, findings_json: str = "", finding_id: str = "", status: str = "", notes: str = "") -> str:
-    """Manage penetration testing findings — add, list, update status, stats, export, clear. Deduplicates by hash. Status: new, confirmed, false_positive, fixing, fixed, retested, wont_fix."""
-    return _findings_mgr(action, findings_json, finding_id, status, notes)
+def findings_manager(action: str, findings_json: str = "", finding_id: str = "", status: str = "",
+                     notes: str = "", require_quality: bool = True) -> str:
+    """Findings DB with novelty triage. Actions: add, novelty, triage, list, update, stats, export, clear.
+
+    Dedup fingerprint = host|type|method|path|param|technique|evidence. add/novelty require
+    confidence+coverage when require_quality=true (default). Triage labels: novel, duplicate,
+    regression, changed, untriaged. Status: new, confirmed, false_positive, fixing, fixed, retested, wont_fix.
+    """
+    return _findings_mgr(action, findings_json, finding_id, status, notes, require_quality)
 
 @mcp.tool()
 def vuln_validate(finding_json: str) -> str:
@@ -1038,7 +1044,7 @@ def bulk_scan(targets: str, tool: str = "port_scan") -> str:
 
 @mcp.tool()
 def vuln_diff(scan_before: str, scan_after: str) -> str:
-    """Compare 2 scan results to identify new, resolved, and changed vulnerabilities. Accepts 2 JSON strings from any scan."""
+    """Novelty-aware diff of two scans (vulnerabilities/findings/open_ports). Labels novel, resolved, changed, regression."""
     return _vuln_diff(scan_before, scan_after)
 
 @mcp.tool()

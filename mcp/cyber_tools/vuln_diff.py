@@ -1,14 +1,52 @@
-"""Vulnerability diff — compare 2 scan results to find new/resolved/changed findings."""
+"""Vulnerability / exposure diff — novelty-aware compare of two scan snapshots."""
+
+from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+
+from .finding_contract import extract_findings_list, finding_fingerprint, normalize_finding
+
+
+def _vuln_map(payload: dict) -> dict:
+    """Map fingerprint -> finding from vulnerabilities or findings lists."""
+    items = []
+    if isinstance(payload.get("vulnerabilities"), list):
+        items.extend([v for v in payload["vulnerabilities"] if isinstance(v, dict)])
+    items.extend(extract_findings_list(payload))
+    # dedupe while preferring richer records
+    out = {}
+    for raw in items:
+        normalized = normalize_finding(raw, require_quality=False)
+        fp = normalized.get("id") or normalized.get("fingerprint") or finding_fingerprint(normalized)
+        # Keep explicit id if caller supplied a stable one and no fingerprint clash
+        explicit = raw.get("id")
+        key = fp
+        if explicit and explicit not in out:
+            # Prefer fingerprint as canonical novelty key
+            key = fp
+        out[key] = normalized
+    return out
+
+
+def _port_set(payload: dict) -> set:
+    ports = payload.get("open_ports") or payload.get("ports") or []
+    result = set()
+    for p in ports:
+        if isinstance(p, dict):
+            port = p.get("port")
+        else:
+            port = p
+        if port is not None:
+            result.add(port)
+    return result
 
 
 def vuln_diff(scan_before: str, scan_after: str) -> str:
-    """Compare 2 scan results to identify new, resolved, and changed vulnerabilities.
+    """Compare 2 scan results to identify novel, resolved, changed, and regression signals.
 
-    Accepts 2 JSON strings from any scan results.
-    Returns diff with new, resolved, and changed findings.
+    Accepts JSON strings with `vulnerabilities`, `findings`, and/or `open_ports`.
+    Identity uses finding_contract fingerprints when ids are absent.
     """
     try:
         before = json.loads(scan_before)
@@ -16,52 +54,91 @@ def vuln_diff(scan_before: str, scan_after: str) -> str:
     except json.JSONDecodeError as e:
         return json.dumps({"error": f"Invalid JSON: {e}"}, indent=2)
 
-    before_vulns = {v.get("id", v.get("description", "")): v for v in before.get("vulnerabilities", [])} if isinstance(before.get("vulnerabilities"), list) else {}
-    after_vulns = {v.get("id", v.get("description", "")): v for v in after.get("vulnerabilities", [])} if isinstance(after.get("vulnerabilities"), list) else {}
+    if not isinstance(before, dict):
+        before = {"findings": before if isinstance(before, list) else []}
+    if not isinstance(after, dict):
+        after = {"findings": after if isinstance(after, list) else []}
 
-    before_before = before.get("open_ports", [])
+    before_vulns = _vuln_map(before)
+    after_vulns = _vuln_map(after)
+
+    before_ports = before.get("open_ports", [])
     after_ports = after.get("open_ports", [])
-    before_port_set = {p.get("port") for p in before_ports}
-    after_port_set = {p.get("port") for p in after_ports}
+    # Keep local names for clarity / backwards-compatible structure
+    _ = before_ports, after_ports
+    before_port_set = _port_set(before)
+    after_port_set = _port_set(after)
 
-    new_vulns = []
-    resolved_vulns = []
-    changed_vulns = []
+    novel = []
+    resolved = []
+    changed = []
+    regressions = []
 
     for vid, vuln in after_vulns.items():
         if vid not in before_vulns:
-            new_vulns.append(vuln)
+            item = dict(vuln)
+            item["triage"] = "novel"
+            novel.append(item)
         else:
             old_v = before_vulns[vid]
-            if old_v.get("severity") != vuln.get("severity") or old_v.get("status") != vuln.get("status"):
-                changed_vulns.append({
+            old_status = (old_v.get("status") or "").lower()
+            if old_status in ("fixed", "retested", "wont_fix", "false_positive"):
+                item = dict(vuln)
+                item["triage"] = "regression"
+                item["prior_status"] = old_status
+                regressions.append(item)
+            elif (
+                old_v.get("severity") != vuln.get("severity")
+                or old_v.get("status") != vuln.get("status")
+                or old_v.get("confidence") != vuln.get("confidence")
+            ):
+                changed.append({
                     "id": vid,
-                    "before": {"severity": old_v.get("severity"), "status": old_v.get("status")},
-                    "after": {"severity": vuln.get("severity"), "status": vuln.get("status")},
+                    "fingerprint": vid,
+                    "triage": "changed",
+                    "before": {
+                        "severity": old_v.get("severity"),
+                        "status": old_v.get("status"),
+                        "confidence": old_v.get("confidence"),
+                    },
+                    "after": {
+                        "severity": vuln.get("severity"),
+                        "status": vuln.get("status"),
+                        "confidence": vuln.get("confidence"),
+                    },
                 })
 
     for vid, vuln in before_vulns.items():
         if vid not in after_vulns:
-            resolved_vulns.append(vuln)
+            item = dict(vuln)
+            item["triage"] = "resolved"
+            resolved.append(item)
 
-    new_ports = after_port_set - before_port_set
-    closed_ports = before_port_set - after_port_set
+    new_ports = sorted(after_port_set - before_port_set, key=lambda x: (str(type(x)), x))
+    closed_ports = sorted(before_port_set - after_port_set, key=lambda x: (str(type(x)), x))
 
     result = {
-        "diff_at": datetime.now().isoformat(),
+        "diff_at": datetime.now(timezone.utc).isoformat(),
+        "engine": "novelty-v1",
         "summary": {
-            "new_vulnerabilities": len(new_vulns),
-            "resolved_vulnerabilities": len(resolved_vulns),
-            "changed_vulnerabilities": len(changed_vulns),
-            "new_open_ports": list(new_ports),
-            "closed_ports": list(closed_ports),
+            "novel": len(novel),
+            "new_vulnerabilities": len(novel),  # backwards-compatible alias
+            "resolved": len(resolved),
+            "resolved_vulnerabilities": len(resolved),
+            "changed": len(changed),
+            "changed_vulnerabilities": len(changed),
+            "regressions": len(regressions),
+            "new_open_ports": new_ports,
+            "closed_ports": closed_ports,
         },
-        "new": new_vulns,
-        "resolved": resolved_vulns,
-        "changed": changed_vulns,
+        "novel": novel,
+        "new": novel,  # alias
+        "resolved": resolved,
+        "changed": changed,
+        "regressions": regressions,
         "port_changes": {
-            "new_open": list(new_ports),
-            "closed": list(closed_ports),
+            "new_open": new_ports,
+            "closed": closed_ports,
         },
         "before_stats": {
             "total_vulns": len(before_vulns),
@@ -73,13 +150,18 @@ def vuln_diff(scan_before: str, scan_after: str) -> str:
         },
     }
 
-    if not any([new_vulns, resolved_vulns, changed_vulns, new_ports, closed_ports]):
+    if not any([novel, resolved, changed, regressions, new_ports, closed_ports]):
         result["overall"] = "No changes detected between scans"
-    elif len(new_vulns) > len(resolved_vulns):
-        result["overall"] = f"WORSE — {len(new_vulns)} new vulnerabilities, {len(resolved_vulns)} resolved"
-    elif len(resolved_vulns) > len(new_vulns):
-        result["overall"] = f"IMPROVED — {len(resolved_vulns)} resolved, {len(new_vulns)} new"
+    elif regressions:
+        result["overall"] = (
+            f"REGRESSION — {len(regressions)} returned; "
+            f"{len(novel)} novel, {len(resolved)} resolved"
+        )
+    elif len(novel) > len(resolved):
+        result["overall"] = f"WORSE — {len(novel)} novel, {len(resolved)} resolved"
+    elif len(resolved) > len(novel):
+        result["overall"] = f"IMPROVED — {len(resolved)} resolved, {len(novel)} novel"
     else:
-        result["overall"] = f"MIXED — {len(new_vulns)} new, {len(resolved_vulns)} resolved"
+        result["overall"] = f"MIXED — {len(novel)} novel, {len(resolved)} resolved"
 
     return json.dumps(result, indent=2)
