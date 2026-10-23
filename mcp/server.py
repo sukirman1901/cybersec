@@ -62,6 +62,7 @@ from cyber_tools.sub_takeover import sub_takeover as _subto
 from cyber_tools.origin_ip_discovery import origin_ip_discovery as _origin
 from cyber_tools.service_fingerprint import service_fingerprint as _svcfp
 from cyber_tools.shodan_lookup import shodan_lookup as _shodan
+from cyber_tools.epss_lookup import epss_lookup as _epss_lookup
 from cyber_tools.wayback_urls import wayback_urls as _wayback
 from cyber_tools.bypass_403 import bypass_403 as _bypass
 from cyber_tools.smuggling_check import smuggling_check as _smuggling
@@ -522,6 +523,14 @@ def service_fingerprint(target: str, port: int = 80) -> str:
 def shodan_lookup(query: str, api_key: str = "") -> str:
     """Search Shodan for exposed devices and services."""
     return json.dumps(_run(_shodan(query, api_key=api_key)), indent=2)
+
+@mcp.tool()
+def epss_lookup(cves: list, include_kev: bool = True) -> str:
+    """FIRST EPSS probability + percentile per CVE, plus CISA KEV membership and
+    patch priority (P0 KEV / P1 >50% / P2 >10% / P3 low). Read-only, no target
+    traffic; max 2 outbound requests (FIRST + CISA feed, cached). Batch up to 25
+    CVE IDs. Use for patch prioritization instead of CVSS-alone decisions."""
+    return json.dumps(_run(_epss_lookup(cves, include_kev=include_kev)), indent=2)
 
 @mcp.tool()
 def wayback_urls(domain: str, limit: int = 100) -> str:
