@@ -34,6 +34,7 @@ from cyber_tools.subdomain_enum import enumerate_subdomains
 from cyber_tools.param_discovery import discover_params
 from cyber_tools.tech_detect import detect_technologies
 from cyber_tools.vuln_scanner import scan_vulnerabilities
+from cyber_tools.php2shell_remote import scan_php2shell
 from cyber_tools.cli_tools import (
     nikto_scan as _nikto, sqlmap_check as _sqlmap, amass_enum as _amass,
     wpscan_check as _wpscan, masscan_scan as _masscan, xsstrike_check as _xsstrike,
@@ -325,6 +326,21 @@ def vuln_scan(target: str) -> str:
     return json.dumps(_run(scan_vulnerabilities(target)), indent=2)
 
 # --- CLI Wrapper Tools ---
+
+@mcp.tool()
+def php2shell_scan(target: str, phpinfo_paths: bool = True, max_requests: int = 8,
+                   timeout: float = 8.0) -> str:
+    """Identify PHP2SHELL CVE-2026-109618/109619 on an authorized single origin.
+
+    Dedicated lightweight GET/HEAD/OPTIONS and optional common phpinfo pages;
+    no unrelated vulnerability/credential checks. Max 8 requests by default
+    (1..12), 200 KB body/read, TLS verified, 30s whole-scan deadline.
+    Same-origin redirects only. Stop on HTTP 429. No OOM/race/load/exploit probes.
+    Returns php2shell version assessment, coverage reason, evidence, allowlisted
+    configuration and probable findings. Unknown/blocked does not mean safe.
+    phpinfo_paths=False disables diagnostic-page discovery. No raw page/cookies exported.
+    """
+    return json.dumps(_run(scan_php2shell(target, phpinfo_paths, max_requests, timeout)), indent=2)
 
 @mcp.tool()
 def nikto_scan(target: str) -> str:

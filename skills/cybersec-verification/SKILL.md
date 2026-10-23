@@ -34,12 +34,13 @@ BEFORE claiming any security finding:
 
 ### PHP2SHELL evidence gate
 
-For CVE-2026-109618 and CVE-2026-109619, `vuln_scan`'s `php2shell.status`
-is a version assessment, not an exploit verdict:
+For CVE-2026-109618 and CVE-2026-109619, use dedicated `php2shell_scan` for
+identification-only requests. Both it and broad `vuln_scan` expose
+`php2shell.status` as a version assessment, not an exploit verdict:
 The following PHP2SHELL rules override the generic verification table above.
 
 - `potentially_affected` / `confidence=probable` (e.g. PHP/8.4.26): retain the
-  header evidence and backport caveat; never promote it to verified RCE.
+  version evidence, its source and backport caveat; never promote it to verified RCE.
 - `unknown` (including PHPSESSID without a version): insufficient evidence,
   not safe. EOL and future branches require separate vendor assessment.
 - `not_affected_by_version` (e.g. PHP/8.4.27): advertised version meets the fix,
@@ -51,6 +52,13 @@ on every PHP service, including restarted/recreated long-running workers. Distro
 backports may fix older banners. Composer constraints are not runtime evidence.
 Do not use OOM/race/load probes or webshell execution for PHP2SHELL identification
 or patch verification. A failed probe or absence of a finding cannot prove safety.
+Inspect `coverage` and the per-request `requests` records: `access_blocked`,
+`php_detected_version_hidden`, `network_error` and `budget_exhausted` are distinct
+limitations. The dedicated tool uses bounded phpinfo discovery; configuration is
+allowlisted and source-attributed, not a raw-page dump. phpinfo may be static or
+stale, so it does not prove the origin's current runtime or verified RCE.
+`session.upload_progress.enabled=Off` does not prove either CVE is fixed.
+Never publish raw phpinfo, environment secrets or session-cookie values.
 
 ## Quick Examples
 

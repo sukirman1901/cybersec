@@ -21,7 +21,7 @@ Create a todo list from the checklist below, then execute all steps immediately.
 10. **Exploit Research** — For critical/high findings, check if public PoC exists via `cve_search`
 
 ### Tools Available
-`cve_search`, `vuln_scan`, `tech_detect`, `ssl_check`, `crt_search`, `dork_search`, `crlf_inject`, `ldap_inject`, `pickle_deserialize`, `mass_assignment`
+`cve_search`, `vuln_scan`, `php2shell_scan`, `tech_detect`, `ssl_check`, `crt_search`, `dork_search`, `crlf_inject`, `ldap_inject`, `pickle_deserialize`, `mass_assignment`
 
 ### Output
 Prioritized vulnerability list with: CVE ID, CVSS score, affected service, description, and known exploit status.
@@ -29,8 +29,9 @@ Prioritized vulnerability list with: CVE ID, CVSS score, affected service, descr
 ### PHP2SHELL identification
 
 For CVE-2026-109618 (OOM corruption) and CVE-2026-109619 (stale global
-state), use `vuln_scan(target)` on an authorized target. Inspect its `php2shell`
-assessment, `evidence`, `observed_versions`, `reason` and `limitations`.
+state), use `php2shell_scan(target)` on an authorized target. This dedicated
+tool avoids the unrelated credential/path checks of broad `vuln_scan`. Inspect
+`php2shell` assessment, `evidence`, `observed_versions`, `reason` and `limitations`.
 `cve_search("php", "8.4.26")` also includes offline branch-aware correlation.
 Its results are not proof that a remote target runs that version.
 For an identification-only request, stop after assessment and remediation advice;
@@ -55,10 +56,25 @@ do not follow the generic checklist or Next Skill into unrelated tests/exploitat
 - Distro/vendor backports may fix older versions without changing their upstream
   number. Verify package security changelogs. Composer `require.php` constraints
   are compatibility ranges, not the deployed runtime. Do not feed them as versions.
-- This PHP2SHELL check reads already-fetched headers only. It does not crawl
-  phpinfo pages or infer upload-progress settings. Do not run the reference race
-  harnesses, OOM/multipart load probes, webshell uploads or origin/WAF bypass to
-  identify these CVEs. Existing unrelated `vuln_scan` checks still run.
+- `php2shell_scan` uses GET/HEAD/OPTIONS and five common phpinfo paths (disable
+  discovery with `phpinfo_paths=false`). Default 8 requests, max 12; TLS verified,
+  same-origin redirects only, bounded bodies and a 30-second whole-scan deadline.
+  Inspect per-request `requests` and `coverage`: `access_blocked` is not the same
+  as `php_detected_version_hidden`, `network_error`, `redirect_out_of_scope`,
+  `budget_exhausted`, `rate_limited`, `timeout` or `no_php_evidence`. Report what
+  was actually checked; do not stop at one missing banner and call it a full audit.
+  `version_unclassified` means an observed version is outside the supported
+  table or incomplete/prerelease, not that it is hidden. Inspect `body_skipped`
+  and truncation records: unexpectedly compressed bodies are not decompressed.
+- `configuration` contains only allowlisted phpinfo fields with source URLs:
+  SAPI, memory/upload/input limits, upload progress and fatal backtrace settings.
+  phpinfo may be static/stale and is not verified RCE. Upload progress `Off` is
+  not proof either CVE is fixed; configuration signals never override version
+  evidence or resolve conflicting versions. Do not export entire phpinfo pages,
+  session-cookie values, environment variables or secrets.
+- `vuln_scan` still offers header-only PHP2SHELL correlation inside its broader
+  checks. Do not run reference race harnesses, OOM/multipart load probes,
+  malformed requests, webshell uploads or origin/WAF bypass for identification.
 - Recommend the branch security release or later supported release. Verify
   `php -v` and package provenance in every serving PHP container and restart/recreate
   persistent workers. A CLI binary alone does not prove the FPM runtime was updated.
