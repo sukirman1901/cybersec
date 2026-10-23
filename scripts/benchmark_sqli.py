@@ -17,6 +17,8 @@ from cyber_tools.sqli_detect import sqli_detect
 from test_sqli_sqlite_benchmark import TestSQLiteBenchmark
 
 
+# Keep the first nine scenarios in PR #8 order for comparable before/after counts.
+ORIGINAL_CASE_COUNT = 9
 CASES = [
     ("numeric_error", "/unsafe-numeric", "7", "observe-first", True),
     ("string_error", "/unsafe-string", "alpha", "observe-first", True),
@@ -27,26 +29,34 @@ CASES = [
     ("safe_string", "/safe-string", "alpha", "observe-first", False),
     ("empty_baseline_blind", "/unsafe-numeric-blind", "999", "observe-first", True),
     ("deep_string_blind", "/unsafe-string-blind", "alpha", "staging-deep", True),
+    ("empty_string_blind", "/unsafe-string-blind", "missing", "observe-first", True),
+    ("safe_empty_numeric", "/safe-numeric", "999", "observe-first", False),
+    ("safe_empty_string", "/safe-string", "missing", "observe-first", False),
+    ("deep_empty_numeric", "/unsafe-numeric-blind", "999", "staging-deep", True),
 ]
 
 
 async def benchmark(base, runs):
     rows = []
     counts = {"true_positive": 0, "true_negative": 0, "false_positive": 0, "false_negative": 0}
+    subsets = {name: dict.fromkeys(counts, 0) for name in ("original_nine", "additional")}
     for run in range(runs):
-        for name, path, value, preset, truth in CASES:
+        for index, (name, path, value, preset, truth) in enumerate(CASES):
             result = await sqli_detect(f"{base}{path}?id={value}&tenant=qa%20team", "id", preset)
             found = result["vulnerable"]
             key = ("true_positive" if found else "false_negative") if truth else (
                 "false_positive" if found else "true_negative")
             counts[key] += 1
+            subset = "original_nine" if index < ORIGINAL_CASE_COUNT else "additional"
+            subsets[subset][key] += 1
             rows.append({"run": run + 1, "case": name, "known_vulnerable": truth,
                          "detected": found, "assessment": result["assessment"],
                          "techniques": result["techniques_found"],
-                         "requests": result["requests_sent"], "outcome": key})
+                         "requests": result["requests_sent"], "outcome": key, "subset": subset})
     return {"environment": "localhost HTTP + in-memory SQLite; synthetic rows only",
-            "runs": runs, "cases_per_run": len(CASES), "counts": counts, "results": rows,
-            "limitations": ["Empty-result blind baseline is a known false negative",
+            "runs": runs, "cases_per_run": len(CASES), "counts": counts,
+            "subset_counts": subsets, "results": rows,
+            "limitations": ["Empty-baseline cases here return stable HTTP 200 responses",
                             "Repeated presets are not independent real-world targets",
                             "No claims about MySQL/PostgreSQL/MSSQL, timing, UNION or WAF bypass"]}
 

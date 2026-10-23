@@ -296,53 +296,86 @@ async def _experiment(session, context, preset, findings, candidates):
         candidate("error_based", "error_not_causally_confirmed",
                   probes=_proof([first, repeat]), controls=_proof(controls))
 
-    # All families preserve the original parameter value, including quoted SQL
-    # contexts. Distinct predicates and reversed order reduce cache/order noise.
+    # AND retains a matching row; OR can expand an empty result. The matching
+    # branch must reproduce baseline and the opposite branch must be stable and
+    # separate. Never infer "empty" from a particular JSON/HTML response format.
     suffixes = ["", "'", '")', "')"] if preset == "staging-deep" else ["", "'"]
-    for suffix in suffixes:
-        pairs = []
-        for round_index, (left, right) in enumerate(((17, 18), (29, 30))):
+    near_limit, far_limit = max(0.02, noise * 2), max(0.06, noise * 3)
+
+    def normal(sample):
+        return (sample is not None and not sample["blocked"] and not sample["signatures"]
+                and sample["proof"]["status"] == baseline["proof"]["status"])
+
+    def matches_baseline(sample):
+        return normal(sample) and max(_distance(b["text"], sample["text"])
+                                      for b in baselines) <= near_limit
+
+    for operator, matching_branch, signal_branch in (("AND", "true", "false"),
+                                                     ("OR", "false", "true")):
+        for suffix in suffixes:
             ending = "-- " if suffix else ""
-            true_value = f"{context.original}{suffix} AND {left}={left}{ending}"
-            false_value = f"{context.original}{suffix} AND {left}={right}{ending}"
-            values = [("true", true_value), ("false", false_value)]
-            if round_index:
-                values.reverse()
-            samples = {role: await session.sample(context, value, "boolean_" + role)
-                       for role, value in values}
-            if any(sample is None for sample in samples.values()):
-                break
-            true, false = samples["true"], samples["false"]
-            if any(sample["blocked"] or sample["signatures"]
-                   or sample["proof"]["status"] != baseline["proof"]["status"]
-                   for sample in (true, false)):
-                break
-            true_delta = max(_distance(b["text"], true["text"]) for b in baselines)
-            false_delta = min(_distance(b["text"], false["text"]) for b in baselines)
-            if true_delta > max(0.02, noise * 2) or false_delta < max(0.06, noise * 3):
-                break
-            if _distance(true["text"], false["text"]) < max(0.06, noise * 3):
-                break
-            pairs.append({"true": true, "false": false, "true_delta": true_delta,
-                          "probe_values": [value for _, value in values],
-                          "false_delta": false_delta})
-        if len(pairs) == 2 and _distance(pairs[0]["false"]["text"],
-                                         pairs[1]["false"]["text"]) <= max(0.02, noise * 2):
-            evidence = {
-                "confirmation_rounds": 2, "request_order": ["true,false", "false,true"],
-                "baseline": _proof(baselines), "controls": _proof(controls),
-                "baseline_noise": round(noise, 4),
-                "pairs": [{"true": pair["true"]["proof"], "false": pair["false"]["proof"],
-                           "true_distance": round(pair["true_delta"], 4),
-                           "false_distance": round(pair["false_delta"], 4)} for pair in pairs],
-            }
-            findings.append(_finding(context, "boolean_blind", evidence, preset,
-                                     "paired_AND_predicates",
-                                     [value for pair in pairs for value in pair["probe_values"]],
-                                     control_values))
-            break
-        if pairs:
-            candidate("boolean_blind", "differential_not_reproduced")
+            keyword_values, keyword_controls = [], []
+            if operator == "OR":
+                # Same operator token and quoting family, but no boolean
+                # predicate. Keyword filters/reflection must not count as SQL.
+                keyword_values = [f"{context.original}{suffix} OR qa_probe_{name}{ending}"
+                                  for name in ("a", "b")]
+                keyword_controls = [await session.sample(context, value, "or_keyword_control")
+                                    for value in keyword_values]
+                if not all(matches_baseline(sample) for sample in keyword_controls):
+                    continue
+            pairs = []
+            for round_index, (left, right) in enumerate(((17, 18), (29, 30))):
+                true_value = f"{context.original}{suffix} {operator} {left}={left}{ending}"
+                false_value = f"{context.original}{suffix} {operator} {left}={right}{ending}"
+                values = [("true", true_value), ("false", false_value)]
+                if round_index:
+                    values.reverse()
+                samples = {role: await session.sample(context, value, "boolean_" + role)
+                           for role, value in values}
+                if not all(normal(sample) for sample in samples.values()):
+                    break
+                near, far = samples[matching_branch], samples[signal_branch]
+                if not matches_baseline(near):
+                    break
+                if min(_distance(b["text"], far["text"]) for b in baselines) < far_limit:
+                    break
+                if _distance(near["text"], far["text"]) < far_limit:
+                    break
+                pairs.append({**samples, "probe_values": [value for _, value in values],
+                              "true_delta": max(_distance(b["text"], samples["true"]["text"])
+                                                for b in baselines),
+                              "false_delta": max(_distance(b["text"], samples["false"]["text"])
+                                                 for b in baselines)})
+            stable_signal = (len(pairs) == 2 and
+                             _distance(pairs[0][signal_branch]["text"],
+                                       pairs[1][signal_branch]["text"]) <= near_limit)
+            if stable_signal:
+                recovery = None
+                if operator == "OR":
+                    recovery = await session.sample(context, None, "or_recovery")
+                    if not matches_baseline(recovery):
+                        candidate("boolean_blind", "or_baseline_recovery_failed")
+                        continue
+                evidence = {
+                    "operator": operator, "baseline_matches": matching_branch,
+                    "confirmation_rounds": 2, "request_order": ["true,false", "false,true"],
+                    "baseline": _proof(baselines), "controls": _proof(controls),
+                    "keyword_controls": _proof(keyword_controls),
+                    "baseline_noise": round(noise, 4),
+                    "pairs": [{"true": pair["true"]["proof"], "false": pair["false"]["proof"],
+                               "true_distance": round(pair["true_delta"], 4),
+                               "false_distance": round(pair["false_delta"], 4)} for pair in pairs],
+                }
+                if recovery is not None:
+                    evidence["recovery"] = recovery["proof"]
+                findings.append(_finding(context, "boolean_blind", evidence, preset,
+                                         f"paired_{operator}_predicates",
+                                         [value for pair in pairs for value in pair["probe_values"]],
+                                         control_values + keyword_values))
+                return findings, candidates
+            if pairs:
+                candidate("boolean_blind", "differential_not_reproduced", operator=operator)
     return findings, candidates
 
 
