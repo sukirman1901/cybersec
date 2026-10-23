@@ -902,9 +902,9 @@ def misplaced_files(target: str) -> str:
     return json.dumps(_run(_misplaced(target)), indent=2)
 
 @mcp.tool()
-def sqli_detect(target: str, param: str = "") -> str:
-    """Test SQL injection via URL parameters — error-based, time-based, UNION, boolean."""
-    return json.dumps(_run(_sqli(target, param)), indent=2)
+def sqli_detect(target: str, param: str = "", preset: str = "observe-first") -> str:
+    """Test SQL injection via URL parameters. preset observe-first (default, bounded) or staging-deep."""
+    return json.dumps(_run(_sqli(target, param, preset)), indent=2)
 
 @mcp.tool()
 def express_scan(target: str) -> str:
@@ -1065,9 +1065,9 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
 # --- Advanced Tools (16 new) ---
 
 @mcp.tool()
-def auto_exploit(target: str, vuln_type: str = "auto", param: str = "") -> str:
-    """Auto-exploit chain: detect → verify → exploit. vuln_type: auto, sqli, xss, lfi, ssrf, open_redirect."""
-    return _auto_exploit(target, vuln_type, param)
+def auto_exploit(target: str, vuln_type: str = "auto", param: str = "", approval_id: str = "") -> str:
+    """Auto-exploit chain: detect → verify → vuln_validate → exploit. Requires approved approval_id. vuln_type: auto, sqli, xss, lfi, ssrf, open_redirect."""
+    return _auto_exploit(target, vuln_type, param, approval_id)
 
 @mcp.tool()
 def scan_template(target: str, template: str = "observe-first") -> str:

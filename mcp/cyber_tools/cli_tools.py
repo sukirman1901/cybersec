@@ -41,6 +41,7 @@ def _which(tool: str) -> str | None:
 
 
 def _err(tool: str) -> Dict:
+    """Fail closed: missing CLI is not a clean scan."""
     return {
         "available": False,
         "error": f"'{tool}' CLI not found in PATH. Install it first.",
@@ -59,7 +60,22 @@ def _err(tool: str) -> Dict:
             "testssl": "brew install testssl",
             "sslyze": "pip install sslyze",
         }.get(tool, f"Install '{tool}' manually"),
+        "confidence": "LOW",
+        "coverage": "cli_missing",
+        "findings": [],
+        "count": 0,
+        "vulnerable": False,
+        "ran": False,
     }
+
+
+def _stamp_ok(payload: Dict, tool: str) -> Dict:
+    out = dict(payload)
+    out.setdefault("available", True)
+    out.setdefault("ran", True)
+    out.setdefault("confidence", "MEDIUM" if out.get("findings") or out.get("count") or out.get("vulnerable") else "LOW")
+    out.setdefault("coverage", f"cli_ran={tool}")
+    return out
 
 
 async def nikto_scan(target: str) -> Dict:
@@ -73,7 +89,7 @@ async def nikto_scan(target: str) -> Dict:
     for line in r.get("stdout", "").split("\n"):
         if line.startswith("+") and ":" in line:
             findings.append(line.strip())
-    return {"findings": findings, "count": len(findings), "available": True}
+    return _stamp_ok({"findings": findings, "count": len(findings)}, "nikto")
 
 
 async def sqlmap_check(target: str, risk: int = 1, level: int = 1) -> Dict:
@@ -85,10 +101,12 @@ async def sqlmap_check(target: str, risk: int = 1, level: int = 1) -> Dict:
     r = await _run_cli(["sqlmap", "-u", target, "--batch", "--risk", str(risk), "--level", str(level)])
     out = r.get("stdout", "") + r.get("stderr", "")
     vuln = "sqlmap identified the following injection point" in out
-    return {
+    return _stamp_ok({
         "vulnerable": vuln,
         "details": out[:2000] if vuln else "No injection detected",
-    }
+        "confidence": "HIGH" if vuln else "MEDIUM",
+        "coverage": "cli_ran=sqlmap; batch_safe_mode",
+    }, "sqlmap")
 
 
 async def amass_enum(target: str, passive: bool = True) -> Dict:
@@ -107,7 +125,7 @@ async def amass_enum(target: str, passive: bool = True) -> Dict:
                 subs.append(d.get("name", ""))
             except json.JSONDecodeError:
                 pass
-    return {"subdomains": subs, "count": len(subs), "available": True}
+    return _stamp_ok({"subdomains": subs, "count": len(subs)}, "amass")
 
 
 async def wpscan_check(target: str) -> Dict:
@@ -119,14 +137,16 @@ async def wpscan_check(target: str) -> Dict:
     r = await _run_cli(["wpscan", "--url", target, "--no-banner", "--format", "json"])
     try:
         data = json.loads(r.get("stdout", "{}"))
-        return {
-            "version": data.get("version", {}),
-            "plugins": list(data.get("plugins", {}).keys()),
-            "themes": list(data.get("themes", {}).keys()),
-            "vulnerabilities": data.get("vulnerabilities", []),
-        }
     except json.JSONDecodeError:
-        return {"raw": r.get("stdout", "")[:1000]}
+        return _stamp_ok({"raw": r.get("stdout", "")[:1000], "confidence": "LOW"}, "wpscan")
+    vulns = data.get("vulnerabilities", []) or []
+    return _stamp_ok({
+        "version": data.get("version", {}),
+        "plugins": list(data.get("plugins", {}).keys()),
+        "themes": list(data.get("themes", {}).keys()),
+        "vulnerabilities": vulns,
+        "count": len(vulns),
+    }, "wpscan")
 
 
 async def masscan_scan(target: str, ports: str = "80,443", rate: int = 1000) -> Dict:
@@ -140,7 +160,7 @@ async def masscan_scan(target: str, ports: str = "80,443", rate: int = 1000) -> 
             parts = line.strip().split()
             if len(parts) >= 4:
                 ports_found.append({"port": parts[3], "protocol": parts[2], "ip": parts[5] if len(parts) > 5 else target})
-    return {"open_ports": ports_found, "count": len(ports_found), "available": True}
+    return _stamp_ok({"open_ports": ports_found, "count": len(ports_found)}, "masscan")
 
 
 async def xsstrike_check(target: str) -> Dict:
@@ -151,7 +171,11 @@ async def xsstrike_check(target: str) -> Dict:
         target = f"https://{target}"
     r = await _run_cli(["xsstrike", "-u", target, "--silent"])
     out = r.get("stdout", "")
-    return {"vulnerable": "XSS" in out or "vulnerable" in out.lower(), "output": out[:1000]}
+    vuln = "XSS" in out or "vulnerable" in out.lower()
+    return _stamp_ok({
+        "vulnerable": vuln, "output": out[:1000],
+        "confidence": "MEDIUM" if vuln else "LOW",
+    }, "xsstrike")
 
 
 async def gitleaks_check(path: str) -> Dict:
@@ -165,7 +189,7 @@ async def gitleaks_check(path: str) -> Dict:
             leaks = [leaks]
     except json.JSONDecodeError:
         leaks = []
-    return {"leaks": leaks, "count": len(leaks), "available": True}
+    return _stamp_ok({"leaks": leaks, "count": len(leaks)}, "gitleaks")
 
 
 async def cmseek_check(target: str) -> Dict:
@@ -185,7 +209,7 @@ async def cmseek_check(target: str) -> Dict:
         m = re.search(r"CMS Version: (.*)", line)
         if m:
             version = m.group(1).strip()
-    return {"cms": cms, "version": version, "available": cms is not None}
+    return _stamp_ok({"cms": cms, "version": version, "available": cms is not None}, "cmseek")
 
 
 async def testssl_check(target: str, port: int = 443) -> Dict:
@@ -200,7 +224,7 @@ async def testssl_check(target: str, port: int = 443) -> Dict:
                 findings.append(json.loads(line))
             except json.JSONDecodeError:
                 pass
-    return {"findings": findings, "count": len(findings), "available": True}
+    return _stamp_ok({"findings": findings, "count": len(findings)}, "testssl")
 
 
 async def sslyze_check(target: str, port: int = 443) -> Dict:
@@ -212,7 +236,7 @@ async def sslyze_check(target: str, port: int = 443) -> Dict:
         data = json.loads(r.get("stdout", "{}"))
     except json.JSONDecodeError:
         data = {"raw": r.get("stdout", "")[:1000]}
-    return data
+    return _stamp_ok(data if isinstance(data, dict) else {"raw": data}, "sslyze")
 
 
 async def gobuster_dir(target: str, wordlist: str = "") -> Dict:
@@ -226,7 +250,7 @@ async def gobuster_dir(target: str, wordlist: str = "") -> Dict:
     for line in r.get("stdout", "").split("\n"):
         if "(" in line and ")" in line:
             entries.append(line.strip())
-    return {"entries": entries, "count": len(entries), "available": True}
+    return _stamp_ok({"entries": entries, "count": len(entries)}, "gobuster")
 
 
 async def ffuf_fuzz(target: str, wordlist: str = "") -> Dict:
@@ -241,4 +265,4 @@ async def ffuf_fuzz(target: str, wordlist: str = "") -> Dict:
         results = data.get("results", [])
     except json.JSONDecodeError:
         results = []
-    return {"results": results, "count": len(results), "available": True}
+    return _stamp_ok({"results": results, "count": len(results)}, "ffuf")

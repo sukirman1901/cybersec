@@ -330,15 +330,37 @@ def _fingerprint_db(body: str, headers: dict) -> dict:
     return db_info
 
 
-async def sqli_detect(target: str, param: str = "") -> dict:
-    """Deep SQL injection detection with WAF bypass, DB fingerprinting, and multiple techniques."""
+async def sqli_detect(target: str, param: str = "", preset: str = "observe-first") -> dict:
+    """SQL injection detection with WAF bypass, DB fingerprinting, and multiple techniques.
+
+    preset observe-first (default): short deadline, trimmed payload sets.
+    staging-deep: fuller technique coverage within a hard deadline.
+    """
+    from .finding_contract import attach_contract_fields, normalize_confidence
+
     test_targets = _build_test_urls(target, param)
+    deep = preset == "staging-deep"
+    deadline = time.monotonic() + (55.0 if deep else 18.0)
+    max_params = 4 if deep else 2
+    test_targets = test_targets[:max_params]
+    error_payloads = ERROR_PAYLOADS if deep else ERROR_PAYLOADS[:8]
+    diff_payloads = DIFF_PAYLOADS if deep else DIFF_PAYLOADS[:2]
+    bool_payloads = BOOLEAN_PAYLOADS if deep else BOOLEAN_PAYLOADS[:2]
+    time_payloads = TIME_PAYLOADS if deep else TIME_PAYLOADS[:2]
+    union_payloads = UNION_PAYLOADS if deep else UNION_PAYLOADS[:3]
+    fp_payloads = DB_FINGERPRINT_PAYLOADS if deep else DB_FINGERPRINT_PAYLOADS[:2]
+    variant_limit = 3 if deep else 1
+    coverage_notes = [f"preset={preset}", f"params={len(test_targets)}"]
+    timed_out = False
     results = []
     waf_detected = None
     db_fingerprint = None
 
-    async with httpx.AsyncClient(timeout=25.0, verify=False, follow_redirects=False) as client:
+    async with httpx.AsyncClient(timeout=8.0 if not deep else 25.0, verify=False, follow_redirects=False) as client:
         for base, p in test_targets:
+            if time.monotonic() > deadline:
+                timed_out = True
+                break
             baseline_val = "1"
             baseline_params = {p: baseline_val}
             baseline_url = f"{base}?{urllib.parse.urlencode(baseline_params)}"
@@ -356,9 +378,12 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                 continue
 
             # --- ERROR-BASED SQLi ---
-            for payload_name, payload in ERROR_PAYLOADS:
+            for payload_name, payload in error_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 variants = _waf_bypass_variants(payload) if waf_detected else [payload]
-                for variant in variants[:3]:  # Limit variants to avoid timeout
+                for variant in variants[:variant_limit]:
                     try:
                         test_params = {p: variant}
                         url = f"{base}?{urllib.parse.urlencode(test_params)}"
@@ -379,7 +404,9 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                                 "response_diff": abs(len(body) - baseline_len),
                                 "evidence": _extract_error_evidence(body),
                                 "risk": "CRITICAL",
-                                "confidence": "high",
+                                "confidence": "HIGH",
+                                "coverage": f"preset={preset}; error_based",
+                                "target": base,
                             })
                             if db_fingerprint is None and db["type"] != "unknown":
                                 db_fingerprint = db
@@ -387,8 +414,14 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                     except Exception:
                         continue
 
+            if timed_out:
+                break
+
             # --- DIFFERENTIAL (BEHAVIORAL) SQLi: injection marker moves the response, control does not ---
-            for payload_name, marker_payload, control_payload in DIFF_PAYLOADS:
+            for payload_name, marker_payload, control_payload in diff_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 try:
                     marker_url = f"{base}?{urllib.parse.urlencode({p: marker_payload})}"
                     control_url = f"{base}?{urllib.parse.urlencode({p: control_payload})}"
@@ -419,14 +452,22 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             "marker_delta": marker_delta,
                             "control_delta": control_delta,
                             "risk": "CRITICAL" if marker_ratio > 1.5 else "HIGH",
-                            "confidence": "high" if marker_ratio > 1.5 else "medium",
+                            "confidence": "HIGH" if marker_ratio > 1.5 else "MEDIUM",
+                            "coverage": f"preset={preset}; differential",
+                            "target": base,
                         })
                         break
                 except Exception:
                     continue
 
+            if timed_out:
+                break
+
             # --- BOOLEAN-BASED BLIND SQLi ---
-            for payload_name, true_payload, false_payload in BOOLEAN_PAYLOADS:
+            for payload_name, true_payload, false_payload in bool_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 try:
                     true_url = f"{base}?{urllib.parse.urlencode({p: true_payload})}"
                     false_url = f"{base}?{urllib.parse.urlencode({p: false_payload})}"
@@ -455,14 +496,22 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             "true_status": true_status,
                             "false_status": false_status,
                             "risk": "CRITICAL",
-                            "confidence": "high" if len_ratio > 1.5 else "medium",
+                            "confidence": "HIGH" if len_ratio > 1.5 else "MEDIUM",
+                            "coverage": f"preset={preset}; boolean_blind",
+                            "target": base,
                         })
                         break
                 except Exception:
                     continue
 
+            if timed_out:
+                break
+
             # --- TIME-BASED BLIND SQLi ---
-            for payload_name, payload, db_type in TIME_PAYLOADS:
+            for payload_name, payload, db_type in time_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 try:
                     start_time = time.time()
                     url = f"{base}?{urllib.parse.urlencode({p: payload})}"
@@ -478,7 +527,9 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             "db_type": db_type,
                             "status": resp.status_code,
                             "risk": "CRITICAL",
-                            "confidence": "high",
+                            "confidence": "HIGH",
+                            "coverage": f"preset={preset}; time_blind",
+                            "target": base,
                         })
                         if db_fingerprint is None:
                             db_fingerprint = {"type": db_type, "version": None, "evidence": "time-based detection"}
@@ -486,8 +537,14 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                 except Exception:
                     continue
 
+            if timed_out:
+                break
+
             # --- UNION-BASED SQLi ---
-            for payload_name, payload in UNION_PAYLOADS:
+            for payload_name, payload in union_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 try:
                     url = f"{base}?{urllib.parse.urlencode({p: payload})}"
                     resp = await client.get(url)
@@ -510,7 +567,9 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             "response_diff": diff,
                             "status": resp.status_code,
                             "risk": "HIGH",
-                            "confidence": "medium",
+                            "confidence": "MEDIUM",
+                            "coverage": f"preset={preset}; union_based",
+                            "target": base,
                         })
                         break
                     elif has_data and diff > 200:
@@ -522,14 +581,22 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                             "response_diff": diff,
                             "status": resp.status_code,
                             "risk": "CRITICAL",
-                            "confidence": "high",
+                            "confidence": "HIGH",
+                            "coverage": f"preset={preset}; union_based",
+                            "target": base,
                         })
                         break
                 except Exception:
                     continue
 
+            if timed_out:
+                break
+
             # --- DB FINGERPRINTING via UNION ---
-            for payload_name, payload, db_pattern in DB_FINGERPRINT_PAYLOADS:
+            for payload_name, payload, db_pattern in fp_payloads:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 try:
                     url = f"{base}?{urllib.parse.urlencode({p: payload})}"
                     resp = await client.get(url)
@@ -546,28 +613,53 @@ async def sqli_detect(target: str, param: str = "") -> dict:
                                 "db_type": db["type"],
                                 "db_version": db["version"],
                                 "risk": "CRITICAL",
-                                "confidence": "high",
+                                "confidence": "HIGH",
+                                "coverage": f"preset={preset}; db_fingerprint",
+                                "target": base,
                             })
                             break
                 except Exception:
                     continue
 
+    if timed_out:
+        coverage_notes.append("deadline_reached — remaining probes skipped")
+    coverage_notes.append(f"findings={len(results)}")
+    if not deep:
+        coverage_notes.append("payload sets truncated (use preset=staging-deep)")
+
+    for r in results:
+        r["confidence"] = normalize_confidence(r.get("confidence")) or "MEDIUM"
+        r.setdefault("coverage", f"preset={preset}")
+        r.setdefault("type", f"sqli_{r.get('technique', 'unknown')}")
+        r.setdefault("severity", (r.get("risk") or "medium").lower())
+
+    if any(r.get("confidence") == "HIGH" for r in results):
+        confidence = "HIGH"
+    elif results:
+        confidence = "MEDIUM"
+    else:
+        confidence = "LOW" if timed_out else "MEDIUM"
+
     # --- SUMMARY ---
-    return {
+    return attach_contract_fields({
         "target": target,
+        "preset": preset,
         "params_tested": [p for _, p in test_targets],
         "waf_detected": waf_detected,
         "db_fingerprint": db_fingerprint,
         "results": results,
+        "findings": results,
         "vulnerable": len(results) > 0,
         "total_findings": len(results),
         "techniques_found": list(set(r["technique"] for r in results)),
+        "confidence": confidence,
+        "coverage": "; ".join(coverage_notes),
         "risk_summary": {
             "critical": sum(1 for r in results if r.get("risk") == "CRITICAL"),
             "high": sum(1 for r in results if r.get("risk") == "HIGH"),
             "medium": sum(1 for r in results if r.get("risk") == "MEDIUM"),
         },
-    }
+    }, finding_type="sqli")
 
 
 def _extract_error_evidence(body: str) -> str:
