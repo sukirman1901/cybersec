@@ -48,8 +48,11 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
         result, seen = await self.run_scan(handler)
         self.assertEqual(result["php2shell"]["status"], "potentially_affected")
         self.assertEqual(result["php2shell"]["version"], "8.4.26")
+        self.assertEqual(result["php2shell"]["confidence"], "HIGH")
+        self.assertEqual(result["php2shell"]["sapi"], "FPM/FastCGI")
+        self.assertTrue(result["php2shell"]["worker_persistent"])
         self.assertEqual(len(result["findings"]), 2)
-        self.assertTrue(all(f["confidence"] == "probable" for f in result["findings"]))
+        self.assertTrue(all(f["confidence"] == "HIGH" for f in result["findings"]))
         config = result["configuration"][0]
         self.assertEqual(config["source"], "https://example.test/info.php")
         self.assertEqual(config["values"]["session.upload_progress.enabled"], ["On", "On"])
@@ -66,6 +69,7 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
             with self.subTest(headers=headers):
                 result, _ = await self.run_scan(lambda r: httpx.Response(200, headers=headers), phpinfo_paths=False)
                 self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+                self.assertEqual(result["php2shell"]["confidence"], "MEDIUM")
 
     async def test_head_and_options_can_fill_banner_gap(self):
         for method in ("HEAD", "OPTIONS"):
@@ -98,6 +102,7 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["php2shell"]["status"], "unknown")
         self.assertEqual(result["coverage"], "conflicting_evidence")
         self.assertEqual(set(result["php2shell"]["observed_versions"]), {"8.4.26", "8.4.27"})
+        self.assertEqual(result["php2shell"]["confidence"], "LOW")
         self.assertEqual(result["findings"], [])
 
     async def test_disabled_upload_progress_does_not_mean_fixed(self):
@@ -256,6 +261,67 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
         self.assertLess(elapsed, 0.25)
         self.assertEqual(result["coverage"], "timeout")
         self.assertEqual(result["requests"][0]["error"], "request_timeout")
+
+    async def test_error_page_disclosure_is_high_confidence(self):
+        body = "PHP Fatal error:  Uncaught Error in /var/www/app.php on line 12\nPHP/8.4.26"
+        result, _ = await self.run_scan(lambda r: httpx.Response(200, text=body), phpinfo_paths=False)
+        self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+        self.assertEqual(result["php2shell"]["version"], "8.4.26")
+        self.assertEqual(result["php2shell"]["confidence"], "HIGH")
+        self.assertTrue(any(e["source"] == "body:errorpage" for e in result["php2shell"]["evidence"]))
+
+    async def test_proxy_lowers_header_confidence(self):
+        result, _ = await self.run_scan(
+            lambda r: httpx.Response(200, headers={
+                "X-Powered-By": "PHP/8.4.26", "Server": "cloudflare", "CF-Ray": "abc-SJC",
+            }), phpinfo_paths=False)
+        self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+        self.assertEqual(result["php2shell"]["confidence"], "LOW")
+        self.assertIn("Cloudflare", result["php2shell"]["proxy"])
+        self.assertTrue(all(f["confidence"] == "LOW" for f in result["findings"]))
+
+    async def test_deep_version_reaches_expanded_phpinfo_path(self):
+        def handler(request):
+            if request.url.path == "/test.php":
+                return httpx.Response(200, text=PHPINFO)
+            return httpx.Response(404, text="Missing")
+        result, seen = await self.run_scan(handler, deep_version=True, max_requests=12)
+        self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+        self.assertEqual(result["php2shell"]["confidence"], "HIGH")
+        self.assertTrue(any(r.url.path == "/test.php" for r in seen))
+        # Default allowlist must not request deep-only paths when flag is off.
+        shallow, shallow_seen = await self.run_scan(handler, deep_version=False, max_requests=12)
+        self.assertFalse(any(r.url.path == "/test.php" for r in shallow_seen))
+        self.assertEqual(shallow["php2shell"]["status"], "unknown")
+
+    async def test_rate_limit_preserves_unknown_not_safe(self):
+        result, seen = await self.run_scan(lambda r: httpx.Response(429, headers={"X-Powered-By": "PHP/8.4.26"}))
+        self.assertEqual(len(seen), 1)
+        self.assertEqual(result["coverage"], "rate_limited")
+        # First response still contributes evidence, but 429 stops further discovery.
+        self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+        self.assertEqual(result["php2shell"]["confidence"], "MEDIUM")
+
+    async def test_local_flag_default_off_and_optional_host_probe(self):
+        result, _ = await self.run_scan(lambda r: httpx.Response(404), max_requests=1)
+        self.assertIsNone(result["local"])
+        with patch("cyber_tools.php2shell.shutil.which", return_value="/usr/bin/php"), \
+             patch("cyber_tools.php2shell.subprocess.run") as run:
+            run.side_effect = [
+                type("P", (), {"stdout": "PHP 8.4.26 (cli)\n", "stderr": ""})(),
+                type("P", (), {"stdout": "Server API => Command Line Interface\nmemory_limit => 128M => 128M\npost_max_size => 8M => 8M\n", "stderr": ""})(),
+            ]
+            local_result, _ = await self.run_scan(lambda r: httpx.Response(404), max_requests=1, local=True)
+        self.assertFalse(local_result["local"]["skipped"])
+        self.assertEqual(local_result["local"]["php_version"], "8.4.26")
+        self.assertEqual(local_result["local"]["php2shell"]["status"], "potentially_affected")
+
+    async def test_local_sandbox_block_is_skipped_with_todo(self):
+        with patch("cyber_tools.php2shell.shutil.which", return_value="/usr/bin/php"), \
+             patch("cyber_tools.php2shell.subprocess.run", side_effect=PermissionError("blocked")):
+            result, _ = await self.run_scan(lambda r: httpx.Response(404), max_requests=1, local=True)
+        self.assertTrue(result["local"]["skipped"])
+        self.assertIn("TODO", result["local"]["reason"])
 
 
 if __name__ == "__main__":

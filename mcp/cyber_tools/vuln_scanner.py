@@ -315,12 +315,14 @@ async def vuln_scanner(target: str) -> Dict:
                 headers = response.headers
                 php2shell = assess_headers(headers)
                 for record in cve_records(php2shell):
+                    grade = record.get("confidence") or "LOW"
                     vulnerabilities.append({
                         "name": record["name"], "severity": record["severity"].lower(),
                         "description": record["description"], "matched_at": str(response.url),
-                        "type": "cve", "cve": record["id"], "confidence": "probable",
+                        "type": "cve", "cve": record["id"], "confidence": grade,
                         "evidence": str(php2shell["evidence"]),
                         "fixed_version": record["fixed_version"], "references": record["references"],
+                        "confidence_notes": record.get("confidence_notes", []),
                     })
 
                 for check_id, check in SECURITY_CHECKS.items():
@@ -533,13 +535,18 @@ async def vuln_scanner(target: str) -> Dict:
 
     # Summary
     by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
-    by_confidence = {"verified": 0, "probable": 0, "info": 0}
+    by_confidence = {"verified": 0, "probable": 0, "info": 0,
+                     "HIGH": 0, "MEDIUM": 0, "LOW": 0}
     for v in vulnerabilities:
         s = v["severity"]
         if s in by_severity:
             by_severity[s] += 1
         c = v.get("confidence", "info")
-        if c in by_confidence:
+        if c in ("HIGH", "MEDIUM", "LOW"):
+            by_confidence[c] += 1
+            # Version/CVE correlation remains non-verified for report gating.
+            by_confidence["probable"] += 1
+        elif c in by_confidence:
             by_confidence[c] += 1
 
     return {
@@ -551,7 +558,8 @@ async def vuln_scanner(target: str) -> Dict:
         "verified_count": by_confidence["verified"],
         "note": (
             "Use findings with confidence=verified for reports. "
-            "confidence=probable means version/CVE correlation only, not exploited."
+            "HIGH/MEDIUM/LOW (also counted under probable) are version/CVE "
+            "correlation grades only, not verified RCE."
         ),
     }
 

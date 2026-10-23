@@ -329,18 +329,22 @@ def vuln_scan(target: str) -> str:
 
 @mcp.tool()
 def php2shell_scan(target: str, phpinfo_paths: bool = True, max_requests: int = 8,
-                   timeout: float = 8.0) -> str:
+                   timeout: float = 8.0, deep_version: bool = False,
+                   local: bool = False) -> str:
     """Identify PHP2SHELL CVE-2026-109618/109619 on an authorized single origin.
 
     Dedicated lightweight GET/HEAD/OPTIONS and optional common phpinfo pages;
     no unrelated vulnerability/credential checks. Max 8 requests by default
     (1..12), 200 KB body/read, TLS verified, 30s whole-scan deadline.
     Same-origin redirects only. Stop on HTTP 429. No OOM/race/load/exploit probes.
-    Returns php2shell version assessment, coverage reason, evidence, allowlisted
-    configuration and probable findings. Unknown/blocked does not mean safe.
-    phpinfo_paths=False disables diagnostic-page discovery. No raw page/cookies exported.
+    Returns php2shell version assessment with HIGH/MEDIUM/LOW confidence, SAPI/proxy
+    caveats, coverage, evidence, allowlisted configuration and findings.
+    Unknown/blocked does not mean safe. deep_version expands GET-only allowlisted
+    paths (default off). local runs php -v/-i on the MCP host only (default off).
+    No raw page/cookies, secrets discovery, origin bypass or subdomain fan-out.
     """
-    return json.dumps(_run(scan_php2shell(target, phpinfo_paths, max_requests, timeout)), indent=2)
+    return json.dumps(_run(scan_php2shell(
+        target, phpinfo_paths, max_requests, timeout, deep_version, local)), indent=2)
 
 @mcp.tool()
 def nikto_scan(target: str) -> str:
