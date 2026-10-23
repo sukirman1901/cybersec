@@ -1,4 +1,4 @@
-# SQLi evidence engine (GET/query, first slice)
+# SQLi evidence engine (GET/query)
 
 The existing `sqli_detect(target, param="", preset="observe-first")` MCP interface
 is unchanged. It now uses repeated, controlled experiments rather than treating a
@@ -16,6 +16,15 @@ single SQL-looking error, status change, slow response or HTML table as proof.
   reversed request order on the second round. True responses must remain close
   to baseline; false responses must consistently separate in content, with the
   same successful status. Exact probe reflection is normalized before comparison.
+- If AND does not confirm, OR reverses those roles: false must match baseline and
+  true must consistently diverge. Two operator/quoting-matched keyword controls
+  using non-predicate identifiers must stay baseline-like; a successful original-
+  value recovery is required after both rounds. This covers the previously missed
+  stable HTTP-200 empty-result case without assuming a JSON/HTML response format.
+  Successful AND experiments do not run the extra OR fallback.
+- Boolean evidence records `operator` and `baseline_matches`, plus keyword controls
+  and recovery for OR. OR is an active query-expansion experiment: an application
+  may return additional rows, but scanner evidence exports hashes, not row content.
 - Findings include request roles, SHA-256 response hashes, response sizes/statuses,
   timings, matched SQL error signatures and content-distance measurements.
   `evidence` remains a JSON-encoded **string** for existing report converters.
@@ -68,7 +77,7 @@ Vendor/version fingerprinting is not established (`db_fingerprint` remains null)
 
 Repeated observations reduce noise but are not a mathematical proof of SQL execution
 on arbitrary applications. Highly dynamic content, small differences on large pages,
-uncovered SQL quoting contexts, and blind queries with an empty baseline can be missed.
+uncovered SQL quoting contexts, and non-successful empty-baseline responses can be missed.
 Only SQLite numeric/string execution is benchmarked here; this is not a claim of
 MySQL/PostgreSQL/MSSQL/Oracle coverage or production-wide accuracy.
 
@@ -78,22 +87,26 @@ From the repository root, using an environment with the MCP dependencies:
 
 ```bash
 python scripts/benchmark_sqli.py --runs 3
-python -m pytest mcp/tests/test_sqli_evidence.py mcp/tests/test_sqli_sqlite_benchmark.py -q
+python -m pytest mcp/tests/test_sqli_evidence.py mcp/tests/test_sqli_or_evidence.py mcp/tests/test_sqli_sqlite_benchmark.py -q
 ```
 
 The benchmark binds an ephemeral **127.0.0.1** port and runs SQL against synthetic
 in-memory tables. It has no remote-target option and shuts down in `finally`.
 
-Observed on Python 3.12, 2026-10-24, including a rerun after review fixes:
+Observed on Python 3.12, 2026-10-24. The original nine scenarios are retained
+unchanged, and four additional scenarios extend empty numeric/string and safe-query
+coverage. Counts are separated in `subset_counts` to avoid inflating comparisons:
 
-| Three runs of nine labeled scenarios | Count |
-| --- | ---: |
-| True positive | 18 |
-| True negative | 6 |
-| False positive | 0 |
-| False negative | 3 |
+| Three runs | PR #8: original nine | OR fallback: same nine | OR fallback: all thirteen |
+| --- | ---: | ---: | ---: |
+| True positive | 18 | 21 | 27 |
+| True negative | 6 | 6 | 12 |
+| False positive | 0 | 0 | 0 |
+| False negative | 3 | 0 | 0 |
 
-The three misses are the **same known-vulnerable empty-baseline blind case**, once
-per run. Count it as a false negative, not a clean endpoint. The repeated deep
-preset is also not an independent target. These small benchmark counts must not
-be marketed as general detection accuracy.
+The three previous misses were the same known-vulnerable empty-baseline blind case,
+once per run. They now confirm via OR with 18 requests each. The additional empty
+string case confirms with 22 requests; parameterized empty cases remain negative.
+The repeated deep preset is not an independent target. These small benchmark counts
+must not be marketed as general detection accuracy. PostgreSQL/MySQL and timing/
+UNION remain unvalidated or deferred, regardless of this matrix passing.

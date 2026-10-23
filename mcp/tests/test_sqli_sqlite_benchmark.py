@@ -97,9 +97,32 @@ class TestSQLiteBenchmark(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(out["vulnerable"])
         self.assertTrue(out["coverage_complete"])
 
-    async def test_empty_baseline_does_not_claim_boolean_confirmation(self):
+    async def test_empty_numeric_baseline_is_confirmed_by_or(self):
         out = await self.scan("/unsafe-numeric-blind", "999")
+        self.assertEqual(out["techniques_found"], ["boolean_blind"])
+        evidence = json.loads(out["findings"][0]["evidence"])
+        self.assertEqual(evidence["operator"], "OR")
+        self.assertEqual(evidence["baseline_matches"], "false")
+
+    async def test_empty_string_baseline_is_confirmed_by_or(self):
+        out = await self.scan("/unsafe-string-blind", "missing")
+        self.assertEqual(out["techniques_found"], ["boolean_blind"])
+        self.assertEqual(json.loads(out["findings"][0]["evidence"])["operator"], "OR")
+
+    async def test_safe_empty_numeric_baseline_is_not_flagged(self):
+        out = await self.scan("/safe-numeric", "999")
         self.assertFalse(out["vulnerable"])
+        self.assertTrue(out["coverage_complete"])
+
+    async def test_safe_empty_string_baseline_is_not_flagged(self):
+        out = await self.scan("/safe-string", "missing")
+        self.assertFalse(out["vulnerable"])
+        self.assertTrue(out["coverage_complete"])
+
+    async def test_deep_empty_numeric_baseline_is_confirmed(self):
+        out = await self.scan("/unsafe-numeric-blind", "999", "staging-deep")
+        self.assertTrue(out["vulnerable"])
+        self.assertLessEqual(out["requests_sent"], out["request_budget"])
 
     async def test_deep_preset_uses_real_database_with_bounded_requests(self):
         out = await self.scan("/unsafe-string-blind", "alpha", "staging-deep")
