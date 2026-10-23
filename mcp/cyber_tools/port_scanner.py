@@ -27,6 +27,9 @@ COMMON_PORTS = {
     50070: "hdfs", 60010: "hbase", 60020: "hbase",
 }
 
+# Alias for detect_service() legacy interface (kept identical to COMMON_PORTS).
+COMMON_SERVICE_PORTS = COMMON_PORTS
+
 # --- Service Signatures ---
 SERVICE_SIGNATURES = {
     "SSH": {
