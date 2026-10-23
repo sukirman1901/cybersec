@@ -431,9 +431,9 @@ def crt_search(domain: str) -> str:
 # --- Web Security Testing Tools ---
 
 @mcp.tool()
-def cors_check(target: str) -> str:
-    """Test for CORS misconfiguration by sending cross-origin requests."""
-    return json.dumps(_run(_cors(target)), indent=2)
+def cors_check(target: str, preset: str = "observe-first") -> str:
+    """Test for CORS misconfiguration. preset: observe-first (default, bounded) or staging-deep."""
+    return json.dumps(_run(_cors(target, preset)), indent=2)
 
 @mcp.tool()
 def open_redirect(target: str) -> str:
@@ -722,9 +722,9 @@ def nosql_inject(target: str, param: str = "user") -> str:
     return json.dumps(_run(_nosql(target, param=param)), indent=2)
 
 @mcp.tool()
-def laravel_scan(target: str) -> str:
-    """Scan Laravel app for .env leak, debug mode, artisan exposure, etc."""
-    return json.dumps(_run(_laravel(target)), indent=2)
+def laravel_scan(target: str, preset: str = "observe-first") -> str:
+    """Scan Laravel app for .env leak, debug mode, artisan exposure. preset: observe-first|staging-deep."""
+    return json.dumps(_run(_laravel(target, preset)), indent=2)
 
 @mcp.tool()
 def php_deserialize(target: str, param: str = "") -> str:
@@ -934,9 +934,10 @@ def cookie_editor(target: str, cookie_str: str = "", action: str = "analyze") ->
     return json.dumps(_run(_cookie_editor(target, cookie_str, action)), indent=2)
 
 @mcp.tool()
-def xss_detect(target: str, param: str = "", method: str = "get", use_browser: bool = False) -> str:
-    """Active XSS injection testing — reflected, stored, DOM, and browser-based XSS detection with Playwright support."""
-    return json.dumps(_run(_xss_detect(target, param, method, use_browser)), indent=2)
+def xss_detect(target: str, param: str = "", method: str = "get", use_browser: bool = False,
+               preset: str = "observe-first") -> str:
+    """Active XSS testing. preset observe-first (default, bounded) or staging-deep; optional Playwright."""
+    return json.dumps(_run(_xss_detect(target, param, method, use_browser, preset)), indent=2)
 
 @mcp.tool()
 def wordpress_scan(target: str) -> str:
@@ -1016,8 +1017,8 @@ def vuln_validate(finding_json: str) -> str:
     return _vuln_validate(finding_json)
 
 @mcp.tool()
-def pentest_workflow(target: str, template: str = "web-audit", custom_json: str = "") -> str:
-    """Define a chain of pentest tools with conditions. Templates: web-audit, recon-full, network-scan, bugbounty, cloud-audit. Or provide custom JSON."""
+def pentest_workflow(target: str, template: str = "observe-first", custom_json: str = "") -> str:
+    """Workflow plan. Templates: observe-first (default), staging-deep, enterprise-pipeline, web-audit, recon-full, network-scan, bugbounty, cloud-audit. Or custom JSON. Gates preserved."""
     return _pentest_workflow(target, template, custom_json)
 
 @mcp.tool()
@@ -1063,8 +1064,8 @@ def auto_exploit(target: str, vuln_type: str = "auto", param: str = "") -> str:
     return _auto_exploit(target, vuln_type, param)
 
 @mcp.tool()
-def scan_template(target: str, template: str = "quick-recon") -> str:
-    """Pre-defined scan template combos. Templates: quick-recon, web-full, network-audit, api-security, cloud-audit, ad-pentest, code-audit, ctf."""
+def scan_template(target: str, template: str = "observe-first") -> str:
+    """Scan template combos. Defaults observe-first; also staging-deep, quick-recon, web-full, network-audit, api-security, cloud-audit, ad-pentest, code-audit, ctf."""
     return _scan_template(target, template)
 
 @mcp.tool()
@@ -1151,7 +1152,7 @@ def csrf_extract(target: str, method: str = "get", param_hint: str = "") -> str:
 
 @mcp.tool()
 def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5", user_a_cookie: str = "", user_b_cookie: str = "", param: str = "id", method: str = "get", role_a_header: str = "", role_b_header: str = "") -> str:
-    """IDOR/BOLA access validation — sequential enumeration, cross-user access, negative IDs, array bypass."""
+    """IDOR/BOLA validation with dual-role differential. Single-role enum is LOW confidence; both cookies/headers required for HIGH BOLA."""
     return _idor_access_validation(target, resource_ids, user_a_cookie, user_b_cookie, param, method, role_a_header, role_b_header)
 
 @mcp.tool()

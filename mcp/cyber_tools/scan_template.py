@@ -2,6 +2,36 @@
 import json
 
 TEMPLATES = {
+    "observe-first": {
+        "description": "Default safe observe-first — gate, light recon, header/CORS, findings+schema",
+        "steps": [
+            {"tool": "engagement_gate", "params": {"action": "validate", "target": "{target}"}},
+            {"tool": "dns_lookup", "params": {"target": "{target}"}},
+            {"tool": "subdomain_enum", "params": {"target": "{target}"}},
+            {"tool": "http_probe_target", "params": {"target": "{target}"}},
+            {"tool": "tech_detect", "params": {"target": "{target}"}},
+            {"tool": "vuln_scan", "params": {"target": "{target}"}},
+            {"tool": "cors_check", "params": {"target": "{target}", "preset": "observe-first"}},
+            {"tool": "findings_manager", "params": {"action": "stats"}},
+            {"tool": "report_schema_v2", "params": {"action": "validate", "findings_json": "[]"}},
+        ],
+    },
+    "staging-deep": {
+        "description": "Opt-in staging-deep — authorize, deeper web probes, dual-role IDOR, report+retest",
+        "steps": [
+            {"tool": "engagement_gate", "params": {"action": "authorize", "target": "{target}", "confirmation": "AUTHORIZED"}},
+            {"tool": "approval_artifact", "params": {"action": "request", "target": "{target}"}},
+            {"tool": "tech_detect", "params": {"target": "{target}"}},
+            {"tool": "vuln_scan", "params": {"target": "{target}"}},
+            {"tool": "sqli_detect", "params": {"target": "{target}"}},
+            {"tool": "xss_detect", "params": {"target": "{target}", "preset": "staging-deep"}},
+            {"tool": "cors_check", "params": {"target": "{target}", "preset": "staging-deep"}},
+            {"tool": "idor_access_validation", "params": {"target": "{target}"}},
+            {"tool": "findings_manager", "params": {"action": "stats"}},
+            {"tool": "branded_report", "params": {"target": "{target}", "findings_json": "[]"}},
+            {"tool": "retest_vuln", "params": {"target": "{target}", "vuln_type": "xss"}},
+        ],
+    },
     "quick-recon": {
         "description": "Fast recon — DNS, subdomains, HTTP probe",
         "steps": [
@@ -15,11 +45,11 @@ TEMPLATES = {
         "steps": [
             {"tool": "tech_detect", "params": {"target": "{target}"}},
             {"tool": "vuln_scan", "params": {"target": "{target}"}},
-            {"tool": "cors_check", "params": {"target": "{target}"}},
+            {"tool": "cors_check", "params": {"target": "{target}", "preset": "observe-first"}},
             {"tool": "csp_analyze", "params": {"target": "{target}"}},
             {"tool": "cookie_audit", "params": {"target": "{target}"}},
             {"tool": "sqli_detect", "params": {"target": "{target}"}},
-            {"tool": "xss_detect", "params": {"target": "{target}"}},
+            {"tool": "xss_detect", "params": {"target": "{target}", "preset": "observe-first"}},
             {"tool": "lfi_detect", "params": {"target": "{target}"}},
             {"tool": "ssrf_detect", "params": {"target": "{target}"}},
         ],
@@ -90,7 +120,7 @@ TEMPLATES = {
     },
 }
 
-def scan_template(target: str, template: str = "quick-recon") -> str:
+def scan_template(target: str, template: str = "observe-first") -> str:
     if template not in TEMPLATES:
         available = ", ".join(TEMPLATES.keys())
         return json.dumps({"error": f"Template '{template}' not found", "available": available}, indent=2)

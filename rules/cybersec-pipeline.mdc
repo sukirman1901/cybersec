@@ -1,0 +1,14 @@
+---
+description: Cybersec default enterprise pipeline, presets, and report quality gates for Cursor
+alwaysApply: true
+---
+
+# Cybersec pipeline (Cursor)
+
+When security testing or reporting is in scope:
+
+1. **Agents** — Prefer plugin agents: `pentester` (orchestrator), `recon` (passive), `vuln-analyst` (active), `report-writer` (verify + report).
+2. **Gates** — Keep `engagement_gate` and `approval_artifact`. Never remove them for convenience.
+3. **Presets** — Default **observe-first**. Use **staging-deep** only when the user opts in and authorization is recorded.
+4. **Flow** — `engagement_gate` → scan (`pentest_workflow` / `scan_template`) → `findings_manager` → verification → `report_schema_v2` / `branded_report` → optional `github_issue` / `jira_create` → `retest_vuln`.
+5. **Quality** — Every finding needs **confidence** + **coverage** notes. Dual-role authz checks before BOLA/IDOR HIGH claims. Load `cybersec-verification` before reporting.

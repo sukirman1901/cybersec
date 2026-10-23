@@ -247,21 +247,35 @@ def _detect_context(body: str, param: str, payload_reflection: str) -> str:
     return "html"
 
 
-async def xss_detect(target: str, param: str = "", method: str = "get", use_browser: bool = False) -> dict:
-    """Deep XSS detection — reflected, stored, DOM-based with WAF bypass and context-aware payloads."""
+async def xss_detect(target: str, param: str = "", method: str = "get",
+                     use_browser: bool = False, preset: str = "observe-first") -> dict:
+    """Deep XSS detection — reflected, stored, DOM-based with WAF bypass and context-aware payloads.
+
+    preset observe-first (default): short deadline, limited payloads/params, no stored fan-out.
+    staging-deep: broader payloads + stored paths within a hard deadline.
+    """
+    import time
     results = []
     waf_detected = None
+    coverage_notes = [f"preset={preset}"]
+    timed_out = False
     parsed = urllib.parse.urlparse(target)
     params = urllib.parse.parse_qs(parsed.query)
     base = target.rstrip("/")
+    deep = preset == "staging-deep"
+    deadline = time.monotonic() + (45.0 if deep else 15.0)
+    max_params = 8 if deep else 3
+    max_payloads = 40 if deep else 12
 
     test_params = [param] if param else list(params.keys()) if params else [
         "q", "search", "s", "id", "page", "name", "user", "input",
         "query", "text", "msg", "message", "comment", "title", "url",
         "redirect", "next", "return", "callback", "data", "value",
     ]
+    test_params = test_params[:max_params]
+    coverage_notes.append(f"params={len(test_params)}")
 
-    async with httpx.AsyncClient(timeout=15.0, verify=False, follow_redirects=False) as client:
+    async with httpx.AsyncClient(timeout=5.0, verify=False, follow_redirects=False) as client:
         # Get baseline
         try:
             baseline_resp = await client.get(base)
@@ -275,11 +289,18 @@ async def xss_detect(target: str, param: str = "", method: str = "get", use_brow
         # --- REFLECTED XSS ---
         if params or test_params:
             for p in test_params:
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
                 all_payloads = HTML_CONTEXT_PAYLOADS + ATTR_CONTEXT_PAYLOADS + JS_CONTEXT_PAYLOADS + URL_CONTEXT_PAYLOADS
                 if waf_detected:
                     all_payloads = WAF_BYPASS_PAYLOADS
+                all_payloads = all_payloads[:max_payloads]
 
                 for payload_name, payload in all_payloads:
+                    if time.monotonic() > deadline:
+                        timed_out = True
+                        break
                     try:
                         if method == "get":
                             new_params = {k: v[0] for k, v in params.items()} if params else {p: payload}
@@ -321,9 +342,17 @@ async def xss_detect(target: str, param: str = "", method: str = "get", use_brow
                                 break  # Confirmed exploit context
                     except Exception:
                         continue
+                if timed_out:
+                    break
 
         # --- STORED XSS ---
-        for path in STORED_PATHS:
+        stored_paths = STORED_PATHS if deep else []
+        if not deep:
+            coverage_notes.append("stored_xss_skipped (observe-first)")
+        for path in stored_paths:
+            if time.monotonic() > deadline:
+                timed_out = True
+                break
             try:
                 store_url = base.rstrip("/") + path
                 store_payloads = [
@@ -409,7 +438,12 @@ async def xss_detect(target: str, param: str = "", method: str = "get", use_brow
             ("X-Forwarded-Host", "<script>alert(1)</script>"),
             ("X-Original-URL", "<script>alert(1)</script>"),
         ]
+        if not deep:
+            header_payloads = header_payloads[:2]
         for header_name, h_payload in header_payloads:
+            if time.monotonic() > deadline:
+                timed_out = True
+                break
             try:
                 resp = await client.get(base, headers={header_name: h_payload})
                 if h_payload[:15] in resp.text:
@@ -472,13 +506,28 @@ async def xss_detect(target: str, param: str = "", method: str = "get", use_brow
             except Exception as e:
                 results.append({"type": "browser_xss", "error": str(e)[:80], "risk": "INFO"})
 
+    if any(r.get("confidence") == "confirmed" for r in results):
+        confidence = "HIGH"
+    elif any(r.get("risk") in ("CRITICAL", "HIGH") for r in results):
+        confidence = "HIGH" if any(r.get("confidence") == "high" for r in results) else "MEDIUM"
+    elif results:
+        confidence = "MEDIUM"
+    else:
+        confidence = "LOW" if timed_out else "MEDIUM"
+    if timed_out:
+        coverage_notes.append("deadline_reached — remaining probes skipped")
+    coverage_notes.append(f"findings={len(results)}")
+
     return {
         "target": target,
+        "preset": preset,
         "waf_detected": waf_detected,
         "results": results,
         "vulnerable": any(r.get("risk") in ["CRITICAL", "HIGH"] for r in results),
         "total_findings": len(results),
-        "types_found": list(set(r["type"] for r in results)),
+        "types_found": list(set(r["type"] for r in results if "type" in r)),
+        "confidence": confidence,
+        "coverage": "; ".join(coverage_notes),
         "risk_summary": {
             "critical": sum(1 for r in results if r.get("risk") == "CRITICAL"),
             "high": sum(1 for r in results if r.get("risk") == "HIGH"),

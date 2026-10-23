@@ -647,7 +647,11 @@ Skills load automatically via intent detection. The AI follows the skill's metho
 
 ---
 
-## Agents (OpenCode)
+## Agents (OpenCode + Cursor)
+
+OpenCode agents live in `.opencode/agents/`. Cursor-compatible mirrors ship in `agents/` (declared in `.cursor-plugin/plugin.json`) with the same roles: **pentester**, **recon**, **vuln-analyst**, **report-writer**. Cursor also loads `rules/cybersec-pipeline.mdc` for the default enterprise flow.
+
+**Default pipeline:** `engagement_gate` → `observe-first` / opt-in `staging-deep` → `findings_manager` → verification → `report_schema_v2` / `branded_report` → tickets → `retest_vuln`.
 
 OpenCode-compatible agents are included in `.opencode/agents/`. These agents have tailored permissions and prompts for different security testing phases.
 
