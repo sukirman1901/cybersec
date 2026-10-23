@@ -272,7 +272,7 @@ def ssl_check(target: str, port: int = 443) -> str:
 
 @mcp.tool()
 def cve_search(service: str, version: str = "") -> str:
-    """Look up known CVEs for a given service and optional version."""
+    """Look up known CVEs by service/version, including offline PHP2SHELL version correlation (not verified RCE)."""
     results = cve_lookup(service, version)
     return json.dumps({"query": f"{service} {version}", "results": results, "count": len(results)}, indent=2)
 
@@ -315,7 +315,13 @@ def tech_detect(target: str) -> str:
 
 @mcp.tool()
 def vuln_scan(target: str) -> str:
-    """Scan for common vulnerabilities (missing headers, exposed paths, CVE patterns)."""
+    """Scan headers, exposed paths and CVE patterns; includes non-destructive PHP2SHELL header assessment.
+
+    php2shell.status is potentially_affected, not_affected_by_version or unknown.
+    PHP2SHELL findings are probable version correlations, never verified RCE.
+    Unknown (including hidden versions) is not safe; check vendor backports.
+    No PHP2SHELL crash/load probes are sent. Other existing scan checks still run.
+    """
     return json.dumps(_run(scan_vulnerabilities(target)), indent=2)
 
 # --- CLI Wrapper Tools ---

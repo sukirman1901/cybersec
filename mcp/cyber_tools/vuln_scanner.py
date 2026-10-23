@@ -4,6 +4,7 @@ import re
 import httpx
 import asyncio
 from typing import Dict, List
+from .php2shell import assess_headers, cve_records
 
 # --- Security Header Checks ---
 SECURITY_CHECKS = {
@@ -304,6 +305,7 @@ async def vuln_scanner(target: str) -> Dict:
         target = f"https://{target}"
 
     vulnerabilities: List[Dict] = []
+    php2shell = assess_headers({})
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
@@ -311,6 +313,15 @@ async def vuln_scanner(target: str) -> Dict:
             try:
                 response = await client.get(target)
                 headers = response.headers
+                php2shell = assess_headers(headers)
+                for record in cve_records(php2shell):
+                    vulnerabilities.append({
+                        "name": record["name"], "severity": record["severity"].lower(),
+                        "description": record["description"], "matched_at": str(response.url),
+                        "type": "cve", "cve": record["id"], "confidence": "probable",
+                        "evidence": str(php2shell["evidence"]),
+                        "fixed_version": record["fixed_version"], "references": record["references"],
+                    })
 
                 for check_id, check in SECURITY_CHECKS.items():
                     try:
@@ -518,7 +529,7 @@ async def vuln_scanner(target: str) -> Dict:
                 pass
 
     except Exception as e:
-        return {"vulnerabilities": [], "error": str(e)}
+        return {"vulnerabilities": [], "error": str(e), "php2shell": php2shell}
 
     # Summary
     by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
@@ -532,6 +543,7 @@ async def vuln_scanner(target: str) -> Dict:
             by_confidence[c] += 1
 
     return {
+        "php2shell": php2shell,
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),
         "by_severity": by_severity,

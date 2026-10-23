@@ -2,6 +2,7 @@
 
 import urllib.request
 import json
+from .php2shell import ADVISORIES, assess_version, cve_records
 
 KNOWN_VULNS = {
     "apache 2.4.49": [{"id": "CVE-2021-41773", "severity": "CRITICAL", "description": "Path traversal and file disclosure in Apache HTTP Server 2.4.49"}],
@@ -41,6 +42,9 @@ def cve_lookup(service: str, version: str = "") -> list[dict]:
     """Look up CVEs for a service. Checks built-in DB + NVD API."""
     query = f"{service} {version}".strip().lower()
     results = _match_known(query)
+    is_php = service.strip().lower() == "php"
+    if is_php:
+        results.extend(cve_records(assess_version(version)))
 
     try:
         search = urllib.request.quote(f"{service} {version}")
@@ -50,6 +54,10 @@ def cve_lookup(service: str, version: str = "") -> list[dict]:
         data = json.loads(resp.read().decode())
         for vuln in data.get("vulnerabilities", []):
             cve = vuln.get("cve", {})
+            # NVD keyword hits alone cannot establish PHP2SHELL version applicability.
+            # Keep the local branch-aware assessment authoritative for these IDs.
+            if is_php and cve.get("id") in ADVISORIES:
+                continue
             metrics = cve.get("metrics", {})
             severity = "UNKNOWN"
             for key in ["cvssMetricV31", "cvssMetricV30", "cvssMetricV2"]:
