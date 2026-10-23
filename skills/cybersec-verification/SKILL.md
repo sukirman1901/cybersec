@@ -77,6 +77,17 @@ Never publish raw phpinfo, environment secrets or session-cookie values.
 [hash_analyze] → bcrypt, mode 3200 → "Hash is bcrypt"
 ```
 
+## Quality fields (required before report)
+
+Every finding handed to `report_schema_v2` / `branded_report` must include:
+
+| Field | Meaning |
+|-------|---------|
+| `confidence` | HIGH / MEDIUM / LOW (or numeric from `vuln_validate`) |
+| `coverage` | What was tested vs skipped (preset, dual-role gap, 429, blocked, budget) |
+
+IDOR/BOLA: dual-role cookies/headers required for HIGH confidence. Single-role enum alone is LOW.
+
 ## When To Apply
 
-Before reporting findings, moving to next phase, or writing final report.
+Before reporting findings, moving to next phase, or writing final report. Load this skill before `report-writer` / `branded_report`.

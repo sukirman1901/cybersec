@@ -12,6 +12,8 @@ CTEM is a continuous loop: **Discovery → Validation → Prioritization → Rem
 ## Prerequisites
 
 - **Establish scope** — define which assets, IP ranges, domains are in scope
+- **engagement_gate** — `init` + `validate` (and `authorize` before staging-deep loops)
+- **Preset** — default `observe-first`; opt into `staging-deep` only on authorized staging assets
 
 ## Phase 1: Discovery (Continuous)
 
@@ -129,6 +131,9 @@ After Phase 4, the cycle restarts:
 ### Automated Workflow
 
 Use `pentest_workflow` with templates:
+- `observe-first` → **default** safe continuous loop entry
+- `enterprise-pipeline` → gate → scan → findings → schema/report → tickets → retest
+- `staging-deep` → opt-in deeper validation (still gated)
 - `recon-full` → comprehensive discovery
 - `web-audit` → web application testing
 - `network-scan` → network security

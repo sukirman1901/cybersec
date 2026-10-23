@@ -97,6 +97,28 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file") 
 
 Standard pentest workflow: **Recon → OSINT → Scanning → Vulns → Web → Bug Bounty → AD → Cloud → Password → AI → AI Safety → Desktop → Code Audit → Exploit → Report**
 
+### Default enterprise pipeline (all harnesses)
+
+```
+engagement_gate → scan (observe-first | staging-deep) → findings_manager
+  → cybersec-verification → report_schema_v2 / branded_report
+  → github_issue | jira_create (optional) → retest_vuln
+```
+
+- **observe-first** (default) — `pentest_workflow(template="observe-first")` / `scan_template(template="observe-first")`
+- **staging-deep** (opt-in) — deeper probes only after `engagement_gate` authorize + `approval_artifact` when required
+- Never remove `engagement_gate` / `approval_artifact`
+- Every finding needs **confidence** + **coverage** before reporting
+
+### Cursor / OpenCode agent parity
+
+| Role | Cursor agent (`agents/`) | OpenCode (`.opencode/agents/`) |
+|------|--------------------------|--------------------------------|
+| Orchestrator | `pentester` | `pentester` (primary) |
+| Passive OSINT | `recon` | `recon` |
+| Active testing | `vuln-analyst` | `vuln-analyst` |
+| Verify + report | `report-writer` | `report-writer` |
+
 For continuous monitoring: **CTEM** runs in parallel — Discovery → Validation → Prioritization → Remediation in a continuous loop.
 For CTFs: **CTF** is a parallel path covering all phases — load `cybersec-ctf` for challenge-based engagements like OWASP Juice Shop.
 For AI Safety BB: **AI Safety** follows AI phase — load `cybersec-ai-safety` for OpenAI Safety Bug Bounty scope (prompt injection, agent hijack, MCP abuse, anti-automation).

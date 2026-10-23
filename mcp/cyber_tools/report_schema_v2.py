@@ -58,6 +58,13 @@ def _validate_findings(findings_json):
         if not f.get("evidence") and not f.get("response"):
             f_warnings.append("No evidence provided")
 
+        confidence = f.get("confidence", (f.get("metadata") or {}).get("confidence"))
+        coverage = f.get("coverage", (f.get("metadata") or {}).get("coverage"))
+        if confidence in (None, "", []):
+            f_errors.append("Missing confidence (required before reporting)")
+        if coverage in (None, "", []):
+            f_errors.append("Missing coverage notes (required before reporting)")
+
         if f_errors:
             errors.append({"finding_index": i, "title": f.get("title", "unknown"), "errors": f_errors})
         if f_warnings:
@@ -74,6 +81,7 @@ def _validate_findings(findings_json):
         "error_details": errors,
         "warning_details": warnings,
         "is_valid": len(errors) == 0,
+        "quality_gates": ["confidence required", "coverage notes required"],
     }, indent=2)
 
 
@@ -101,10 +109,13 @@ def _convert_v1_to_v2(findings_json):
             "evidence": f.get("evidence", f.get("response", "")),
             "remediation": f.get("remediation", f.get("fix", "")),
             "description": f.get("description", f.get("summary", "")),
+            "confidence": f.get("confidence", (f.get("metadata") or {}).get("confidence")),
+            "coverage": f.get("coverage", (f.get("metadata") or {}).get("coverage", "")),
             "metadata": {
                 "detected_at": f.get("detected_at", f.get("timestamp", f.get("added", datetime.utcnow().isoformat()))),
                 "tool": "Cybersec MCP",
-                "confidence": f.get("confidence", None),
+                "confidence": f.get("confidence", (f.get("metadata") or {}).get("confidence")),
+                "coverage": f.get("coverage", (f.get("metadata") or {}).get("coverage", "")),
                 "reproducible": f.get("reproducible", f.get("repeatable", False)),
                 "poc": f.get("poc_url", f.get("poc_link", "")),
                 "tags": f.get("tags", []),
