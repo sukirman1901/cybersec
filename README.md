@@ -311,7 +311,7 @@ Expected: 180+ tools listed.
 | `subdomain_enum` | Passive subdomain enumeration (crt.sh, DNS brute, APIs) |
 | `param_discovery` | HTTP parameter discovery |
 | `tech_detect` | Web technology detection (CMS, frameworks, CDN) |
-| `vuln_scan` | Common vulnerability scan (headers, paths, CVEs) |
+| `vuln_scan` | Common vulnerability scan (headers, paths, CVEs), including PHP2SHELL version assessment |
 | `whois_lookup` | Query WHOIS for domain registration |
 | `asn_lookup` | ASN information lookup (Team Cymru) |
 | `reverse_ip` | Find domains on same IP |
@@ -332,6 +332,36 @@ Expected: 180+ tools listed.
 | `sub_takeover` | Subdomain takeover detection |
 | `origin_ip_discovery` | Origin IP behind CDN discovery |
 | `service_fingerprint` | Deep banner grabbing service fingerprint |
+
+### PHP2SHELL detection
+
+Existing MCP tools identify CVE-2026-109618 and CVE-2026-109619 without
+PHP2SHELL exploit/load probes:
+
+- `vuln_scan(target="https://your-authorized-host.example")` adds a `php2shell`
+  assessment from existing response headers. Existing unrelated scan checks still run.
+- `cve_search(service="php", version="8.4.26")` includes offline version-based
+  PHP2SHELL matches even if the NVD lookup fails.
+
+`php2shell.status` is `potentially_affected` (two probable CVE findings),
+`not_affected_by_version` (advertised version meets its branch fix), or `unknown`
+(insufficient evidence, EOL/future branch, prerelease or conflicting versions).
+Fixed baselines: **8.2.35 / 8.3.36 / 8.4.27 / 8.5.12**.
+Neither a banner nor a Composer PHP constraint proves the deployed runtime.
+Check vendor backports and actual serving workers before reporting affectedness
+or remediation. A hidden version is not evidence of safety.
+
+The `cybersec-vulns` and `cybersec-verification` skills describe these evidence
+limits. Restart the MCP server/client after updating. If your client uses an
+installed plugin/cache rather than this checkout, update that installation too;
+editing this source tree does not update an already-running server or cached skills.
+
+Validation: `mcp/.venv/bin/python -m unittest discover -s mcp/tests -p test_php2shell.py -v`.
+References: [PHP advisory](https://www.php.net/archive/2026.php#2026-10-21-5),
+[VulnCheck](https://www.vulncheck.com/blog/php2shell-vulnerabilities),
+[Ramikan](https://github.com/Ramikan/PHP2SHELL-Scanner),
+[JoasASantos](https://github.com/JoasASantos/php2shell-scanner).
+Reference exploit/race code is not incorporated or executed.
 
 ### CLI Wrapper Tools
 

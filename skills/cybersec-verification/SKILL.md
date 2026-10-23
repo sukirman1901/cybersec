@@ -32,6 +32,26 @@ BEFORE claiming any security finding:
 | Exploit works | Actual exploit output |
 | Fix applied | Re-run scan shows issue resolved |
 
+### PHP2SHELL evidence gate
+
+For CVE-2026-109618 and CVE-2026-109619, `vuln_scan`'s `php2shell.status`
+is a version assessment, not an exploit verdict:
+The following PHP2SHELL rules override the generic verification table above.
+
+- `potentially_affected` / `confidence=probable` (e.g. PHP/8.4.26): retain the
+  header evidence and backport caveat; never promote it to verified RCE.
+- `unknown` (including PHPSESSID without a version): insufficient evidence,
+  not safe. EOL and future branches require separate vendor assessment.
+- `not_affected_by_version` (e.g. PHP/8.4.27): advertised version meets the fix,
+  not proof the origin and all workers are patched. Headers may be stale or proxied.
+
+Fixed baselines are 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12. Before claiming remediation,
+verify the actual serving runtime/package provenance and vendor security changelog
+on every PHP service, including restarted/recreated long-running workers. Distro
+backports may fix older banners. Composer constraints are not runtime evidence.
+Do not use OOM/race/load probes or webshell execution for PHP2SHELL identification
+or patch verification. A failed probe or absence of a finding cannot prove safety.
+
 ## Quick Examples
 
 **Port scan:**
