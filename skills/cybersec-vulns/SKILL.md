@@ -16,7 +16,11 @@ Create a todo list from the checklist below, then execute all steps immediately.
    providers; default off. Inspect `intel_summary` for lookup failures and missing
    feed entries. `intel` prioritizes patching only: it never upgrades finding
    confidence or confirms exploitation of the scanned target. Feed absence is
-   not proof of safety; KEV availability/cache freshness must be checked separately.
+   not proof of safety. Inspect `intel_summary.sources` for feed status and dates:
+   KEV cache expires after one hour. `in_kev=null` means unknown (stale, unavailable
+   or disabled); `stale_in_kev` is historical reference only. Missing/invalid EPSS
+   scores remain null, never an automatic low-priority verdict. EPSS-only patch
+   priority cannot rule out KEV membership while KEV is unknown.
 3. **CVE Cross-Reference** — For software with multiple CVEs, check severity and public exploit availability
 4. **CRLF Injection Scan** — Call `crlf_inject(target)` for HTTP header injection vulnerabilities
 5. **LDAP Injection Scan** — If LDAP endpoints found, call `ldap_inject(target)` for LDAP query manipulation

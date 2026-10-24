@@ -530,7 +530,11 @@ def shodan_lookup(query: str, api_key: str = "") -> str:
 @mcp.tool()
 def epss_lookup(cves: list, include_kev: bool = True) -> str:
     """FIRST EPSS probability + percentile per CVE, plus CISA KEV membership and
-    patch priority (P0 KEV / P1 >50% / P2 >10% / P3 low). Read-only, no target
+    patch priority (P0 KEV / P1 >=50% / P2 >=10% / P3 low; unknown if no score).
+    in_kev is true/false only for fresh evidence, null if stale/unavailable/disabled.
+    sources records feed status, retrieval/source dates and one-hour KEV cache age;
+    stale_in_kev is historical only. Missing EPSS rows retain nullable entries.
+    Read-only, no target
     traffic; max 2 outbound requests (FIRST + CISA feed, cached). Batch up to 25
     CVE IDs. Use for patch prioritization instead of CVSS-alone decisions."""
     return json.dumps(_run(_epss_lookup(cves, include_kev=include_kev)), indent=2)
