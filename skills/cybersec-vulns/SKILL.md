@@ -11,6 +11,12 @@ Create a todo list from the checklist below, then execute all steps immediately.
 
 1. **CVE Lookup** — For each detected service + version, call `cve_search(service, version)` for known vulnerabilities
 2. **Vulnerability Scan** — Call `vuln_scan(target)` for common vulnerability patterns
+   or `vuln_scan(target, epss_intel=true)` to opt into FIRST EPSS/CISA KEV
+   enrichment of up to 25 unique CVE IDs. This sends CVE IDs to external intel
+   providers; default off. Inspect `intel_summary` for lookup failures and missing
+   feed entries. `intel` prioritizes patching only: it never upgrades finding
+   confidence or confirms exploitation of the scanned target. Feed absence is
+   not proof of safety; KEV availability/cache freshness must be checked separately.
 3. **CVE Cross-Reference** — For software with multiple CVEs, check severity and public exploit availability
 4. **CRLF Injection Scan** — Call `crlf_inject(target)` for HTTP header injection vulnerabilities
 5. **LDAP Injection Scan** — If LDAP endpoints found, call `ldap_inject(target)` for LDAP query manipulation

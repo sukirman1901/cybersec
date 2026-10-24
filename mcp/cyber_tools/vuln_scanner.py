@@ -5,6 +5,9 @@ import httpx
 import asyncio
 from typing import Dict, List
 from .php2shell import assess_headers, cve_records
+from .epss_lookup import epss_lookup as _epss_lookup
+
+CVE_ID_RE = re.compile(r"CVE-\d{4}-\d{4,10}")
 
 # --- Security Header Checks ---
 SECURITY_CHECKS = {
@@ -299,13 +302,21 @@ def _version_banner(headers) -> str:
     return " ".join(parts)
 
 
-async def vuln_scanner(target: str) -> Dict:
-    """Deep vulnerability scanner with header checks, path probes, CVE patterns, tech-specific checks, default creds."""
+async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
+    """Deep vulnerability scanner with header checks, path probes, CVE patterns, tech-specific checks, default creds.
+
+    epss_intel=True optionally enriches CVE findings with FIRST EPSS probability,
+    percentile, CISA KEV membership and a P0-P3 patch priority (at most the two
+    read-only intel requests owned by epss_lookup; failures never fail the scan).
+    """
+    if not isinstance(epss_intel, bool):
+        epss_intel = bool(epss_intel)
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 
     vulnerabilities: List[Dict] = []
     php2shell = assess_headers({})
+    result_enrichment: Dict = None
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
@@ -533,6 +544,50 @@ async def vuln_scanner(target: str) -> Dict:
     except Exception as e:
         return {"vulnerabilities": [], "error": str(e), "php2shell": php2shell}
 
+    # Optional EPSS/KEV enrichment (opt-in; at most the two intel requests owned
+    # by epss_lookup, cached KEV; never target probing; failures never fail scan)
+    if epss_intel and vulnerabilities:
+        intel_summary = {"attempted": True, "requested": [], "enriched": 0,
+                         "unknown_not_in_feed": [], "references": []}
+        try:
+            def _finding_cve(finding):
+                explicit = finding.get("cve")
+                if explicit and CVE_ID_RE.fullmatch(str(explicit).strip().upper()):
+                    return str(explicit).strip().upper()
+                match = CVE_ID_RE.search(
+                    f"{finding.get('name', '')} {finding.get('description', '')}")
+                return match.group(0).upper() if match else None
+
+            ids = []
+            for finding in vulnerabilities:
+                cve = _finding_cve(finding)
+                if cve and cve not in ids:
+                    ids.append(cve)
+            intel_summary["requested"] = ids[:25]
+            intel = (await _epss_lookup(intel_summary["requested"], include_kev=True)
+                     if ids else {"entries": []})
+            intel_summary["attempted"] = bool(ids)
+            if "error" in intel and not intel.get("entries"):
+                intel_summary["error"] = intel["error"]
+            else:
+                by_cve = {e["cve"]: e for e in intel.get("entries", [])}
+                for finding in vulnerabilities:
+                    cve = _finding_cve(finding)
+                    entry = by_cve.get(cve) if cve else None
+                    if entry:
+                        finding["intel"] = {
+                            "epss": entry.get("epss"), "percentile": entry.get("percentile"),
+                            "in_kev": entry.get("in_kev"),
+                            "patch_priority": entry.get("patch_priority"),
+                            "source": "FIRST EPSS + CISA KEV (epss_lookup)",
+                        }
+                        intel_summary["enriched"] += 1
+                intel_summary["unknown_not_in_feed"] = intel.get("unknown_not_in_feed", [])
+                intel_summary["references"] = intel.get("references", [])
+        except Exception as error:  # enrichment must never fail the scan
+            intel_summary["error"] = f"epss enrichment failed: {error}"
+        result_enrichment = intel_summary
+
     # Summary
     by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
     by_confidence = {"verified": 0, "probable": 0, "info": 0,
@@ -549,7 +604,7 @@ async def vuln_scanner(target: str) -> Dict:
         elif c in by_confidence:
             by_confidence[c] += 1
 
-    return {
+    response = {
         "php2shell": php2shell,
         "vulnerabilities": vulnerabilities,
         "count": len(vulnerabilities),
@@ -562,6 +617,9 @@ async def vuln_scanner(target: str) -> Dict:
             "correlation grades only, not verified RCE."
         ),
     }
+    if result_enrichment is not None:
+        response["intel_summary"] = result_enrichment
+    return response
 
 
 # Backward-compatible alias
