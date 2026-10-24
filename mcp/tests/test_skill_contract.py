@@ -68,6 +68,8 @@ class TestSkillContracts(unittest.TestCase):
             ('cybersec-vulns', 'epss_lookup(cves=["CVE-2026-109618"])'),
             ('cybersec-report', 'generate_report(target=target, findings=findings_json, format="markdown")'),
             ('cybersec-cloud', 'cloud_audit(provider="aws", buckets=bucket_names)'),
+            ('cybersec-password', 'hash_analyze(hash_string="d41d8cd98f00b204e9800998ecf8427e")'),
+            ('cybersec-password', 'hash_detect(hash_string="d41d8cd98f00b204e9800998ecf8427e")'),
         ]
         for skill, example in examples:
             with self.subTest(example=example):
@@ -112,6 +114,19 @@ class TestSkillContracts(unittest.TestCase):
                      "do not execute", "local", "synthetic"):
             with self.subTest(term=term):
                 self.assertIn(term, body.lower())
+
+    def test_hash_only_examples_do_not_infer_keywords_from_variable_labels(self):
+        body = SKILLS["cybersec-password"]
+        self.assertNotIn("hash_analyze(hash)", body)
+        self.assertNotIn("hash_detect(hash)", body)
+        for skill in ("cybersec-password", "using-cybersec"):
+            with self.subTest(skill=skill):
+                text = SKILLS[skill].lower()
+                self.assertIn("argument names", text)
+                self.assertIn("variable labels", text)
+        for skill, text in SKILLS.items():
+            with self.subTest(skill=skill):
+                self.assertNotRegex(text, r"(?:hash_analyze|hash_detect)\(hash\s*=")
 
     def test_active_exploit_section_requires_explicit_non_auto_selection(self):
         text = SKILLS["cybersec-exploit"]

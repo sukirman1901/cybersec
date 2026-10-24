@@ -159,8 +159,11 @@ These tools support the testing workflow itself (authorization, evidence, lab, i
 
 ## Host capability discovery
 
-Discover the live tool catalog and input schema before calling a tool. Source
-inventory (209 tools / 24 skills) does not attest the connected server generation.
+Discover the live tool catalog and input schema before calling a tool. Examples
+and variable labels are not a substitute for that schema: copy argument names
+exactly, including required fields; do not derive argument names from variable labels.
+For example, a value labeled "hash" does not establish a keyword named `hash`.
+Source inventory (209 tools / 24 skills) does not attest the connected server generation.
 If schema/version differs, omit unsupported optional enrichment only when it
 preserves intent; otherwise stop with a compatibility gap. Never silently edit
 plugin configuration, install dependencies or reload the client.
