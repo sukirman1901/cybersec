@@ -5,6 +5,14 @@ description: Code security audit methodology — SAST, secret scanning, manual r
 
 ## Code Security Audit Methodology
 
+For source-only requests, use the supplied repository path/files and no remote
+probes. Select relevant languages/tools; inspect the live schema for path/code
+inputs instead of substituting a URL. Before separately requested active target
+probes require `engagement_gate` `init` + `authorize`; confirmed `extend` only for
+additional user-approved resources, not URLs found in source. Record coverage and
+missing dependencies; redact secrets in file:line evidence, never validate leaked
+credentials against services. No clean verdict from pattern scans alone.
+
 ### 1. Secret Discovery
 - Run `secret_scanner` with regex + entropy detection across repository
 - Focus: API keys, passwords, tokens, private keys, database URLs
@@ -19,16 +27,16 @@ description: Code security audit methodology — SAST, secret scanning, manual r
 - Check for injection vectors (SQLi, NoSQL, command injection)
 - Review authentication logic, session handling, authorization checks
 - Look for insecure deserialization, SSRF, path traversal
-- Check Python pickle deserialization: `pickle_deserialize(target)` for RCE via pickle
+- Trace Python pickle deserialization from untrusted input to sink in supplied source; `pickle_deserialize` is a remote test and is not part of source-only review
 - Review file upload handling, input validation
 
 ### 4. Dependency Audit
 - Check exposed dependency files (package.json, requirements.txt, go.mod)
 - Look for known vulnerable versions, supply chain risks
-- Use `supply_chain` tool for manifest analysis
+- Review local manifests/lockfiles with offline dependency tools; use `supply_chain` only if its live schema supports the requested input (its target mode is remote)
 
 ### 5. CI/CD Pipeline Audit
-- Scan CI/CD configs (GitHub Actions, GitLab CI, Jenkins, CircleCI) via `ci_cd_scan`
+- Review supplied CI/CD config files (GitHub Actions, GitLab CI, Jenkins, CircleCI) locally; `ci_cd_scan(target)` checks remote endpoints and is not a source-only tool
 - Look for secrets exposure, insecure environment injection, privileged runners
 
 ### 6. Reporting

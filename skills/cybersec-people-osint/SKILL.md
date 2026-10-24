@@ -7,14 +7,21 @@ description: Use when user asks to track a person by phone number, Telegram user
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant branches for the supplied phone/username/email, not a mandatory
+identity-enrichment chain. Public intelligence needs no engagement; before active
+target probes require `engagement_gate` `init` + `authorize`, and confirmed `extend`
+only for additional user-approved resources. Discovery grants no authority. Record
+coverage/source dates and redact personal data not needed for the legitimate task.
+Do not infer identity or exact location from username matches/carrier regions alone,
+access private accounts, or treat generated lookup links as retrieved evidence.
+Stop when the requested lookup is answered; do not automatically build a dossier.
 
 1. **Phone Lookup** — Call `phone_osint(phone_number)` to parse number, get region, carrier type, and generate lookup URLs (Truecaller, GetContact, sync.me)
 2. **Telegram OSINT** — Call `telegram_osint(username)` to get Telegram user ID, bio, profile photo URL, and username history links
 3. **Social Media Cross-Reference** — Call `social_osint(username)` to check the same username across 100+ social platforms (Instagram, Twitter, TikTok, Facebook, GitHub, Reddit, etc.)
 4. **Email Investigation** — Call `email_osint(email)` to validate format, check MX records, domain reputation, and generate breach lookup URLs
 5. **Cross-Reference Results** — Match findings across tools: same username on multiple platforms? Phone region matches Telegram bio location?
-6. **Compile Identity Profile** — Aggregate: name, aliases, locations, social accounts, phone carrier, email breaches, Telegram activity
+6. **Summarize Requested Evidence** — Separate retrieved public facts, tentative matches and unvisited lookup links; omit unnecessary personal details
 
 ### Investigation Flow
 

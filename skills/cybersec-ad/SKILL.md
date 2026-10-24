@@ -7,6 +7,15 @@ description: Use when user asks about Active Directory, domain enumeration, Kerb
 
 ### Checklist
 
+Select relevant branches, not every attack. Before active target probes require
+`engagement_gate` `init` + `authorize`; use confirmed `extend` only for additional
+user-approved resources. Discovery grants no authority. Honor supplied domain,
+DC IP, identity and resource scope. Record coverage/skips and redact credentials
+and ticket/hash material in evidence. Missing inputs or denial stops that branch.
+Enumeration does not authorize roasting, spraying, DCSync, relay or lateral
+movement: each needs an explicitly requested technique, scoped accounts and
+bounded attempts. Record lockout policy and cleanup before credential testing.
+
 1. **Domain Discovery** — Run `ad_enum(domain, dc_ip, username, password)` for comprehensive AD enumeration (users, groups, computers, trusts, password policy)
 2. **Port Scan DC** — Run `nmap_scan(target, ports="88,389,445,464,636,3268,3269", scripts="ldap*")` on domain controllers
 3. **LDAP Injection** — If LDAP interface exposed, call `ldap_inject(target)` for LDAP query manipulation and auth bypass

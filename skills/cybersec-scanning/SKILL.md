@@ -7,7 +7,13 @@ description: Use when user asks to scan ports, detect services, or fingerprint a
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant protocols/ports for the requested outcome, not every service.
+Before active target probes require `engagement_gate` `init` + `authorize`;
+confirmed `extend` only for additional user-approved resources. Record coverage,
+request/time budget and skips; redact secrets in banners. For TLS-only requests,
+use `ssl_check` on the specified host/port: no port discovery, SSH/SMB checks,
+directory scans or vulnerability escalation. Deep TLS tools are optional only
+within requested depth/budget. A timeout is inconclusive, not a closed/safe port.
 
 1. **Port Scan** — Call `port_scan(target)` with common ports (21,22,23,25,53,80,110,143,443,445,3306,3389,5432,5900,8080,8443)
 2. **Service Detection** — For each open port, identify service name and version
@@ -28,4 +34,4 @@ Create a todo list from the checklist below, then execute all steps immediately.
 Table of open ports with: port number, service name, version, banner, and security notes (weak ciphers, old protocols).
 
 ### Next Skill
-When all checklist items complete, load `cybersec-vulns` skill for vulnerability assessment.
+Load `cybersec-vulns` only if a vulnerability assessment is requested and authorized.

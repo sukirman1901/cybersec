@@ -7,6 +7,15 @@ description: Use when user asks about password cracking, hash identification, br
 
 ### Checklist
 
+Select relevant offline or online branches from the actual input. For hash-only
+identification use `hash_analyze`/`hash_detect`, explain ambiguity and stop: do not
+crack, discover services or perform online guessing. Cracking needs a separately
+requested offline task and owned hash material. Before active target probes require
+`engagement_gate` `init` + `authorize`; confirmed `extend` only for additional
+user-approved resources. Online guessing needs named service/accounts, lockout
+policy, bounded attempts and stop-on-lockout/throttling, not just a supplied hash.
+Record coverage and redact recovered passwords, hashes and credentials in evidence.
+
 1. **Hash Identification** — Run `hash_analyze(hash)` or `hash_detect(hash)` to identify the hash type (MD5, SHA1, bcrypt, NTLM, argon2, 20+ more)
 2. **Crack Command** — Use the hashcat mode from hash_analyze to construct crack command
 3. **Online Brute Force** — Run `hydra_brute(target, service, username)` for online password guessing

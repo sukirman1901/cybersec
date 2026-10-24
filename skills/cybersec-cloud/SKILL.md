@@ -7,14 +7,22 @@ description: Use when user asks about cloud security, AWS, Azure, GCP, S3 bucket
 
 ### Checklist
 
-0. **Engagement scope** — `engagement_gate("init", scope_json='{"providers":["aws"],"buckets":["company-prod"],"companies":["company"]}')` then `engagement_gate("authorize", confirmation="yes")` — cloud calls are denied without these. When items 1–2 discover new buckets/companies, you must re-`init` with the expanded `scope_json` and `authorize` again — `init` replaces the engagement and revokes the prior approval (there is no scope-extension action).
+Select relevant resources, not all provider checks. Before active target probes,
+use `engagement_gate` `init` + `authorize` with actual authorized providers,
+companies, buckets and targets. For additional user-approved resources, use
+`engagement_gate(action="extend", scope_json=additional_scope, confirmation="yes")`
+only after actual confirmation. Discovery is not authorization; do not auto-extend.
+`init` replaces the engagement and revokes prior approval; `extend` preserves it.
+Honor provider/config/path/bucket-specific inputs, record coverage, redact secrets
+and stop denied branches. Supplied config review stays offline; CLI/cloud-account
+access requires the named account and read-only credentials, never assumed access.
 1. **Cloud Resource Enumeration** — Run `cloud_enum(company)` to discover AWS S3, Azure Blob, GCP Storage resources
-2. **S3 Bucket Deep Scan** — For each discovered S3 bucket, run `s3_scanner(bucket_name)` to check public access
-3. **Cloud IAM Audit** — Run `cloud_iam_audit(target)` for overly permissive roles, public access, cross-account trust
-4. **Cloud Infra Enum** — Run `cloud_infra(target)` for open security groups, unencrypted storage, public endpoints
-5. **Cloud Config Review** — Run `cloud_audit(target)` for a comprehensive cloud security audit (S3 public, K8s API, Docker socket, IAM, infra)
+2. **S3 Bucket Deep Scan** — For each explicitly authorized bucket, run `s3_scanner(bucket_name=bucket)` to check public access
+3. **Cloud IAM Audit** — `cloud_iam_audit(provider="aws")` selects a provider, not a target URL; require authorized account access in the configured CLI context (do not invent profile/config arguments)
+4. **Cloud Infra Enum** — `cloud_infra(provider="aws")` selects a provider, not a target URL; require authorized account access in the configured CLI context
+5. **Cloud Audit** — `cloud_audit(provider="aws", buckets=bucket_names)` for authorized bucket names serialized as the live schema expects; use `targets` only for explicitly authorized endpoints. Supplied local configs are reviewed offline, not passed as URLs
 6. **Container/K8s/Redis** — `docker_scan(target)` (socket exposure, container escape, env leaks), `k8s_scan(target)` (unauthorized API access, secrets, RBAC), `redis_enum(target)` (auth, keyspace, version)
-7. **Metadata API Check** — If inside cloud environment, check http://169.254.169.254/latest/meta-data/ (AWS)
+7. **Metadata API Check** — Only if explicitly requested on an authorized cloud instance; do not query the agent host metadata service or harvest instance credentials
 8. **Cloud Config Review** — Check for exposed cloud config files (.aws/config, credentials, .env)
 9. **DNS Enum** — Use `dns_lookup(target)` to find cloud services (s3, cloudfront, azurewebsites)
 10. **SSL Analysis** — Check SSL certs via `ssl_check(target)` for cloud service info in CN/SAN

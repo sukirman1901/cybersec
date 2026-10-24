@@ -7,7 +7,12 @@ description: Use when user asks for a security report, remediation plan, or fix 
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant existing evidence; report-only requests do not start new scans.
+Before separately requested active target probes require `engagement_gate` `init`
++ `authorize`; confirmed `extend` only for additional user-approved resources.
+Record coverage, missing evidence and confidence; redact secrets before report
+generation/export. Publishing tickets/webhooks is a separate user-approved side
+effect. A report or remediation template is not a verified patch or retest result.
 
 0. **Verification gate** — Load `cybersec-verification`. Reject findings missing **confidence** or **coverage**. Prefer export from `findings_manager` first.
 
@@ -25,7 +30,7 @@ Create a todo list from the checklist below, then execute all steps immediately.
    - MEDIUM: XSS, directory listing, missing security headers
    - LOW: Information disclosure, outdated versions without known exploits
 
-3. **Generate Report** — Call `generate_report(target, findings, "markdown")` with structured findings JSON:
+3. **Generate Report** — Call `generate_report(target=target, findings=findings_json, format="markdown")` with actual collected findings serialized as JSON (not invented placeholders):
    ```json
    {
      "target": "example.com",
@@ -38,9 +43,10 @@ Create a todo list from the checklist below, then execute all steps immediately.
    }
    ```
 
-4. **Generate Remediation Code** — For each vulnerability:
-   - Run `generate_report(target, findings_json)` — tool auto-generates fix code
-   - Verify fix code is correct for the target's tech stack
+4. **Draft Remediation Guidance** — For each vulnerability:
+   - `generate_report` can supply generic templates, not verified patches
+   - Without source/configuration, label snippets illustrative and state assumptions
+   - With source, review the actual diff and run relevant tests plus equivalent retest before claiming a verified fix
    - If finding type isn't auto-matched, write custom fix code manually:
      - LFI: Path validation + allowlist pattern
      - SQLi: Parameterized queries / ORM
@@ -54,7 +60,7 @@ Create a todo list from the checklist below, then execute all steps immediately.
    - All findings are documented
    - Risk ratings are justified
    - Remediation steps are actionable with code snippets
-   - Fix code is copy-pasteable (correct syntax, no placeholders missing)
+   - Templates are labeled, assumptions/placeholders explicit; no claim of deployment or verification without source/runtime evidence
    - Executive summary explains business impact
 
 6. **Remediation Plan** — Create prioritized fix list:
@@ -72,4 +78,8 @@ Create a todo list from the checklist below, then execute all steps immediately.
 `generate_report`, `cve_search`, `dork_search`, `compliance_map`, `report_schema_v2`, `branded_report`, `executive_summary`, `findings_manager`, `github_issue`, `jira_create`, `retest_vuln`
 
 ### Output
-Professional security report with: executive summary, methodology, detailed findings with evidence, risk ratings, prioritized remediation plan, and copy-pasteable fix code per vulnerability.
+Security report with executive summary, methodology, evidence status, confidence,
+coverage, justified impact and prioritized remediation guidance. Negative or
+blocked scans alone cannot justify clean/fixed claims; `not_reproduced` remains
+distinct from verified-fixed. Do not inflate generic issue classes into fixed
+severity without demonstrated context and impact.
