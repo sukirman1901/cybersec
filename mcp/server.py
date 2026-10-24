@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import sys
+from pathlib import Path
 
 
 def _mcp_stdio_logging_guard() -> None:
@@ -27,6 +28,7 @@ from cyber_tools.web_fuzz import dir_bust
 from cyber_tools.ssl_analyzer import ssl_analyze
 from cyber_tools.vuln_db import cve_lookup
 from cyber_tools.tool_health import check_tool_health
+from cyber_tools.runtime_info import capture_runtime, inspect_runtime
 from cyber_tools.waf_detect import waf_detect
 from cyber_tools.google_dork import google_dork
 from cyber_tools.report import gen_report
@@ -264,8 +266,17 @@ def dir_bruteforce(target: str, wordlist: str = "common") -> str:
 
 @mcp.tool()
 def tool_health(include_optional: bool = True) -> str:
-    """Check which CLI dependencies are installed for MCP cyber tools."""
-    return json.dumps(check_tool_health(include_optional=include_optional), indent=2)
+    """Check CLI dependencies and read-only MCP startup source identity.
+
+    runtime records version, initialization time, source fingerprint and install
+    location of this server. files_on_disk is separate current disk evidence;
+    mcp_vs_startup is match/different/unknown. Client plugin/skill loading remains
+    unknown: disk files do not attest loaded client state. No reload/cache edits.
+    Local installation/Python paths and PID are diagnostics; redact before sharing.
+    """
+    result = check_tool_health(include_optional=include_optional)
+    result.update(inspect_runtime(_RUNTIME_IDENTITY))
+    return json.dumps(result, indent=2)
 
 @mcp.tool()
 def ssl_check(target: str, port: int = 443) -> str:
@@ -1414,6 +1425,9 @@ def http_request_splitting(target: str) -> str:
     return json.dumps(_run(_http_split(target)), indent=2)
 
 _mcp_stdio_logging_guard()
+
+# Capture once before serving; never replace startup evidence during health calls.
+_RUNTIME_IDENTITY = capture_runtime(Path(__file__).resolve().parent.parent)
 
 if __name__ == "__main__":
     mcp.run(transport="stdio", show_banner=False, log_level="ERROR")
