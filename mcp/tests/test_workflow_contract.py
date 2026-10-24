@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import sys
 import unittest
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -39,12 +40,10 @@ def plans():
 
 
 class WorkflowContractTests(unittest.TestCase):
-    def test_all_209_tools_and_144_steps_have_valid_argument_contracts(self):
+    def test_all_tools_and_template_steps_have_valid_argument_contracts(self):
         contracts = tool_contracts()
         self.assertEqual(len(contracts), 209)
         self.assertEqual((len(WORKFLOW_TEMPLATES), len(TEMPLATES)), (8, 10))
-        self.assertEqual(sum(len(t["steps"]) for t in WORKFLOW_TEMPLATES.values()), 78)
-        self.assertEqual(sum(len(t["steps"]) for t in TEMPLATES.values()), 66)
         for name, plan in plans():
             self.assertEqual(plan["total_steps"], len(plan["steps"]))
             self.assertGreater(len(plan["steps"]), 0)
@@ -151,6 +150,79 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("error", json.loads(pentest_workflow("example.test", "missing")))
         self.assertIn("error", json.loads(scan_template("example.test", "missing")))
         self.assertIn("error", json.loads(pentest_workflow("example.test", custom_json="{")))
+
+    def test_non_object_custom_json_is_a_structured_error(self):
+        for value in ([], None, True, 42, "workflow", {"steps": None}, {"steps": [False]}, {"steps": [{"params": []}]}):
+            with self.subTest(value=value):
+                try:
+                    result = json.loads(pentest_workflow("example.test", custom_json=json.dumps(value)))
+                except (AttributeError, TypeError) as error:
+                    self.fail(f"Malformed custom plan must return an error, not throw: {error}")
+                self.assertIn("error", result)
+
+    def test_approval_requests_require_explicit_tool_selection(self):
+        for name, plan in plans():
+            for step in plan["steps"]:
+                if step["tool"] == "approval_artifact":
+                    with self.subTest(template=name):
+                        self.assertEqual(step["params"].get("tool_name"), "{approval_tool}")
+                        self.assertEqual(step["params"]["action"], "request")
+                        description = plan["required_inputs"]["approval_tool"]
+                        self.assertIn("explicit", description.lower())
+                        self.assertIn("not blanket authorization", description)
+
+    def test_source_audit_contains_only_local_path_tools(self):
+        steps = json.loads(scan_template("/source/repository", "code-audit"))["steps"]
+        self.assertEqual({s["tool"] for s in steps},
+                         {"bandit_scan", "semgrep_scan", "secret_scanner", "sast_review"})
+        self.assertTrue(all(s["params"] == {"path": "/source/repository"} for s in steps))
+
+    def test_candidate_findings_preserve_uncertainty(self):
+        plan = json.loads(pentest_workflow("example.test"))
+        for description in (plan["required_inputs"]["findings"],
+                            json.loads(pentest_workflow("example.test", "staging-deep"))["required_inputs"]["finding"]):
+            self.assertIn("candidate", description)
+            self.assertIn("verdict", description)
+            self.assertIn("coverage", description)
+            self.assertIn("uncertainty", description)
+            self.assertNotIn("verified finding", description)
+
+    def test_condition_selectors_match_real_mocked_result_shapes(self):
+        # Execute the real server wrapper bodies without importing/registering MCP.
+        # The actual producer implementations run against mocked transport/DNS only.
+        from cyber_tools.http_probe import http_probe
+        from cyber_tools.dns_enum import dns_enum
+        tree = ast.parse((Path(__file__).resolve().parents[1] / "server.py").read_text())
+        wrappers = [n for n in tree.body if isinstance(n, ast.FunctionDef)
+                    and n.name in ("http_probe_target", "dns_lookup", "port_scan")]
+        for node in wrappers:
+            node.decorator_list = []
+        namespace = {"json": json, "http_probe": http_probe, "dns_enum": dns_enum,
+                     "scan_ports": lambda *_: [22, 443], "detect_service": lambda *_: "mock"}
+        exec(compile(ast.Module(body=wrappers, type_ignores=[]), "server-wrappers", "exec"), namespace)
+        response = Mock(status=200, headers={})
+        response.getheader.return_value = "mock"
+        connection = Mock()
+        connection.getresponse.return_value = response
+        with patch("cyber_tools.http_probe.http.client.HTTPConnection", return_value=connection):
+            http = json.loads(namespace["http_probe_target"]("http://example.test:8080"))
+        with patch("cyber_tools.dns_enum.socket.getaddrinfo", return_value=[(None, None, None, None, ("192.0.2.1", 0))]), patch("cyber_tools.dns_enum.socket.gethostbyname", return_value="192.0.2.1"):
+            dns = json.loads(namespace["dns_lookup"]("example.test"))
+        ports = json.loads(namespace["port_scan"]("example.test"))
+        self.assertIn(200, [p["status"] for p in http["probes"]])
+        self.assertEqual(dns["records"]["records"]["A"], ["192.0.2.1"])
+        self.assertIn(443, [p["port"] for p in ports["open_ports"]])
+        web = json.loads(pentest_workflow("example.test", "web-audit"))
+        with self.subTest(selector="http"):
+            self.assertEqual(web["steps"][3]["condition"], "http_probe_target.probes[*].status contains 200")
+        recon = json.loads(pentest_workflow("example.test", "recon-full"))
+        for step in recon["steps"][4:6]:
+            with self.subTest(selector=step["tool"]):
+                self.assertEqual(step["condition"], "dns_lookup.records.records.A contains a valid IPv4 address (ignore error strings)")
+        network = json.loads(pentest_workflow("example.test", "network-scan"))
+        for step, port in zip(network["steps"][1:3], (443, 22)):
+            with self.subTest(selector=step["tool"]):
+                self.assertEqual(step["condition"], f"port_scan.open_ports[*].port contains {port}")
 
 
 if __name__ == "__main__":

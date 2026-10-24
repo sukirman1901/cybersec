@@ -22,7 +22,7 @@ TEMPLATES = {
         "description": "Opt-in staging-deep — authorize, deeper web probes, dual-role IDOR, report+retest",
         "steps": [
             {"tool": "engagement_gate", "params": {"action": "validate", "target": "{target}"}},
-            {"tool": "approval_artifact", "params": {"action": "request", "target": "{target}"}},
+            {"tool": "approval_artifact", "params": {"action": "request", "tool_name": "{approval_tool}", "target": "{target}"}},
             {"tool": "tech_detect", "params": {"target": "{target}"}},
             {"tool": "vuln_scan", "params": {"target": "{target}"}},
             {"tool": "sqli_detect", "params": {"target": "{target}"}},
@@ -97,14 +97,12 @@ TEMPLATES = {
         ],
     },
     "code-audit": {
-        "description": "Source code audit — SAST, secrets, deps",
+        "description": "Local source code audit — SAST and secrets; no remote destination tests",
         "steps": [
             {"tool": "bandit_scan", "params": {"path": "{target}"}},
             {"tool": "semgrep_scan", "params": {"path": "{target}"}},
             {"tool": "secret_scanner", "params": {"path": "{target}"}},
             {"tool": "sast_review", "params": {"path": "{target}"}},
-            {"tool": "ci_cd_scan", "params": {"target": "{target}"}},
-            {"tool": "supply_chain", "params": {"target": "{target}"}},
         ],
     },
     "ctf": {
