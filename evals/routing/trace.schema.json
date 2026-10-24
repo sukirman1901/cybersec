@@ -6,6 +6,14 @@
   "properties": {
     "schema_version": {"const": 1},
     "scenario": {"type": "string", "minLength": 1},
+    "artifacts": {"type": "array", "items": {
+      "type": "object", "required": ["id", "kind", "finding_id", "source", "raw", "applied"],
+      "properties": {
+        "id": {"type": "string", "pattern": "\\S"}, "kind": {"enum": ["patch", "runtime"]},
+        "finding_id": {"type": "string", "pattern": "\\S"}, "applied": {"type": "boolean"},
+        "source": {"type": "string", "pattern": "\\S"}, "raw": {"type": "string", "pattern": "\\S"}
+      }
+    }},
     "provenance": {
       "type": "object", "required": ["kind", "source", "captured_at", "model", "model_version", "recorder"],
       "properties": {
@@ -31,6 +39,12 @@
               "outcome": {"enum": ["ok", "error", "denied", "timeout", "missing_dependency"]},
               "authorized_origins": {"type": "array", "items": {"type": "string"}},
               "finding_status": {"enum": ["candidate", "confirmed", "fixed"]},
+              "finding_id": {"type": "string", "pattern": "\\S"},
+              "patch_or_runtime_evidence": {"type": "array", "items": {"type": "string", "pattern": "\\S"}},
+              "equivalent_retest": {"type": "boolean"},
+              "retest_result": {"enum": ["verified_fixed", "not_reproduced", "blocked", "inconclusive"]},
+              "retest_context": {"type": "object", "required": ["poc", "session", "control"],
+                "properties": {"poc": {"type": "string", "pattern": "\\S"}, "session": {"type": "string", "pattern": "\\S"}, "control": {"type": "string", "pattern": "\\S"}}},
               "retest_of": {"type": "string"}
             }
           }
@@ -42,6 +56,7 @@
         "type": "object", "required": ["status", "evidence_calls"],
         "properties": {
           "status": {"enum": ["candidate", "confirmed", "fixed"]},
+          "finding_id": {"type": "string", "pattern": "\\S"},
           "evidence_calls": {"type": "array", "items": {"type": "string"}}
         }
       }
