@@ -12,7 +12,7 @@ CTEM is a continuous loop: **Discovery → Validation → Prioritization → Rem
 ## Prerequisites
 
 - **Establish scope** — define which assets, IP ranges, domains are in scope
-- **engagement_gate** — `init` + `validate` (and `authorize` before staging-deep loops)
+- **engagement_gate** — `init` + `authorize` is required before any active probing (Phase 1 and everything after); read-only intelligence lookups run without an engagement
 - **Preset** — default `observe-first`; opt into `staging-deep` only on authorized staging assets
 
 ## Phase 1: Discovery (Continuous)

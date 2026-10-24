@@ -7,6 +7,7 @@ description: Use when user asks about cloud security, AWS, Azure, GCP, S3 bucket
 
 ### Checklist
 
+0. **Engagement scope** — `engagement_gate("init", scope_json='{"providers":["aws"],"buckets":["company-prod"],"companies":["company"]}')` then `engagement_gate("authorize", confirmation="yes")` — cloud calls are denied without these. When items 1–2 discover new buckets/companies, you must re-`init` with the expanded `scope_json` and `authorize` again — `init` replaces the engagement and revokes the prior approval (there is no scope-extension action).
 1. **Cloud Resource Enumeration** — Run `cloud_enum(company)` to discover AWS S3, Azure Blob, GCP Storage resources
 2. **S3 Bucket Deep Scan** — For each discovered S3 bucket, run `s3_scanner(bucket_name)` to check public access
 3. **Cloud IAM Audit** — Run `cloud_iam_audit(target)` for overly permissive roles, public access, cross-account trust
