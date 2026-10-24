@@ -21,6 +21,11 @@ Create a todo list from the checklist below, then execute all steps immediately.
    or disabled); `stale_in_kev` is historical reference only. Missing/invalid EPSS
    scores remain null, never an automatic low-priority verdict. EPSS-only patch
    priority cannot rule out KEV membership while KEV is unknown.
+   For two stored snapshots, `vuln_diff(scan_before, scan_after)` compares intel
+   offline in `intel_changes` separately from novel/resolved/changed/regressions.
+   Inspect `data_quality` (added, removed, degraded, recovered, mixed, unchanged)
+   and before/after source context. Feed loss is not reduced risk; timestamps
+   alone do not generate changes. Intel events apply only to matched findings.
 3. **CVE Cross-Reference** — For software with multiple CVEs, check severity and public exploit availability
 4. **CRLF Injection Scan** — Call `crlf_inject(target)` for HTTP header injection vulnerabilities
 5. **LDAP Injection Scan** — If LDAP endpoints found, call `ldap_inject(target)` for LDAP query manipulation
