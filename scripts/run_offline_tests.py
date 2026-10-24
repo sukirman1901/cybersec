@@ -21,6 +21,7 @@ MODULES = (
     "test_tool_policy", "test_install_ci_contract",
     "test_workflow_contract",
     "test_skill_contract",
+    "test_redirect_contract",
 )
 
 
