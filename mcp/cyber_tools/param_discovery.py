@@ -38,6 +38,7 @@ EXTENDED_PARAMS = COMMON_PARAMS + [
 async def discover_params(target: str, method: str = "GET", thorough: bool = False) -> Dict:
     """Discover HTTP parameters by testing common names against target."""
     import httpx
+    from .http_guard import GuardedAsyncClient
 
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
@@ -47,7 +48,7 @@ async def discover_params(target: str, method: str = "GET", thorough: bool = Fal
     found_params: List[str] = []
 
     try:
-        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True, verify=False) as client:
+        async with GuardedAsyncClient(timeout=10.0, follow_redirects=True, verify=False) as client:
             try:
                 if method == "GET":
                     baseline = await client.get(target)

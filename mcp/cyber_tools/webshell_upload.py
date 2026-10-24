@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 _COMMON_UPLOAD_PATHS = [
     "/upload",
@@ -84,7 +85,7 @@ async def webshell_upload(
     upload_urls = list(_COMMON_UPLOAD_PATHS)
     upload_urls = [f"{base}{u}" for u in upload_urls]
 
-    async with httpx.AsyncClient(timeout=15.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=15.0, verify=False, follow_redirects=True) as client:
         # Discover upload forms on the target page
         try:
             resp = await client.get(base)

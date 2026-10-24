@@ -1,6 +1,7 @@
 """Deep XSS detection — reflected, stored, DOM-based, with WAF bypass and context-aware payloads."""
 
 import httpx
+from .engagement_gate import validate_target
 import re
 import urllib.parse
 import json
@@ -393,7 +394,10 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
                             loc = submit_resp.headers.get("location", "")
                             if loc:
                                 try:
-                                    loc_resp = await client.get(urllib.parse.urljoin(base, loc))
+                                    destination = urllib.parse.urljoin(base, loc)
+                                    if not validate_target(destination)["validated"]:
+                                        continue
+                                    loc_resp = await client.get(destination)
                                     if sp[:20] in loc_resp.text:
                                         results.append({
                                             "type": "stored_xss_redirect",

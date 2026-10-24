@@ -2,6 +2,7 @@
 
 import re, base64, io
 import httpx
+from .http_guard import GuardedAsyncClient
 from urllib.parse import urlencode
 
 # Optional OCR
@@ -43,7 +44,7 @@ async def captcha_test(target: str, action: str = "all", captcha_url: str = "") 
     base_url = target.rstrip("/")
     parsed = httpx.URL(base_url)
 
-    async with httpx.AsyncClient(timeout=20.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=20.0, verify=False, follow_redirects=True) as client:
         # ── 0. Detect captcha type ──
         try:
             resp = await client.get(base_url)

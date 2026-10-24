@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 _EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
@@ -223,8 +224,8 @@ async def email_osint(email: str, check_breach_urls: bool = True) -> dict:
 
     # Domain reputation (free check via HTTP)
     try:
-        async with httpx.AsyncClient(timeout=10, verify=False) as client:
-            # Check if domain has a website
+        async with GuardedAsyncClient(timeout=10, verify=False) as client:
+            # Check if domain has a website; redirects still require host scope.
             resp = await client.get(f"https://{result['domain']}", follow_redirects=True)
             result["domain_status"] = {
                 "alive": resp.status_code < 500,

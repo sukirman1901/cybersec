@@ -5,13 +5,14 @@ import urllib.parse
 import http.cookiejar
 import re
 import time
+from .http_guard import ScopeClampedRedirectHandler
 
 def auth_macro_runner(target: str, auth_type: str = "form", username: str = "", password: str = "", login_url: str = "", username_field: str = "username", password_field: str = "password", extra_fields: str = "", token_extract: str = "", steps_json: str = "") -> str:
     if not target.startswith("http"):
         target = "http://" + target
 
     cj = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    opener = urllib.request.build_opener(ScopeClampedRedirectHandler, urllib.request.HTTPCookieProcessor(cj))
     opener.addheaders = [("User-Agent", "CybersecAuthMacro/1.0")]
 
     result = {

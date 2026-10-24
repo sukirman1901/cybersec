@@ -1,4 +1,5 @@
 import httpx
+from .http_guard import GuardedAsyncClient
 import re
 import zipfile
 import io
@@ -7,7 +8,7 @@ import io
 async def apk_analyze(target: str) -> dict:
     findings = []
     try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+        async with GuardedAsyncClient(timeout=30.0, follow_redirects=True) as client:
             resp = await client.get(target)
             if resp.status_code != 200 or len(resp.content) < 1000:
                 return {"target": target, "error": "Could not download APK", "findings": []}

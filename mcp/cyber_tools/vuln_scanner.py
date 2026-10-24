@@ -2,6 +2,7 @@
 
 import re
 import httpx
+from .http_guard import GuardedAsyncClient
 import asyncio
 from typing import Dict, List
 from .php2shell import assess_headers, cve_records
@@ -319,7 +320,7 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
     result_enrichment: Dict = None
 
     try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
+        async with GuardedAsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
             # --- Security Header Checks ---
             try:
                 response = await client.get(target)

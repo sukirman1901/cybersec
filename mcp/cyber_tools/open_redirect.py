@@ -1,6 +1,7 @@
 """Test for open redirect vulnerabilities — comprehensive payload, parameter, and bypass analysis."""
 
 import httpx
+from .engagement_gate import validate_target
 from urllib.parse import urlparse, parse_qs, urlencode, urljoin
 from typing import Optional
 import time
@@ -164,6 +165,10 @@ async def open_redirect(target: str) -> dict:
                             current = loc
                             for _ in range(5):
                                 if current.startswith("http"):
+                                    # Location is evidence, not permission to probe
+                                    # the next host (even with auto-follow off).
+                                    if not validate_target(current)["validated"]:
+                                        break
                                     r2 = await asyncio.wait_for(client.get(current, follow_redirects=False), timeout=_left())
                                     next_loc = r2.headers.get("location", "")
                                     if next_loc:

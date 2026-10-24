@@ -1,6 +1,7 @@
 """Test browser-based AI agents for hijack vulnerabilities — prompt injection via web content, UI manipulation, data exfiltration."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import re
 import urllib.parse
 
@@ -27,7 +28,7 @@ async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
     findings = []
     base = target.rstrip("/")
 
-    async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
+    async with GuardedAsyncClient(timeout=15.0, verify=False) as client:
         # Test 1: Fetch the page and analyze for agent hijacking risks
         try:
             resp = await client.get(base, follow_redirects=True)

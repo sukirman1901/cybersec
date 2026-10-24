@@ -1,6 +1,7 @@
 """GraphQL Depth Limit Bypass — test for depth limiting bypass, batching, alias attacks."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import urllib.parse
 import json
 import time
@@ -602,7 +603,7 @@ async def graphql_depth_bypass(target: str) -> dict:
     all_findings = []
     endpoint = target
 
-    async with httpx.AsyncClient(
+    async with GuardedAsyncClient(
         verify=False,
         follow_redirects=True,
         headers={

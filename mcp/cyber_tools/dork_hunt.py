@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 from cyber_tools.dork_gen import _CATEGORIES, _TECH_DORKS, _VULN_DORKS
 from cyber_tools.dork_scan import _ENGINE_MAP, _HEADERS
@@ -183,7 +184,7 @@ async def dork_hunt(
     seen_urls = set()
     raw_results: list[dict] = []
 
-    async with httpx.AsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
         for dork in dorks:
             for engine in engine_list:
                 scan_fn = _ENGINE_MAP[engine]

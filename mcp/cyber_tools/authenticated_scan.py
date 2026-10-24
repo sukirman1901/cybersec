@@ -1,6 +1,7 @@
 """Authenticated scanning — scan behind login pages."""
 
 import httpx
+from .http_guard import GuardedClient
 import json
 import re
 from datetime import datetime
@@ -23,7 +24,7 @@ def authenticated_scan(target: str, login_url: str = "", username: str = "", pas
         "findings": [],
     }
 
-    session = httpx.Client(timeout=15, follow_redirects=True, verify=False)
+    session = GuardedClient(timeout=15, follow_redirects=True, verify=False)
 
     try:
         if auth_type == "form" and login_url and username and password:

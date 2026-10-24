@@ -43,6 +43,7 @@ CDN_PATTERNS = {
 async def detect_technologies(url: str) -> Dict:
     """Detect web technologies from HTTP response headers and content."""
     import httpx
+    from .http_guard import GuardedAsyncClient
 
     if not url.startswith(("http://", "https://")):
         url = f"https://{url}"
@@ -60,7 +61,7 @@ async def detect_technologies(url: str) -> Dict:
     }
 
     try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, verify=True) as client:
+        async with GuardedAsyncClient(timeout=30.0, follow_redirects=True, verify=True) as client:
             response = await client.get(url)
             result["http_status"] = response.status_code
             result["headers"] = dict(response.headers)
