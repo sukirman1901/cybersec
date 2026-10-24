@@ -337,7 +337,7 @@ Expected: 180+ tools listed.
 ### PHP2SHELL detection
 
 MCP tools identify CVE-2026-109618 and CVE-2026-109619 without PHP2SHELL
-exploit/load probes. The current server registers **208 tools**.
+exploit/load probes. The current server registers **209 tools**.
 
 - **Recommended for PHP2SHELL-only checks:**
   `php2shell_scan(target="https://your-authorized-host.example")` performs normal
