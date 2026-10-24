@@ -104,6 +104,40 @@ class TestSkillContracts(unittest.TestCase):
                 self.assertIn("plans", text)
                 self.assertIn("extend", text)
 
+    def test_code_only_poc_section_is_offline_not_active_tool_generation(self):
+        text = SKILLS["cybersec-exploit"]
+        body = text.split("3. **Generate PoC**", 1)[1].split("4. **Web Shell Deployment**", 1)[0]
+        self.assertNotRegex(body, r"(?:sqli_exploit|xss_exploit|webshell_gen)\(")
+        for term in ("offline", "do not call", "sqli_exploit", "xss_exploit",
+                     "do not execute", "local", "synthetic"):
+            with self.subTest(term=term):
+                self.assertIn(term, body.lower())
+
+    def test_active_exploit_section_requires_explicit_non_auto_selection(self):
+        text = SKILLS["cybersec-exploit"]
+        body = text.split("5. **Execute**", 1)[1].split("7. **Document Results**", 1)[0]
+        for term in ("explicitly approved", "request", "budget", "sqli_exploit",
+                     "xss_exploit", 'technique="auto"', 'xss_type="auto"',
+                     "never", "stacked", "destructive", "approval_artifact"):
+            with self.subTest(term=term):
+                self.assertIn(term, body.lower())
+
+    def test_people_osint_flow_and_output_do_not_prescribe_a_dossier(self):
+        text = SKILLS["cybersec-people-osint"]
+        # Check the actual routing/output body, excluding the safety prefix.
+        flow = text.split("### Investigation Flow", 1)[1].split("### Tools Available", 1)[0]
+        output = text.split("### Output", 1)[1].split("### Next Skill", 1)[0]
+        self.assertNotIn("↓", flow)
+        self.assertNotIn("Identity profile:", flow + output)
+        self.assertNotIn("email breach history", output)
+        for term in ("optional", "phone", "telegram", "social", "email", "only"):
+            with self.subTest(flow_term=term):
+                self.assertIn(term, flow.lower())
+        for term in ("minimum requested", "retrieved", "candidate matches",
+                     "unvisited", "not breach retrieval", "source", "no dossier"):
+            with self.subTest(output_term=term):
+                self.assertIn(term, output.lower())
+
     def test_preserve_php_and_feed_uncertainty(self):
         text = SKILLS["cybersec-vulns"]
         for term in ("in_kev=null", "stale_in_kev", "not proof of safety", "php2shell_scan",

@@ -16,36 +16,42 @@ Do not infer identity or exact location from username matches/carrier regions al
 access private accounts, or treat generated lookup links as retrieved evidence.
 Stop when the requested lookup is answered; do not automatically build a dossier.
 
-1. **Phone Lookup** — Call `phone_osint(phone_number)` to parse number, get region, carrier type, and generate lookup URLs (Truecaller, GetContact, sync.me)
-2. **Telegram OSINT** — Call `telegram_osint(username)` to get Telegram user ID, bio, profile photo URL, and username history links
-3. **Social Media Cross-Reference** — Call `social_osint(username)` to check the same username across 100+ social platforms (Instagram, Twitter, TikTok, Facebook, GitHub, Reddit, etc.)
-4. **Email Investigation** — Call `email_osint(email)` to validate format, check MX records, domain reputation, and generate breach lookup URLs
-5. **Cross-Reference Results** — Match findings across tools: same username on multiple platforms? Phone region matches Telegram bio location?
-6. **Summarize Requested Evidence** — Separate retrieved public facts, tentative matches and unvisited lookup links; omit unnecessary personal details
+Choose only a requested branch with the corresponding supplied input; these are
+alternatives, not sequential steps:
+
+- **Phone (optional)** — `phone_osint(phone_number)` for requested number-format/region/carrier metadata or generated lookup links. A numbering region is not a person's current location
+- **Telegram (optional)** — `telegram_osint(username)` only for a supplied Telegram handle and requested public profile fields. Report only fields actually retrieved; history/search links are not retrieved history
+- **Social (optional)** — `social_osint(username)` only for requested platform/username checks. A profile URL, HTTP response or matching handle is a candidate match, not proof of the same person
+- **Email (optional)** — `email_osint(email)` for requested format/domain/MX metadata and generated search links. A breach-search URL is not a retrieved breach record or evidence that the address was breached
+- **Cross-reference (optional)** — Only when explicitly requested and supported by relevant retrieved sources; preserve competing matches and uncertainty, not inferred real names or locations
 
 ### Investigation Flow
 
-```
-Target: phone number or @username or email
+Route by supplied input and requested outcome; each branch is OPTIONAL:
 
-phone_osint("08xxx") → carrier, region, lookup links
-        ↓
-telegram_osint("@user") → user ID, bio, photo, history
-        ↓
-social_osint("username") → found on Instagram, Twitter, TikTok, GitHub...
-        ↓
-email_osint("email@x.com") → domain info, breach history
-        ↓
-Cross-reference: same username everywhere? Same location in bio?
-        ↓
-Identity profile: name, location, social accounts, phone info
-```
+| Supplied input | Run only when requested | Stop after |
+|---|---|---|
+| Phone number | `phone_osint` metadata/lookup-link branch | Requested metadata or labeled links |
+| Telegram handle | `telegram_osint` public-profile branch | Requested actually retrieved fields |
+| Social username | `social_osint` platform-check branch | Requested candidate matches and evidence |
+| Email address | `email_osint` format/domain/search-link branch | Requested metadata or labeled unvisited links |
+
+Do not derive new identifiers and fan out into the other branches. If a requested
+branch lacks its input, record it as skipped; do not fill the gap by identifying a
+person. An explicit multi-input request may select multiple independent branches,
+but does not authorize an identity dossier or private-data enrichment.
 
 ### Tools Available
 `phone_osint`, `telegram_osint`, `social_osint`, `email_osint`, `people_osint`
 
 ### Output
-Identity profile: real name (if found), aliases, location, phone carrier/region, social media accounts, email breach history, Telegram user details, and cross-referenced findings.
+Return the minimum requested retrieved evidence with source, retrieval date and
+coverage/limitations. Keep candidate matches distinct from established facts and
+unvisited search links distinct from retrieved content. Generated breach-search
+links are not breach retrieval; do not report a breach without an actually
+retrieved, attributable record supporting that claim. No dossier: do not require
+or collect real name, location, accounts or breach records to complete a simple
+metadata/profile lookup. Omit and redact personal details unnecessary to the task.
 
 ### Next Skill
 Load `cybersec-report` to generate investigation report, or `cybersec-crisis` if this is an active fraud/scam case.
