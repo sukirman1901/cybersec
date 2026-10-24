@@ -1,6 +1,7 @@
 """LDAP injection — test for LDAP query manipulation, auth bypass, error-based, boolean-blind, time-blind."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import urllib.parse
 import re
 import asyncio
@@ -202,7 +203,7 @@ async def ldap_inject(target: str) -> dict:
     results = []
     detected_server = "Unknown"
 
-    async with httpx.AsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
         # Get baseline
         baseline_status = 0
         baseline_size = 0

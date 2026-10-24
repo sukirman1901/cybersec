@@ -11,6 +11,7 @@ import time
 from urllib.parse import urlparse
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 
 CORE_ORIGINS = (
@@ -97,7 +98,7 @@ async def cors_check(target: str, preset: str = "observe-first") -> dict:
     evidence_items = []
     timed_out = False
 
-    async with httpx.AsyncClient(timeout=per_request_timeout, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=per_request_timeout, verify=False, follow_redirects=True) as client:
         for origin in origins:
             if time.monotonic() > deadline:
                 timed_out = True

@@ -8,6 +8,7 @@ import tempfile
 import signal
 import time
 from datetime import datetime
+from .http_guard import NoRedirectHandler
 
 def vulnerable_fixture(action: str, target: str = "127.0.0.1", port: int = 9999, vuln_types: str = "sqli,xss,lfi,cmd,ssrf,open_redirect", ssl: bool = False, reset: bool = False) -> str:
     if action == "start":
@@ -308,13 +309,17 @@ def _list_endpoints(vuln_types, port):
 
 def _run_e2e(target, port, vuln_types, ssl):
     import urllib.request
+    # Lab self-tests observe redirects; they must never visit an external
+    # Location. The generated fixture's intentionally vulnerable SSRF handler
+    # is server-side payload behavior, not this validation client's transport.
+    opener = urllib.request.build_opener(NoRedirectHandler)
     results = {}
     base = f"http://{target}:{port}"
     types = [t.strip() for t in vuln_types.split(",")]
 
     # Test health
     try:
-        resp = urllib.request.urlopen(f"{base}/health", timeout=5)
+        resp = opener.open(f"{base}/health", timeout=5)
         results["health"] = {"status": resp.status, "ok": resp.status == 200}
     except Exception as e:
         return json.dumps({"error": f"Fixture not reachable at {base}/health: {str(e)}", "start_hint": "Run start action first"}, indent=2)
@@ -322,7 +327,7 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test SQLi
     if "sqli" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/sqli?id=1'%20OR%20'1'%3D'1", timeout=5)
+            resp = opener.open(f"{base}/sqli?id=1'%20OR%20'1'%3D'1", timeout=5)
             data = json.loads(resp.read())
             results["sqli"] = {"detected": "SQL injection" in json.dumps(data), "response": data}
         except Exception as e:
@@ -331,7 +336,7 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test XSS
     if "xss" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/xss?name=<script>alert(1)</script>", timeout=5)
+            resp = opener.open(f"{base}/xss?name=<script>alert(1)</script>", timeout=5)
             body = resp.read().decode()
             results["xss"] = {"reflected": "<script>" in body, "response_preview": body[:200]}
         except Exception as e:
@@ -340,7 +345,7 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test LFI
     if "lfi" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/lfi?file=/etc/passwd", timeout=5)
+            resp = opener.open(f"{base}/lfi?file=/etc/passwd", timeout=5)
             body = resp.read().decode()
             results["lfi"] = {"readable": "root:" in body or "nobody:" in body, "preview": body[:100]}
         except Exception as e:
@@ -349,7 +354,7 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test CMD
     if "cmd" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/cmd?ip=127.0.0.1;id", timeout=5)
+            resp = opener.open(f"{base}/cmd?ip=127.0.0.1;id", timeout=5)
             body = resp.read().decode()
             results["cmd"] = {"executed": "uid=" in body, "output": body[:200]}
         except Exception as e:
@@ -358,7 +363,7 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test SSRF
     if "ssrf" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/ssrf?url=http://127.0.0.1:{port}/health", timeout=5)
+            resp = opener.open(f"{base}/ssrf?url=http://127.0.0.1:{port}/health", timeout=5)
             body = resp.read()
             results["ssrf"] = {"ssrf_possible": True, "note": "SSRF endpoint makes requests to arbitrary URLs"}
         except Exception as e:
@@ -367,8 +372,13 @@ def _run_e2e(target, port, vuln_types, ssl):
     # Test redirect
     if "open_redirect" in types:
         try:
-            resp = urllib.request.urlopen(f"{base}/redirect?url=https://evil.com", timeout=5)
-            results["open_redirect"] = {"status": resp.status, "location": resp.url}
+            resp = opener.open(f"{base}/redirect?url=https://evil.com", timeout=5)
+            results["open_redirect"] = {"status": resp.status, "detected": False}
+        except urllib.error.HTTPError as error:
+            results["open_redirect"] = {
+                "status": error.code, "location": error.headers.get("Location", ""),
+                "detected": error.code in (301, 302, 303, 307, 308) and bool(error.headers.get("Location")),
+            }
         except Exception as e:
             results["open_redirect"] = {"error": str(e)}
 
@@ -378,7 +388,7 @@ def _run_e2e(target, port, vuln_types, ssl):
             import urllib.request
             data = json.dumps({"id": "1' OR '1'='1"}).encode()
             req = urllib.request.Request(f"{base}/sqli", data=data, headers={"Content-Type": "application/json"})
-            resp = urllib.request.urlopen(req, timeout=5)
+            resp = opener.open(req, timeout=5)
             body = json.loads(resp.read())
             results["sqli_post"] = {"detected": "flag" in json.dumps(body), "response": body}
         except Exception as e:

@@ -1,6 +1,7 @@
 """Python pickle deserialization — detect and test for insecure deserialization, RCE confirmation."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import urllib.parse
 import re
 import asyncio
@@ -214,7 +215,7 @@ async def pickle_deserialize(target: str) -> dict:
     probe_payloads = _make_pickle_payloads()
     rce_payloads = _make_rce_confirmation_payloads()
 
-    async with httpx.AsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
         # Get baseline
         baseline_status = 0
         baseline_body = ""

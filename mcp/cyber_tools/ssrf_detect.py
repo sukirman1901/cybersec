@@ -1,6 +1,7 @@
 """Deep SSRF detection — internal network, cloud metadata, OOB verification, protocol variations."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import re
 import urllib.parse
 import asyncio
@@ -153,7 +154,7 @@ async def ssrf_detect(target: str) -> dict:
     results = []
     open_services = []
 
-    async with httpx.AsyncClient(
+    async with GuardedAsyncClient(
         timeout=20.0,
         follow_redirects=False,
         verify=False,
