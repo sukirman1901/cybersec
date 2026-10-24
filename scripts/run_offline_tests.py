@@ -19,6 +19,7 @@ MODULES = (
     "test_vuln_diff_intel", "test_vuln_scan_epss_intel", "test_novelty_engine",
     "test_doc_tool_count", "test_runtime_info",
     "test_tool_policy", "test_install_ci_contract",
+    "test_workflow_contract",
 )
 
 
