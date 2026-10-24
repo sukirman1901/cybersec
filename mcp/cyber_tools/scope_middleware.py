@@ -41,7 +41,10 @@ TARGET_KEYS = ("target", "target_url", "shell_url", "domain", "dc_ip", "url",
 
 def require_resource(kind, value):
     if not validate_resource(kind, value):
-        raise ToolError(f"Scope policy denied: include this {kind} resource in scope_json and authorize the engagement")
+        raise ToolError(
+            f"Scope policy denied: add this {kind} resource with "
+            "engagement_gate('extend', scope_json=..., confirmation='yes') "
+            "during the engagement, or include it in the init scope_json")
 
 
 def require_authorized_engagement():
