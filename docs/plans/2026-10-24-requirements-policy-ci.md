@@ -5,7 +5,7 @@
 **Goal:** Isolate Certipy from core dependencies and run policy regressions in CI.
 
 **Architecture:** Preserve the explicit offline unittest module list. Add a
-standard-library contract test for active dependency names and required runner
+contract test for active dependency names and required runner
 modules, then make the smallest requirements and allowlist changes.
 
 **Tech Stack:** Python, unittest, packaging requirement parsing, pip, GitHub Actions.
@@ -47,7 +47,9 @@ modules, then make the smallest requirements and allowlist changes.
 
 - [x] Approved design and isolated worktree.
 - [x] Baseline: 189 offline tests pass.
-- [ ] Red contract tests.
-- [ ] Minimal fixes and green suite.
-- [ ] Isolated dependency dry-run.
-- [ ] Diff review and PR preparation.
+- [x] Red contract tests: active Certipy and both missing runner selections fail.
+- [x] Minimal fixes and green suite: 219 offline tests pass (Python 3.12/macOS).
+- [x] Isolated dependency dry-run: 82 packages resolve on Python 3.14/macOS;
+  cryptography 50.0.2, FastMCP 3.4.11, no Certipy selected. No core packages installed.
+- [x] Diff self-review and whitespace verification.
+- [ ] Publish PR and verify hosted CI separately.

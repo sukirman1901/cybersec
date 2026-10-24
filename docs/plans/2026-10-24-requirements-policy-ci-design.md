@@ -11,7 +11,7 @@ returning. Do not change redirects, gates, skill text, or target-facing behavior
 
 The existing `unittest` runner remains the CI entrypoint and continues to block
 outbound socket connections during tests. Explicit selection avoids accidentally
-running network integration modules. A new standard-library-only test module
+running network integration modules. A new offline contract test module
 checks parsed active requirements and the runner's module inventory, including
 its own selection. Existing Certipy subprocess discovery remains untouched.
 
