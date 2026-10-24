@@ -5,6 +5,10 @@ dnspython
 certipy-ad>=5.1.0
 phonenumbers>=8.13.0
 # certipy-ad (ADCS abuse tool) at https://github.com/ly4k/Certipy
+# Do not install it in this environment: certipy-ad 5.1.0 pins cryptography~=42.0.8,
+# which conflicts with cryptography>=46.0.5 (CVE-2026-26007) and would downgrade the
+# core stack to the vulnerable release. certipy is invoked as an external CLI
+# (shutil.which), so install it separately: pipx install certipy-ad
 # phonenumbers (phone OSINT parsing)
 # cryptography: CVE-2026-26007 (missing ECC subgroup check) fixed in 46.0.5
 cryptography>=46.0.5
