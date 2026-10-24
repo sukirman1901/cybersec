@@ -14,3 +14,6 @@ mcp/wordlists/
 
 # Node.js
 node_modules/
+
+# Machine-specific agent harness mirrors
+.agents/
