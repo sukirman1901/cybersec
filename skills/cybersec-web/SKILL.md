@@ -7,7 +7,17 @@ description: Use when user asks to test web applications, check for SQLi, XSS, o
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant branches by requested outcome, input endpoint and observed surface;
+this is a menu, not a command to run all tools. Before active target probes require
+`engagement_gate` `init` + `authorize`; confirmed `extend` only for additional
+user-approved resources, never discovered URLs. Bound requests/time, record coverage
+and skipped prerequisites, and redact secrets. Source/token-only analysis stays
+offline. Denial/throttling stops the branch; no automatic bypass or escalation.
+Use the actual endpoint/parameter and test accounts; IDOR validation requires two
+approved roles. Intrusive upload chains, deserialization, races, smuggling, cache
+poisoning and load/depth tests require explicit technique approval and cleanup.
+SQLi primary is `sqli_detect`, XSS primary is `xss_detect`; deeper CLI tools are
+optional. Reflection is not JavaScript execution, and a missing scanner is a gap.
 
 1. **Technology Stack** — Call `tech_detect(target)` + `http_probe_target(target)` for framework, version, headers
 2. **Directory Busting** — Call `dir_bruteforce(target)` and `gobuster_dir(target)` to find hidden paths, admin panels, backups
@@ -23,7 +33,7 @@ Create a todo list from the checklist below, then execute all steps immediately.
 12. **LFI Test** — If PHP detected, call `lfi_detect(target)` for file inclusion
 13. **SSTI Test** — If template engine detected, call `ssti_detect(target)`
 14. **XXE Test** — If XML processing likely, call `xxe_detect(target)`
-15. **SSRF Test** — If app makes external requests, call `ssrf_detect(target)` and `oast_callback_server(target)` for blind SSRF
+15. **SSRF Test** — For an approved URL-fetch input, use `ssrf_detect(target)` and `oast_callback_server(action="generate")`; correlate a unique token with real callback evidence using poll per the live schema (action is not a target URL)
 16. **Command Injection** — If shell interaction likely, call `cmd_injection(target)` and `cmd_oast_helper(target)` for blind OS command injection
 17. **NoSQL Injection** — If MongoDB/NoSQL detected, call `nosql_inject(target)`
 18. **CSRF Detection** — Call `csrf_detect(target)` to check forms for CSRF tokens. Call `csrf_extract(target)` to analyze token patterns.
@@ -45,30 +55,24 @@ Create a todo list from the checklist below, then execute all steps immediately.
 34. **Log4J Scan** — Call `log4j_scan(target)` for Log4j JNDI injection
 35. **Supply Chain** — Call `supply_chain(target)` for exposed manifests and dependency CVEs
 36. **CAPTCHA Detection** — Call `captcha_test(target, action="detect")` to identify captcha type on forms
-37. **CAPTCHA Bypass** — If captcha detected: call `captcha_test(target, action="all")` to test all bypass vectors (token reuse, empty values, OCR, math solving, header/cookie manipulation)
+37. **CAPTCHA Bypass** — Only for explicitly approved anti-automation testing, select a bounded specific action; detection alone grants no bypass permission
 38. **SQLi / XSS** — If user input found: call `sqli_detect(target)` and `sqlmap_check(target)` for SQLi. Call `xss_detect(target)` and `xsstrike_check(target)` for XSS.
 39. **Injection Validator** — Call `injection_validator(target)` for unified injection validation across 7 types
 40. **Web Shell Detection** — Call `webshell_detect(target, deep_scan=True)` to scan for existing web shells (c99, r57, weevely, china chopper, etc.)
-41. **Dork Target Discovery** — Call `dork_gen(category="vuln_sites", target="target.com")` to generate dorks, then `dork_scan(dorks)` to find exposed pages
-42. **Dork Hunting** — Call `dork_hunt(category="shell_upload", target="target.com", validate=True)` for one-call vuln discovery
+41. **Dork Target Discovery** — `dork_gen(category="vuln_sites", target=domain)` then `dork_scan(dorks=dorks)` for requested target-bound intelligence
+42. **Dork Hunting** — `dork_hunt(category="shell_upload", target=domain, probe=False, validate=False)` for discovery only; separately authorize returned resources before probing
 43. **Mass Assignment** — If API endpoints found, call `mass_assignment(target)` for parameter overwriting / privilege escalation
 44. **HTTP Request Splitting** — Call `http_request_splitting(target)` for CRLF injection in HTTP request headers
 45. **GraphQL Depth Bypass** — If GraphQL found, call `graphql_depth_bypass(target)` for depth limit bypass, batching, alias attacks
 
-### Auto-CAPTCHA Protocol
+### Bounded CAPTCHA branch
 
-**When testing forms/endpoints, ALWAYS auto-detect and test captcha bypass:**
-
-1. On ANY form submission endpoint, run `captcha_test(endpoint, action="detect")`
-2. If captcha detected (reCAPTCHA, hCaptcha, Turnstile, image, math):
-   - Auto-run `captcha_test(endpoint, action="math")` for math captchas
-   - Auto-run `captcha_test(endpoint, action="ocr")` for image captchas
-   - Auto-run `captcha_test(endpoint, action="header")` for header bypass
-   - Auto-run `captcha_test(endpoint, action="cookie")` for cookie bypass
-   - Auto-run `captcha_test(endpoint, action="reuse")` for token reuse
-3. Report all bypass attempts with evidence
-4. If bypass successful: note in report as HIGH/CRITICAL finding
-5. If all bypasses fail: note captcha is effective
+For requested CAPTCHA assessment, detect on the specified form with
+`captcha_test(target=endpoint, action="detect")`. Before any reuse/empty-token,
+math/OCR, header or cookie bypass test, confirm technique scope, test account and
+attempt limit. Stop on throttling, denial or unexpected account effects. Report
+the exact observed behavior and impact; unsuccessful attempts do not establish
+general effectiveness and successful solving alone does not imply HIGH/CRITICAL.
 
 ### Tools Available
 
@@ -90,4 +94,5 @@ Create a todo list from the checklist below, then execute all steps immediately.
 Web application assessment with: discovered paths, API endpoints, misconfigurations, input validation issues, CMS vulnerabilities, CAPTCHA bypass results, and exploit potential.
 
 ### Next Skill
-When all checklist items complete, load `cybersec-exploit` skill for exploitation.
+Load `cybersec-exploit` only for explicitly requested, approved exploitation;
+otherwise stop with findings, uncertainty and coverage for the requested tests.

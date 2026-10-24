@@ -20,6 +20,7 @@ MODULES = (
     "test_doc_tool_count", "test_runtime_info",
     "test_tool_policy", "test_install_ci_contract",
     "test_workflow_contract",
+    "test_skill_contract",
 )
 
 
