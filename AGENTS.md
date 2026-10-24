@@ -20,7 +20,7 @@ The Cybersec MCP server provides 209 security tools via stdio transport.
 cd mcp
 python3 -m venv .venv
 source .venv/bin/activate
-pip install 'fastmcp>=3.4.2,<4' httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 ```
 
 ### Configure MCP server

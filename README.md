@@ -51,7 +51,7 @@ git clone https://github.com/sukirman1901/cybersec.git
 cd cybersec
 python3 -m venv mcp/.venv
 source mcp/.venv/bin/activate
-pip install 'fastmcp>=3.4.2,<4' httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 deactivate
 ```
 
@@ -819,7 +819,7 @@ Expected output: 180+ tools listed.
 
 ```bash
 source mcp/.venv/bin/activate
-pip install 'fastmcp>=3.4.2,<4' httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 ```
 
 ### CLI tools not found

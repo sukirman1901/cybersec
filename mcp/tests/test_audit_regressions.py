@@ -238,6 +238,14 @@ class TestValidatorRegressions(unittest.TestCase):
 
 
 class TestCiRegressions(unittest.TestCase):
+    def test_ci_and_manifest_install_server_import_dependency(self):
+        root = Path(__file__).resolve().parents[2]
+        ci = (root / ".github/workflows/ci.yml").read_text()
+        requirements = (root / "mcp/requirements.txt").read_text().splitlines()
+        self.assertIn("impacket>=0.12.0", ci)
+        self.assertIn("impacket>=0.12.0", requirements)
+        self.assertFalse(any(line.startswith("imp>=") for line in requirements))
+
     def test_ci_runs_offline_regressions(self):
         root = Path(__file__).resolve().parents[2]
         ci = (root / ".github/workflows/ci.yml").read_text()
