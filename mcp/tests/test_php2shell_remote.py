@@ -227,6 +227,8 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
         from server import mcp
         real_client = httpx.AsyncClient
         async with Client(mcp) as client:
+            await client.call_tool("engagement_gate", {"action": "init", "target": "example.test"})
+            await client.call_tool("engagement_gate", {"action": "authorize", "confirmation": "yes"})
             tools = {tool.name: tool for tool in await client.list_tools()}
             self.assertTrue("php2shell_scan" in tools, "Dedicated identification MCP tool is missing")
             with patch("cyber_tools.php2shell_remote.httpx.AsyncClient", side_effect=lambda **kw:

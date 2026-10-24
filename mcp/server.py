@@ -159,6 +159,8 @@ from cyber_tools.mass_assignment import mass_assignment as _massassign
 from cyber_tools.graphql_depth_bypass import graphql_depth_bypass as _graphql_bypass
 from cyber_tools.http_request_splitting import http_request_splitting as _http_split
 mcp = FastMCP("cybersec")
+from cyber_tools.scope_middleware import EngagementMiddleware
+mcp.add_middleware(EngagementMiddleware())
 
 from cyber_tools.exploit_db import exploit_db_search as _exploit_search
 from cyber_tools.exploit_db import exploit_db_detail as _exploit_detail

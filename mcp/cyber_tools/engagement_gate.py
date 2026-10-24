@@ -1,141 +1,164 @@
-"""Engagement gate — scope validation, authorization check, pre-flight approval rules."""
+"""Engagement scope and intent, isolated by MCP session at dispatch.
+
+Confirmation records client intent; it is not proof of external legal authority.
+"""
+import copy
+import ipaddress
 import json
-import re
-from datetime import datetime
-
-def engagement_gate(action: str, target: str = "", scope_json: str = "", rule: str = "", confirmation: str = "") -> str:
-    if action == "init":
-        return _init_engagement(target, scope_json)
-    elif action == "validate":
-        return _validate_target(target, scope_json)
-    elif action == "check":
-        return _check_rule(rule, target)
-    elif action == "add_rule":
-        return _add_rule(rule, target)
-    elif action == "authorize":
-        return _authorize(confirmation, target, scope_json)
-    elif action == "status":
-        return _status()
-    else:
-        return json.dumps({"error": "Unknown action", "actions": ["init", "validate", "check", "add_rule", "authorize", "status"]}, indent=2)
+from contextlib import contextmanager
+from contextvars import ContextVar
+from datetime import datetime, timezone
+from urllib.parse import urlsplit
 
 
-ENGAGEMENT = {
-    "active": False,
-    "scope": {"domains": [], "ips": [], "networks": [], "authorized": False},
-    "rules": [
-        {"type": "no_exploit", "description": "No exploitation without explicit approval"},
-        {"type": "scope_boundary", "description": "Only test targets within defined scope"},
-        {"type": "no_dos", "description": "No denial of service attacks"},
-        {"type": "rate_limit", "description": "Respect rate limits — max 50 req/s"},
-        {"type": "evidence", "description": "Document all findings with evidence"},
-    ],
-    "approved_at": "",
-    "approved_by": "",
-}
+def new_engagement():
+    return {
+        "active": False,
+        "scope": {"domains": [], "ips": [], "networks": [], "authorized": False},
+        "rules": [
+            {"type": "no_exploit", "description": "No exploitation without explicit approval"},
+            {"type": "scope_boundary", "description": "Only test targets within defined scope"},
+            {"type": "no_dos", "description": "No denial of service attacks"},
+            {"type": "rate_limit", "description": "Respect engagement rate limits"},
+            {"type": "evidence", "description": "Document all findings with evidence"},
+        ],
+        "approved_at": "", "approved_by": "",
+    }
 
 
-def _init_engagement(target, scope_json):
-    ENGAGEMENT["active"] = True
-    if scope_json:
-        try:
-            scope = json.loads(scope_json) if isinstance(scope_json, str) else scope_json
-            ENGAGEMENT["scope"].update(scope)
-        except Exception:
-            pass
-    if target:
-        ENGAGEMENT["scope"]["domains"].append(target)
-    return json.dumps({
-        "status": "engagement_initialized",
-        "scope": ENGAGEMENT["scope"],
-        "rules": ENGAGEMENT["rules"],
-        "message": "Engagement scope set. All targets must pass validate() before testing.",
-    }, indent=2)
+# Direct Python callers retain a process-local default; MCP binds a separate state.
+ENGAGEMENT = new_engagement()
+_CURRENT = ContextVar("cybersec_engagement", default=None)
 
 
-def _validate_target(target, scope_json):
-    scope = ENGAGEMENT["scope"]
-    if scope_json:
-        try:
-            scope = json.loads(scope_json) if isinstance(scope_json, str) else scope_json
-        except Exception:
-            pass
+def current_engagement():
+    state = _CURRENT.get()
+    return ENGAGEMENT if state is None else state
 
+
+@contextmanager
+def engagement_context(state):
+    token = _CURRENT.set(state)
+    try:
+        yield
+    finally:
+        _CURRENT.reset(token)
+
+
+def target_host(target):
+    """Canonical hostname/IP only; never match URL paths, userinfo or substrings."""
+    if not isinstance(target, str) or not target or any(c.isspace() for c in target):
+        raise ValueError("Expected one hostname, IP or URL")
+    try:
+        return str(ipaddress.ip_address(target))
+    except ValueError:
+        pass
+    parsed = urlsplit(target if "://" in target else "//" + target)
+    if parsed.username is not None or parsed.password is not None:
+        raise ValueError("Userinfo is not permitted in scoped targets")
+    host = parsed.hostname
+    _ = parsed.port  # Reject malformed ports rather than accepting a partial host.
+    if not host:
+        raise ValueError("Missing target hostname")
+    try:
+        return str(ipaddress.ip_address(host))
+    except ValueError:
+        host = host.rstrip(".").encode("idna").decode("ascii").lower()
+        if not host or any(not part or not all(c.isalnum() or c == "-" for c in part)
+                           for part in host.split(".")):
+            raise ValueError("Invalid hostname")
+        return host
+
+
+def _parse_scope(raw):
+    raw = json.loads(raw) if isinstance(raw, str) else raw
+    if not isinstance(raw, dict):
+        raise ValueError("Scope must be an object")
+    scope = {"domains": [], "ips": [], "networks": [], "authorized": False}
+    for key in ("domains", "ips", "networks"):
+        values = raw.get(key, [])
+        if not isinstance(values, list) or not all(isinstance(v, str) and v for v in values):
+            raise ValueError(f"{key} must be a list of nonempty strings")
+        for value in values:
+            if key == "domains":
+                scope[key].append(target_host(value.removeprefix("*.")))
+            elif key == "ips":
+                scope[key].append(str(ipaddress.ip_address(value)))
+            else:
+                scope[key].append(str(ipaddress.ip_network(value, strict=False)))
+    return scope
+
+
+def _matches(host, scope):
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        ip = None
+    if ip is not None:
+        return (host in scope["ips"] or host in scope["domains"] or
+                any(ip in ipaddress.ip_network(net) for net in scope["networks"]))
+    return any(host == domain or host.endswith("." + domain) for domain in scope["domains"])
+
+
+def validate_target(target, scope_json=""):
+    state = current_engagement()
     checks = {"in_scope": False, "authorized": False, "violations": []}
-
-    domains = scope.get("domains", [])
-    ips = scope.get("ips", [])
-    networks = scope.get("networks", [])
-
-    # Domain check
-    for d in domains:
-        if d in target or target.endswith("." + d.lstrip(".")):
-            checks["in_scope"] = True
-            break
-
-    # IP check
-    for ip in ips:
-        if ip in target:
-            checks["in_scope"] = True
-            break
-
-    # Network check (basic CIDR)
-    for net in networks:
-        if net in target:
-            checks["in_scope"] = True
-            break
-
+    try:
+        host = target_host(target)
+        checks["in_scope"] = state["active"] and _matches(host, state["scope"])
+        if scope_json:
+            # A per-call scope can narrow, never widen, the authorized engagement.
+            checks["in_scope"] = checks["in_scope"] and _matches(host, _parse_scope(scope_json))
+    except (ValueError, TypeError, UnicodeError) as error:
+        checks["violations"].append(str(error))
     if not checks["in_scope"]:
-        checks["violations"].append(f"Target {target} not in scope: domains={domains}, ips={ips}")
-
-    checks["authorized"] = ENGAGEMENT["scope"].get("authorized", False) and checks["in_scope"]
-    if not checks["authorized"] and checks["in_scope"]:
-        checks["violations"].append("Target in scope but not authorized. Run authorize() first.")
-
-    return json.dumps({
-        "target": target,
-        "validated": checks["in_scope"] and checks["authorized"],
-        "checks": checks,
-    }, indent=2)
+        checks["violations"].append("Target is not in the active engagement scope")
+    checks["authorized"] = bool(state["scope"]["authorized"] and checks["in_scope"])
+    if checks["in_scope"] and not checks["authorized"]:
+        checks["violations"].append("Explicit engagement authorization is required")
+    return {"target": target, "validated": checks["authorized"], "checks": checks}
 
 
-def _check_rule(rule, target):
-    for r in ENGAGEMENT["rules"]:
-        if r["type"] == rule:
-            return json.dumps({"rule": r, "approved": True, "note": f"Rule '{rule}' applies to {target}"}, indent=2)
-    return json.dumps({"error": f"Rule not found: {rule}"}, indent=2)
-
-
-def _add_rule(rule, description):
-    ENGAGEMENT["rules"].append({"type": rule, "description": description or rule})
-    return json.dumps({"status": "rule_added", "rule": rule, "total_rules": len(ENGAGEMENT["rules"])}, indent=2)
-
-
-def _authorize(confirmation, target, scope_json):
-    valid_words = ["yes", "y", "approve", "authorized", "confirmed", "true"]
-    if confirmation.lower() not in valid_words:
-        return json.dumps({
-            "status": "not_authorized",
-            "required": "Explicit confirmation required: authorize(confirmation='yes', ...)",
-            "scope": scope_json or "use default scope",
-        }, indent=2)
-
-    ENGAGEMENT["scope"]["authorized"] = True
-    ENGAGEMENT["approved_at"] = datetime.utcnow().isoformat() + "Z"
-    ENGAGEMENT["approved_by"] = "user"
-    return json.dumps({
-        "status": "authorized",
-        "message": "Engagement authorized. Ensure all testing stays within defined scope.",
-        "scope": ENGAGEMENT["scope"],
-        "approved_at": ENGAGEMENT["approved_at"],
-    }, indent=2)
-
-
-def _status():
-    return json.dumps({
-        "active": ENGAGEMENT["active"],
-        "scope": ENGAGEMENT["scope"],
-        "rules_active": len(ENGAGEMENT["rules"]),
-        "authorized": ENGAGEMENT["scope"].get("authorized", False),
-        "approved_at": ENGAGEMENT["approved_at"] or "not yet approved",
-    }, indent=2)
+def engagement_gate(action: str, target: str = "", scope_json: str = "",
+                    rule: str = "", confirmation: str = "") -> str:
+    state = current_engagement()
+    if action == "init":
+        # Reinitialization revokes previous authorization even if input is invalid.
+        state.clear()
+        state.update(new_engagement())
+        try:
+            scope = _parse_scope(scope_json) if scope_json else state["scope"]
+            if target:
+                scope["domains"].append(target_host(target))
+        except (ValueError, TypeError, UnicodeError) as error:
+            return json.dumps({"error": f"Invalid scope: {error}", "authorized": False})
+        state["scope"] = scope
+        state["active"] = True
+        result = {"status": "engagement_initialized", "scope": scope,
+                  "rules": state["rules"], "message": "Authorize the new scope before testing."}
+    elif action == "validate":
+        result = validate_target(target, scope_json)
+    elif action == "authorize":
+        if confirmation.lower() not in ("yes", "y", "approve", "authorized", "confirmed", "true"):
+            result = {"status": "not_authorized", "required": "Explicit confirmation required"}
+        elif not state["active"] or not any(state["scope"][k] for k in ("domains", "ips", "networks")):
+            result = {"status": "not_authorized", "error": "Initialize a nonempty scope first"}
+        else:
+            state["scope"]["authorized"] = True
+            state["approved_at"] = datetime.now(timezone.utc).isoformat()
+            state["approved_by"] = "client-confirmation"
+            result = {"status": "authorized", "scope": state["scope"], "approved_at": state["approved_at"]}
+    elif action == "check":
+        item = next((r for r in state["rules"] if r["type"] == rule), None)
+        result = ({"rule": item, "applies": True, "note": "Rule presence does not grant approval"}
+                  if item else {"error": f"Rule not found: {rule}"})
+    elif action == "add_rule":
+        state["rules"].append({"type": rule, "description": target or rule})
+        result = {"status": "rule_added", "rule": rule, "total_rules": len(state["rules"])}
+    elif action == "status":
+        result = {"active": state["active"], "scope": copy.deepcopy(state["scope"]),
+                  "rules_active": len(state["rules"]), "authorized": state["scope"]["authorized"],
+                  "approved_at": state["approved_at"] or "not yet approved"}
+    else:
+        result = {"error": "Unknown action", "actions": ["init", "validate", "check", "add_rule", "authorize", "status"]}
+    return json.dumps(result, indent=2)

@@ -99,7 +99,7 @@ class TestIdorDualRole(unittest.TestCase):
         self.assertEqual(result["confidence"], "LOW")
         self.assertIn("dual_role_not_tested", result["coverage"])
 
-    def test_dual_role_hash_match_is_high(self):
+    def test_dual_role_hash_match_without_private_ownership_is_unverified(self):
         from cyber_tools.idor_access_validation import idor_access_validation
 
         def fake_urlopen(req, timeout=8):
@@ -115,8 +115,9 @@ class TestIdorDualRole(unittest.TestCase):
                 user_a_cookie="sid=a", user_b_cookie="sid=b",
             ))
         self.assertTrue(result["dual_role_tested"])
-        self.assertTrue(result["bola_found"])
-        self.assertEqual(result["confidence"], "HIGH")
+        self.assertFalse(result["bola_found"])
+        self.assertTrue(result["cross_role_access_observed"])
+        self.assertEqual(result["confidence"], "LOW")
 
 
 class TestBoundedFlakyModules(unittest.IsolatedAsyncioTestCase):

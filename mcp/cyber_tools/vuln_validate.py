@@ -30,8 +30,13 @@ def vuln_validate(finding_json: str) -> str:
     except Exception:
         return json.dumps({"error": "Invalid JSON"}, indent=2)
 
+    if not isinstance(finding, dict):
+        return json.dumps({"error": "Finding must be an object"})
+
     vuln_type = finding.get("type", finding.get("vuln_type", "")).lower()
     evidence = finding.get("evidence", finding.get("response", ""))
+    if not isinstance(evidence, str):
+        evidence = json.dumps(evidence, sort_keys=True, default=str)
     description = finding.get("description", "")
     severity = finding.get("severity", "medium").lower()
     combined = f"{evidence} {description}".lower()
@@ -72,6 +77,14 @@ def vuln_validate(finding_json: str) -> str:
             score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
         elif etype == "data_extracted" and finding.get("data", finding.get("extracted_data", "")):
             score += weight; result["evidence_scored"].append({"type": etype, "score": weight})
+        elif etype == "callback_received" and finding.get("callback_received") is True:
+            callback_id = finding.get("callback_id")
+            hits = finding.get("callback_hits", [])
+            if callback_id and isinstance(hits, list) and any(
+                isinstance(hit, dict) and hit.get("callback_id") == callback_id for hit in hits
+            ):
+                score += weight
+                result["evidence_scored"].append({"type": etype, "score": weight})
 
     # 2. Reproducibility check
     if finding.get("reproducible", finding.get("repeatable", False)):
@@ -88,6 +101,9 @@ def vuln_validate(finding_json: str) -> str:
     # 4. FP signal detection
     fp_score = 0
     for ftype, signals in FP_SIGNALS.items():
+        if ftype != vuln_type or ftype == "sqli":
+            # SQL error messages may support SQLi; they are not refutation.
+            continue
         for signal in signals:
             import re
             if re.search(signal, combined):
@@ -107,9 +123,8 @@ def vuln_validate(finding_json: str) -> str:
 
     # 6. Determine validation state
     if result["fp_signals_detected"] and confidence < 30:
-        result["validation"] = "false_positive"
-        result["is_false_positive"] = True
-        result["fp_reason"] = f"FP signals: {', '.join(s['signal'] for s in result['fp_signals_detected'][:3])}"
+        result["validation"] = "unverified"
+        result["fp_reason"] = "Blocking/error signals require manual review, not automatic dismissal"
     elif confidence >= 70 and result["reproducible"]:
         result["validation"] = "confirmed"
     elif confidence >= 60:
@@ -117,8 +132,7 @@ def vuln_validate(finding_json: str) -> str:
     elif confidence >= 30:
         result["validation"] = "unverified"
     else:
-        result["validation"] = "false_positive"
-        result["is_false_positive"] = True
+        result["validation"] = "unverified"
 
     # 7. Severity-adjusted recommendation
     sev_map = {
