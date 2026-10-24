@@ -6,6 +6,7 @@ import urllib.parse
 import asyncio
 import socket
 import ipaddress
+import html
 
 # --- SSRF Parameters to Test ---
 SSRF_PARAMS = [
@@ -116,6 +117,25 @@ async def _check_port(ip: str, port: int, timeout: float = 2.0) -> bool:
         return False
 
 
+def _response_content(response, payload, baseline, controls):
+    """New successful content beyond baseline and a reflected injected URL.
+
+    HTTP status, response size and URL echoes alone do not prove server fetching.
+    Missing baseline remains inconclusive rather than positive evidence.
+    """
+    if response.status_code != 200 or baseline is None or response.text.strip() == baseline.strip():
+        return ""
+    body = response.text
+    for token in (html.escape(payload), urllib.parse.quote(payload, safe=""), payload):
+        body = body.replace(token, "")
+    control_body = baseline
+    for value in controls:
+        for token in (html.escape(value), urllib.parse.quote(value, safe=""), value):
+            if token:
+                control_body = control_body.replace(token, "")
+    return body if body.strip() != control_body.strip() else ""
+
+
 async def ssrf_detect(target: str) -> dict:
     """Deep SSRF detection with internal network probing, cloud metadata, and protocol variations."""
     if not target.startswith(("http://", "https://")):
@@ -139,6 +159,13 @@ async def ssrf_detect(target: str) -> dict:
         verify=False,
         limits=httpx.Limits(max_connections=50),
     ) as client:
+        baseline = None
+        try:
+            baseline_response = await client.get(target)
+            baseline = baseline_response.text
+        except httpx.HTTPError:
+            pass
+        controls = [value for values in params.values() for value in values]
         # --- Basic SSRF Detection ---
         for p in test_params:
             for internal_ip, ip_addr, label in INTERNAL_TARGETS:
@@ -150,23 +177,17 @@ async def ssrf_detect(target: str) -> dict:
                     resp = await client.get(url)
                     elapsed = asyncio.get_event_loop().time() - start_time
 
-                    body = resp.text
+                    body = _response_content(resp, payload, baseline, controls)
                     body_len = len(body)
 
                     # Detect internal access indicators
                     indicators = []
-                    if resp.status_code == 200 and body_len > 100:
-                        indicators.append("possible_internal_access")
-                    if elapsed > 5:
-                        indicators.append("slow_response")
-                    if "root:" in body or "localhost" in body:
+                    if re.search(r"root:[^:\n]*:0:0:", body):
                         indicators.append("internal_content_leak")
                     if re.search(r"ami-[a-z0-9]+", body):
                         indicators.append("aws_ami_leak")
                     if re.search(r"instance-id", body):
                         indicators.append("instance_metadata")
-                    if resp.status_code in [500, 502, 503]:
-                        indicators.append("server_error")
 
                     # Port scan via SSRF
                     if internal_ip == "127.0.0.1":
@@ -175,7 +196,8 @@ async def ssrf_detect(target: str) -> dict:
                                 svc_url = f"http://{svc_ip}:{svc_port}"
                                 svc_test = f"{base}?{p}={urllib.parse.quote(svc_url, safe='')}"
                                 svc_resp = await client.get(svc_test, timeout=5.0)
-                                if svc_resp.status_code != 0 and len(svc_resp.text) > 0:
+                                svc_body = _response_content(svc_resp, svc_url, baseline, controls)
+                                if re.search(r"SSH-\d|redis_version:|^220[ -].*SMTP", svc_body, re.M | re.I):
                                     open_services.append({
                                         "service": svc_name,
                                         "port": svc_port,
@@ -185,7 +207,7 @@ async def ssrf_detect(target: str) -> dict:
                             except Exception:
                                 pass
 
-                    if indicators or resp.status_code in [200, 301, 302, 307, 308]:
+                    if indicators:
                         results.append({
                             "technique": "basic_ssrf",
                             "param": p,
@@ -209,7 +231,7 @@ async def ssrf_detect(target: str) -> dict:
                     try:
                         url = f"{base}?{p}={urllib.parse.quote(md_url, safe='')}"
                         resp = await client.get(url, timeout=10.0)
-                        body = resp.text
+                        body = _response_content(resp, md_url, baseline, controls)
 
                         # Check for cloud-specific content
                         cloud_indicators = []
@@ -247,7 +269,7 @@ async def ssrf_detect(target: str) -> dict:
                 try:
                     url = f"{base}?{p}={urllib.parse.quote(proto_url, safe='')}"
                     resp = await client.get(url, timeout=10.0)
-                    body = resp.text
+                    body = _response_content(resp, proto_url, baseline, controls)
                     body_len = len(body)
 
                     proto_indicators = []
@@ -255,11 +277,11 @@ async def ssrf_detect(target: str) -> dict:
                         proto_indicators.append("file_read_confirmed")
                     elif proto_name == "file_win" and "[extensions]" in body:
                         proto_indicators.append("windows_file_read")
-                    elif proto_name == "gopher" and body_len > 0:
+                    elif proto_name == "gopher" and re.search(r"^220[ -].*SMTP|redis_version:", body, re.M | re.I):
                         proto_indicators.append("gopher_reachable")
-                    elif proto_name == "dict" and body_len > 0:
+                    elif proto_name == "dict" and re.search(r"redis_version:|^\+PONG", body, re.M):
                         proto_indicators.append("dict_reachable")
-                    elif proto_name == "ldap" and body_len > 0:
+                    elif proto_name == "ldap" and "namingContexts:" in body:
                         proto_indicators.append("ldap_reachable")
 
                     if proto_indicators:
@@ -325,7 +347,7 @@ async def ssrf_detect(target: str) -> dict:
                     resp = await client.get(url, timeout=10.0, follow_redirects=True)
 
                     if str(resp.url) != str(url) and resp.status_code == 200:
-                        body = resp.text
+                        body = _response_content(resp, redir_url, baseline, controls)
                         if "root:" in body or "ami-" in body or "meta-data" in body:
                             results.append({
                                 "technique": "redirect_ssrf",

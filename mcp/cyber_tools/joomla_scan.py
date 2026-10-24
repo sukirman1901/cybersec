@@ -70,7 +70,11 @@ async def joomla_scan(target: str) -> dict:
                     continue
                 text = pr.text[:4000].lower()
                 sensitive = any(k in path for k in ("configuration", "log", "bak", "cache", "tmp"))
-                content_hit = any(tok in text for tok in SENSITIVE_MARKERS)
+                content_hit = (any(tok in text for tok in SENSITIVE_MARKERS)
+                               and pr.text.strip() != body.strip())
+                if "configuration.php" in path:
+                    content_hit = content_hit and bool(re.search(
+                        r"class\s+jconfig\b|public\s+\$(?:host|user|password|db)\s*=", text))
                 if sensitive and pr.status_code == 200 and content_hit:
                     risk, conf = "HIGH", "HIGH"
                 elif sensitive and pr.status_code in (200, 403):

@@ -247,6 +247,11 @@ def _detect_context(body: str, param: str, payload_reflection: str) -> str:
     return "html"
 
 
+def _is_html_response(response) -> bool:
+    media_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    return media_type in ("text/html", "application/xhtml+xml")
+
+
 async def xss_detect(target: str, param: str = "", method: str = "get",
                      use_browser: bool = False, preset: str = "observe-first") -> dict:
     """Deep XSS detection — reflected, stored, DOM-based with WAF bypass and context-aware payloads.
@@ -276,10 +281,12 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
     coverage_notes.append(f"params={len(test_params)}")
 
     async with httpx.AsyncClient(timeout=5.0, verify=False, follow_redirects=False) as client:
-        # Get baseline
+        # Get baseline; an existing static payload is not injection evidence.
+        baseline_body = ""
         try:
             baseline_resp = await client.get(base)
             baseline_len = len(baseline_resp.text)
+            baseline_body = baseline_resp.text
             waf = _detect_waf(baseline_resp)
             if waf:
                 waf_detected = waf
@@ -312,7 +319,8 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
 
                         body = resp.text
                         payl = payload[:25].replace("\\", "").replace('"', "'")
-                        reflected = payl in body
+                        reflected = (_is_html_response(resp) and payl in body
+                                     and payl not in baseline_body)
 
                         if reflected:
                             context = _detect_context(body, p, payl)
@@ -402,7 +410,7 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
         # --- DOM XSS ---
         try:
             resp = await client.get(base)
-            html_content = resp.text
+            html_content = resp.text if _is_html_response(resp) else ""
 
             # Check for DOM sources in page
             dom_sources_found = [s for s in DOM_SOURCES if re.search(s, html_content)]
@@ -446,7 +454,8 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
                 break
             try:
                 resp = await client.get(base, headers={header_name: h_payload})
-                if h_payload[:15] in resp.text:
+                if (_is_html_response(resp) and h_payload[:15] in resp.text
+                        and h_payload[:15] not in baseline_body):
                     results.append({
                         "type": "header_injection",
                         "header": header_name,
