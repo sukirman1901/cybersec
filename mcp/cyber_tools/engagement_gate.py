@@ -5,16 +5,20 @@ Confirmation records client intent; it is not proof of external legal authority.
 import copy
 import ipaddress
 import json
+import re
 from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
+RESOURCE_KINDS = ("providers", "buckets", "companies", "repositories")
+
 
 def new_engagement():
     return {
         "active": False,
-        "scope": {"domains": [], "ips": [], "networks": [], "authorized": False},
+        "scope": {"domains": [], "ips": [], "networks": [],
+                  **{kind: [] for kind in RESOURCE_KINDS}, "authorized": False},
         "rules": [
             {"type": "no_exploit", "description": "No exploitation without explicit approval"},
             {"type": "scope_boundary", "description": "Only test targets within defined scope"},
@@ -74,8 +78,8 @@ def _parse_scope(raw):
     raw = json.loads(raw) if isinstance(raw, str) else raw
     if not isinstance(raw, dict):
         raise ValueError("Scope must be an object")
-    scope = {"domains": [], "ips": [], "networks": [], "authorized": False}
-    for key in ("domains", "ips", "networks"):
+    scope = new_engagement()["scope"]
+    for key in ("domains", "ips", "networks", *RESOURCE_KINDS):
         values = raw.get(key, [])
         if not isinstance(values, list) or not all(isinstance(v, str) and v for v in values):
             raise ValueError(f"{key} must be a list of nonempty strings")
@@ -84,9 +88,37 @@ def _parse_scope(raw):
                 scope[key].append(target_host(value.removeprefix("*.")))
             elif key == "ips":
                 scope[key].append(str(ipaddress.ip_address(value)))
-            else:
+            elif key == "networks":
                 scope[key].append(str(ipaddress.ip_network(value, strict=False)))
+            else:
+                scope[key].append(resource_identity(key, value))
     return scope
+
+
+def resource_identity(kind, value):
+    """Normalize non-host resource identifiers without accepting URL injection."""
+    if not isinstance(value, str):
+        raise ValueError(f"{kind} identifiers must be strings")
+    value = value.lower()
+    patterns = {
+        "providers": r"aws|gcp|azure",
+        "buckets": r"[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]",
+        "companies": r"[a-z0-9][a-z0-9-]{0,62}",
+        "repositories": r"[a-z0-9][a-z0-9-]*/[a-z0-9_.-]+",
+    }
+    if kind not in patterns or not re.fullmatch(patterns[kind], value) or ".." in value:
+        raise ValueError(f"Invalid {kind} resource identifier")
+    return value
+
+
+def validate_resource(kind, value):
+    state = current_engagement()
+    try:
+        value = resource_identity(kind, value)
+    except ValueError:
+        return False
+    return bool(state["active"] and state["scope"]["authorized"] and
+                value in state["scope"].get(kind, []))
 
 
 def _matches(host, scope):
@@ -141,7 +173,7 @@ def engagement_gate(action: str, target: str = "", scope_json: str = "",
     elif action == "authorize":
         if confirmation.lower() not in ("yes", "y", "approve", "authorized", "confirmed", "true"):
             result = {"status": "not_authorized", "required": "Explicit confirmation required"}
-        elif not state["active"] or not any(state["scope"][k] for k in ("domains", "ips", "networks")):
+        elif not state["active"] or not any(state["scope"][k] for k in ("domains", "ips", "networks", *RESOURCE_KINDS)):
             result = {"status": "not_authorized", "error": "Initialize a nonempty scope first"}
         else:
             state["scope"]["authorized"] = True

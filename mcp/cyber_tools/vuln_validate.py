@@ -2,6 +2,41 @@
 import json
 from datetime import datetime
 import hashlib
+import re
+
+
+def controlled_verification(proof, vuln_type):
+    """Check a replayable differential record, not a caller's boolean 'verified'.
+
+    Records are evidence claims, not cryptographic attestations. HTML reflection
+    alone is deliberately not treated as JavaScript execution.
+    """
+    signals = {"sqli": "sql_error", "lfi": "file_content", "ssrf": "metadata_content",
+               "open_redirect": "redirect_location"}
+    if not isinstance(proof, dict) or proof.get("type") != vuln_type:
+        return False
+    if vuln_type not in signals or proof.get("signal") != signals[vuln_type]:
+        return False
+    if proof.get("baseline_signal") is not False or proof.get("control_signal") is not False:
+        return False
+    if proof.get("probe_signals") != [True, True]:
+        return False
+    statuses = proof.get("statuses")
+    if not isinstance(statuses, list) or len(statuses) != 4 or not all(type(s) is int for s in statuses):
+        return False
+    if not all(200 <= s < 300 for s in statuses[:2]):
+        return False
+    allowed_probe = (lambda s: 300 <= s < 400) if vuln_type == "open_redirect" else (
+        lambda s: 200 <= s < 300 or (vuln_type == "sqli" and s == 500))
+    if not all(allowed_probe(s) for s in statuses[2:]):
+        return False
+    baseline, control = proof.get("baseline_hash"), proof.get("control_hash")
+    probes = proof.get("probe_hashes")
+    if not isinstance(probes, list) or len(probes) != 2:
+        return False
+    if not all(isinstance(h, str) and re.fullmatch(r"[0-9a-f]{64}", h) for h in [baseline, control, *probes]):
+        return False
+    return baseline == control and probes[0] == probes[1] and probes[0] != baseline
 
 SEVERITY_WEIGHTS = {"critical": 10, "high": 8, "medium": 5, "low": 2, "info": 0}
 MAX_CONFIDENCE = 99
@@ -117,6 +152,13 @@ def vuln_validate(finding_json: str) -> str:
         raw_conf = 40
 
     confidence = raw_conf - fp_score
+    # Controlled observations are an alternative proof path, not an additional
+    # generic string heuristic. The existing threshold remains unchanged.
+    has_controlled_proof = controlled_verification(finding.get("verification"), vuln_type)
+    if has_controlled_proof:
+        confidence = max(confidence, 75)
+        result["evidence_scored"].append({"type": "controlled_verification", "score": 75})
+    result["controlled_verification"] = has_controlled_proof
     confidence = max(confidence, 5)
     confidence = min(confidence, MAX_CONFIDENCE)
     result["confidence"] = round(confidence)

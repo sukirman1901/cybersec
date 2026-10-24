@@ -14,6 +14,7 @@ import httpx
 
 from cyber_tools.dork_gen import _CATEGORIES, _TECH_DORKS, _VULN_DORKS
 from cyber_tools.dork_scan import _ENGINE_MAP, _HEADERS
+from cyber_tools.engagement_gate import validate_target
 
 
 def _build_dorks(
@@ -214,8 +215,15 @@ async def dork_hunt(
                     "has_findings": False,
                 }
 
+                if not validate_target(url)["validated"]:
+                    entry["risk"] = "not_tested"
+                    entry["error"] = "outside_authorized_scope"
+                    result["targets"].append(entry)
+                    continue
+
                 try:
-                    resp = await client.get(url, headers=_HEADERS)
+                    # Do not follow an unvalidated redirect to a discovered host.
+                    resp = await client.get(url, headers=_HEADERS, follow_redirects=False)
                     entry["status_code"] = resp.status_code
                     content = resp.text[:5000]  # First 5KB for classification
 
