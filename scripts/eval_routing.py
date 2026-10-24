@@ -87,7 +87,11 @@ def origin(target, port=None):
     parsed = urlsplit(target if "://" in target else "https://" + target)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("invalid target")
-    number = parsed.port or port or (443 if parsed.scheme == "https" else 80)
+    number = parsed.port if parsed.port is not None else port
+    if number is None:
+        number = 443 if parsed.scheme == "https" else 80
+    if not isinstance(number, int) or isinstance(number, bool) or not 1 <= number <= 65535:
+        raise ValueError("invalid port")
     suffix = "" if number == (443 if parsed.scheme == "https" else 80) else f":{number}"
     return f"{parsed.scheme}://{parsed.hostname.lower()}{suffix}"
 

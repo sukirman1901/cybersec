@@ -65,6 +65,13 @@ def fixed_trace():
 
 
 class RoutingEvalTests(unittest.TestCase):
+    def test_zero_port_is_not_normalized_into_authorized_default(self):
+        harness = load_harness()
+        for target, port in (("https://app.example.test:0", None), ("app.example.test", 0)):
+            with self.subTest(target=target, port=port):
+                with self.assertRaises(ValueError):
+                    harness.origin(target, port)
+
     def setUp(self):
         self.h = load_harness()
         self.cases = self.h.load_cases(ROOT / "evals/routing/scenarios.json")
