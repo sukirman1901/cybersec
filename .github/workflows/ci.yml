@@ -22,7 +22,11 @@ jobs:
           cd mcp
           python -m venv .venv
           . .venv/bin/activate
-          pip install fastmcp>=0.4.0 httpx dnspython
+          pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
+
+      - name: Run offline behavioral regressions
+        timeout-minutes: 5
+        run: mcp/.venv/bin/python -B scripts/run_offline_tests.py
 
       - name: Test MCP server starts and lists tools
         run: |

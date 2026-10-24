@@ -3,6 +3,7 @@
 import httpx
 import json
 from datetime import datetime
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 RETEST_CHECKS = {
     "sqli": {
@@ -69,13 +70,28 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
 
     payloads = [original_payload] if original_payload else checks["payloads"]
     still_vulnerable = False
+    incomplete = False
+    result["verified_fixed"] = False
 
     for payload in payloads:
         test = {"payload": payload, "vulnerable": False, "evidence": ""}
-        test_url = f"{target}?{param}={payload}" if param else f"{target}?test={payload}"
+        parts = urlsplit(target)
+        key = param or "test"
+        query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if k != key]
+        query.append((key, payload))
+        test_url = urlunsplit(parts._replace(query=urlencode(query), fragment=""))
         try:
             resp = httpx.get(test_url, timeout=10, follow_redirects=False, verify=False)
             body = resp.text.lower()
+            if resp.status_code >= 400:
+                test["incomplete"] = True
+                incomplete = True
+                test["status_code"] = resp.status_code
+                result["tests"].append(test)
+                continue
+            if 300 <= resp.status_code < 400:
+                test["incomplete"] = True
+                incomplete = True
 
             for indicator in checks["success_indicators"]:
                 if indicator.lower() in body:
@@ -96,6 +112,7 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
             test["status_code"] = resp.status_code
         except httpx.RequestError as e:
             test["error"] = str(e)
+            incomplete = True
 
         result["tests"].append(test)
 
@@ -103,9 +120,13 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
         result["status"] = "still_vulnerable"
         result["verdict"] = f"VULNERABILITY NOT FIXED — {vuln_type} still exploitable"
         result["recommendation"] = "The fix has not resolved the vulnerability. Review the remediation and reapply."
+    elif incomplete:
+        result["status"] = "inconclusive"
+        result["verdict"] = "Retest incomplete: network errors or blocked/error responses"
+        result["recommendation"] = "Restore equivalent access and replay the original evidence before deciding remediation status."
     else:
-        result["status"] = "fixed"
-        result["verdict"] = f"VULNERABILITY FIXED — {vuln_type} no longer exploitable"
-        result["recommendation"] = "The vulnerability appears to be fixed. Update finding status to 'fixed'."
+        result["status"] = "not_reproduced"
+        result["verdict"] = "Original indicators were not reproduced in the tested coverage; remediation is not verified."
+        result["recommendation"] = "Compare with the original request, session and baseline before marking the finding fixed."
 
     return json.dumps(result, indent=2)

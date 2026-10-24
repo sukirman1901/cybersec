@@ -51,11 +51,11 @@ git clone https://github.com/sukirman1901/cybersec.git
 cd cybersec
 python3 -m venv mcp/.venv
 source mcp/.venv/bin/activate
-pip install fastmcp>=0.4.0 httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 deactivate
 ```
 
-> The MCP server needs **fastmcp** and optionally **httpx** + **dnspython** for HTTP requests and DNS queries.
+> The MCP server needs **FastMCP >=3.4.2,<4**, **httpx** and **dnspython**. Target-specific calls require an initialized and explicitly authorized engagement in the same MCP session. See [preflight and audit fixes](mcp/AUDIT-FIXES.md) for setup, result compatibility and enforcement limits.
 
 ### Claude Code
 
@@ -563,7 +563,7 @@ Inspired by HackerOne and Pentest-Tools.com — workflow orchestration, findings
 | `vuln_validate` | Verify exploitability, filter false positives with confidence score |
 | `pentest_workflow` | Chain tools with conditions. 5 templates: web-audit, recon-full, network-scan, bugbounty, cloud-audit |
 | `continuous_monitor` | Track target changes over time with snapshot diffing |
-| `retest_vuln` | Re-run scan to confirm fix. Supports sqli, xss, lfi, ssrf, open_redirect, ssti, log4j |
+| `retest_vuln` | Re-run heuristic probes; failed/blocked retests are inconclusive, negative probes are not proof of a fix. Supports sqli, xss, lfi, ssrf, open_redirect, ssti, log4j |
 | `bulk_scan` | Scan multiple targets at once (port_scan, http_probe, ssl_check, vuln_scan). Max 50 |
 | `vuln_diff` | Compare 2 scan results — new, resolved, changed findings + port changes |
 | `authenticated_scan` | Scan behind login (form/cookie/header auth). Detects IDOR, sensitive data, missing headers |
@@ -819,7 +819,7 @@ Expected output: 180+ tools listed.
 
 ```bash
 source mcp/.venv/bin/activate
-pip install fastmcp httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 ```
 
 ### CLI tools not found
@@ -832,7 +832,7 @@ CLI wrapper tools (nikto, sqlmap, etc.) return an error with install instruction
 
 - **Python 3.10+**
 - Any supported AI coding agent (Claude Code, Cursor, Codex, Gemini CLI, Copilot CLI, Kimi Code, OpenCode, Pi)
-- Python packages: `fastmcp>=0.4.0`, `httpx`, `dnspython` (installed in `.venv`)
+- Python packages: `fastmcp>=3.4.2,<4`, `httpx`, `dnspython` (installed in `.venv`)
 - Optional CLI tools: nikto, sqlmap, amass, wpscan, masscan, xsstrike, gitleaks, cmseek, testssl, sslyze, gobuster, ffuf, nuclei, nmap, hydra, searchsploit
 
 ---

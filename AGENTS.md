@@ -20,7 +20,7 @@ The Cybersec MCP server provides 209 security tools via stdio transport.
 cd mcp
 python3 -m venv .venv
 source .venv/bin/activate
-pip install fastmcp>=0.4.0 httpx dnspython
+pip install 'fastmcp>=3.4.2,<4' httpx dnspython 'impacket>=0.12.0'
 ```
 
 ### Configure MCP server
@@ -46,6 +46,10 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | ./mcp/.venv/
 ```
 
 Expected: 209 tools listed.
+
+Target-specific MCP calls require an initialized and explicitly authorized
+engagement in the same MCP session. A new engagement revokes prior approval.
+See `mcp/AUDIT-FIXES.md` for preflight, result compatibility and enforcement limits.
 
 ## Skills
 

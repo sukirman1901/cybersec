@@ -1,7 +1,6 @@
-"""IDOR/BOLA access validation — multi-role, vertical/horizontal privilege escalation.
+"""Collect IDOR/BOLA access signals, not ownership or policy proof.
 
-Dual-role differential is required for HIGH-confidence BOLA claims. Single-role
-enumeration alone is LOW confidence with an explicit coverage gap.
+Two successful sessions do not establish unauthorized access to private data.
 """
 import hashlib
 import json
@@ -103,30 +102,27 @@ def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5",
     accessible_horizontal = sum(
         1 for t in result["tests"] if t.get("type") == "horizontal_idor" and t.get("accessible"))
     horizontal_total = sum(1 for t in result["tests"] if t.get("type") == "horizontal_idor")
-    result["bola_found"] = dual_role and cross_diffs > 0
-    result["idor_found"] = accessible_horizontal > max(1, horizontal_total * 0.5)
+    result["cross_role_access_observed"] = dual_role and cross_diffs > 0
+    result["sequential_access_observed"] = accessible_horizontal > max(1, horizontal_total * 0.5)
+    # This API has no resource ownership or expected-access policy input. Matching
+    # public/shared resources and identical login pages cannot confirm BOLA.
+    coverage.append("ownership_not_established; expected_access_policy_not_provided")
+    result["assessment"] = "unverified"
+    result["confidence"] = "LOW"
+    result["risk"] = "info"
 
-    if result["bola_found"]:
-        result["confidence"] = "HIGH"
-        result["risk"] = "critical"
+    if result["cross_role_access_observed"]:
         result["summary"] = (
-            f"BOLA/IDOR dual-role differential: {cross_diffs} resources returned matching "
-            f"bodies for role A and B"
+            f"Cross-role access observed for {cross_diffs} resources; matching bodies alone "
+            "do not establish private ownership or unauthorized access"
         )
-    elif result["idor_found"] and dual_role:
-        result["confidence"] = "MEDIUM"
-        result["risk"] = "high"
-        result["summary"] = "Horizontal IDOR signals with dual-role session present but weak cross-role match"
-    elif result["idor_found"]:
-        result["confidence"] = "LOW"
-        result["risk"] = "medium"
+    elif result["sequential_access_observed"]:
         result["summary"] = (
-            "Single-role sequential access only — not sufficient for BOLA; retest with two roles"
+            "Sequential access observed — establish resource ownership, distinct authenticated "
+            "identities and expected denial before confirming IDOR"
         )
     else:
-        result["confidence"] = "MEDIUM" if dual_role else "LOW"
-        result["risk"] = "info"
-        result["summary"] = "No IDOR/BOLA confirmed in tested resources"
+        result["summary"] = "No IDOR/BOLA confirmed; access policy and ownership remain unverified"
 
     result["coverage"] = "; ".join(coverage)
     result["remediation"] = (

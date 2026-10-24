@@ -23,6 +23,8 @@ class TestSqliMcp(unittest.IsolatedAsyncioTestCase):
             return httpx.Response(200, text="stable")
 
         async with Client(mcp) as client:
+            await client.call_tool("engagement_gate", {"action": "init", "target": "example.test"})
+            await client.call_tool("engagement_gate", {"action": "authorize", "confirmation": "yes"})
             tools = {tool.name: tool for tool in await client.list_tools()}
             self.assertEqual(len(tools), 209)
             schema = tools["sqli_detect"].inputSchema

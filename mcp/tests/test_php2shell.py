@@ -163,6 +163,8 @@ class TestPhp2ShellMcp(unittest.IsolatedAsyncioTestCase):
             return httpx.Response(404, text="Not found")
 
         async with Client(mcp) as client:
+            await client.call_tool("engagement_gate", {"action": "init", "target": "example.test"})
+            await client.call_tool("engagement_gate", {"action": "authorize", "confirmation": "yes"})
             tools = {tool.name: tool for tool in await client.list_tools()}
             for name in ("cve_search", "vuln_scan"):
                 self.assertIn("PHP2SHELL", tools[name].description)
