@@ -38,7 +38,8 @@ PHP_CREDITS_EGG = "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000"
 BODY_LIMIT = 200_000
 CONFIG_FIELDS = {name.lower(): name for name in (
     "Server API", "PHP API", "memory_limit", "post_max_size", "upload_max_filesize",
-    "max_input_vars", "session.upload_progress.enabled", "fatal_error_backtraces",
+    "max_input_vars", "session.upload_progress.enabled", "session.serialize_handler",
+    "fatal_error_backtraces",
 )}
 PHP_ERROR_MARKERS = (
     re.compile(r"\bPHP (?:Notice|Warning|Fatal error|Parse error|Deprecated)\b", re.I),
@@ -157,6 +158,7 @@ async def scan_php2shell(target: str, phpinfo_paths: bool = True,
             "Static/stale phpinfo and proxy headers may differ from serving workers; verify origin packages and vendor backports.",
             "No OOM/race/load/malformed probes, uploads, secrets-file discovery or origin/CDN bypass.",
             "PHP settings describe observed configuration only; disabled upload progress does not prove either CVE is fixed.",
+            "CVE-2026-115560 (PHP informational advisory, 2026-10-23) additionally requires a runtime ini_set() switch of session.serialize_handler to php after a php_binary/php_serialize config plus enabled upload progress; observed phpinfo values never prove or refute that runtime switch, so serialize_handler data is configuration coverage, not CVE status.",
             "Unknown/blocked/proxy-hidden evidence is not a clean bill of health.",
         ],
     }

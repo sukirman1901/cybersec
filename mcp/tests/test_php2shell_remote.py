@@ -109,6 +109,30 @@ class TestPhp2ShellRemote(unittest.IsolatedAsyncioTestCase):
         result, _ = await self.run_scan(lambda r: httpx.Response(200, text=PHPINFO.replace(">On<", ">Off<")))
         self.assertEqual(result["php2shell"]["status"], "potentially_affected")
 
+    async def test_serialize_handler_collected_for_session_runtime_switch_cve(self):
+        info = PHPINFO.replace(
+            "<tr><td>post_max_size</td>",
+            '<tr><td>session.serialize_handler</td><td>php</td><td>php</td></tr>\n<tr><td>post_max_size</td>')
+        def handler(request):
+            if request.url.path == "/info.php":
+                return httpx.Response(200, text=info)
+            return httpx.Response(404, text="Missing")
+        result, _ = await self.run_scan(handler)
+        config = result["configuration"][0]
+        self.assertEqual(config["values"]["session.serialize_handler"], ["php", "php"])
+        self.assertEqual(config["values"]["session.upload_progress.enabled"], ["On", "On"])
+        # PHP2SHELL verdict is driven by version only; the session switch cannot be
+        # observed remotely and must not change the CVE-2026-109618/109619 assessment.
+        self.assertEqual(result["php2shell"]["status"], "potentially_affected")
+
+    async def test_limitations_flag_runtime_serialize_switch_context(self):
+        result, _ = await self.run_scan(
+            lambda r: httpx.Response(200, headers={"X-Powered-By": "PHP/8.3.35"}), phpinfo_paths=False)
+        text = " ".join(result["limitations"])
+        self.assertIn("session.serialize_handler", text)
+        self.assertIn("ini_set", text)
+        self.assertIn("2026-10-23", text)
+
     async def test_access_blocked_reported_after_bounded_checks(self):
         result, seen = await self.run_scan(lambda r: httpx.Response(403, headers={"Server": "hcdn"}))
         self.assertEqual(result["coverage"], "access_blocked")
