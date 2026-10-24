@@ -67,11 +67,20 @@ do not follow the generic checklist or Next Skill into unrelated tests/exploitat
   table or incomplete/prerelease, not that it is hidden. Inspect `body_skipped`
   and truncation records: unexpectedly compressed bodies are not decompressed.
 - `configuration` contains only allowlisted phpinfo fields with source URLs:
-  SAPI, memory/upload/input limits, upload progress and fatal backtrace settings.
-  phpinfo may be static/stale and is not verified RCE. Upload progress `Off` is
-  not proof either CVE is fixed; configuration signals never override version
-  evidence or resolve conflicting versions. Do not export entire phpinfo pages,
-  session-cookie values, environment variables or secrets.
+  SAPI, memory/upload/input limits, upload progress, session serialize handler and
+  fatal backtrace settings. phpinfo may be static/stale and is not verified RCE.
+  Upload progress `Off` is not proof either CVE is fixed; configuration signals
+  never override version evidence or resolve conflicting versions. Do not export
+  entire phpinfo pages, session-cookie values, environment variables or secrets.
+- CVE-2026-115560 (PHP informational advisory, 2026-10-23): an unlikely RCE vector
+  needs a runtime `ini_set()` switch of `session.serialize_handler` to `php` after
+  a `php_binary`/`php_serialize` config, plus enabled upload progress. Remote
+  evidence cannot prove or refute that runtime switch — `serialize_handler=php`
+  in phpinfo is collection coverage only, never "vulnerable" on its own. Defense
+  guidance stays unupgraded: update to the next bugfix release or set
+  `session.upload_progress.enabled=0` before request parsing (php.ini or FPM pool,
+  not `ini_set()`/`.user.ini`) and restart every worker; if that was already
+  applied for CVE-2026-109619, no further action is needed.
 - `vuln_scan` still offers header-only PHP2SHELL correlation inside its broader
   checks. Do not run reference race harnesses, OOM/multipart load probes,
   malformed requests, webshell uploads or origin/WAF bypass for identification.
@@ -80,6 +89,7 @@ do not follow the generic checklist or Next Skill into unrelated tests/exploitat
   persistent workers. A CLI binary alone does not prove the FPM runtime was updated.
 
 References: [PHP advisory](https://www.php.net/archive/2026.php#2026-10-21-5),
+[PHP session upload progress advisory](https://www.php.net/archive/2026.php#2026-10-23-1),
 [VulnCheck analysis](https://www.vulncheck.com/blog/php2shell-vulnerabilities).
 
 ### Next Skill
