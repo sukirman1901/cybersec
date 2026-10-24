@@ -581,9 +581,13 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                             "patch_priority": entry.get("patch_priority"),
                             "source": "FIRST EPSS + CISA KEV (epss_lookup)",
                         }
+                        for field in ("kev_status", "stale_in_kev", "epss_date", "patch_priority_basis"):
+                            if field in entry:
+                                finding["intel"][field] = entry[field]
                         intel_summary["enriched"] += 1
                 intel_summary["unknown_not_in_feed"] = intel.get("unknown_not_in_feed", [])
                 intel_summary["references"] = intel.get("references", [])
+                intel_summary["sources"] = intel.get("sources", {})
         except Exception as error:  # enrichment must never fail the scan
             intel_summary["error"] = f"epss enrichment failed: {error}"
         result_enrichment = intel_summary

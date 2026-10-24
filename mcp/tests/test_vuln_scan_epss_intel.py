@@ -7,6 +7,7 @@ and enrichment failures must never fail the scan itself.
 """
 
 import json
+from copy import deepcopy
 import sys
 import unittest
 from pathlib import Path
@@ -73,6 +74,23 @@ class TestVulnScanEpssIntel(unittest.IsolatedAsyncioTestCase):
             result, _ = await self.scan()
         intel.assert_not_awaited()
         self.assertTrue(all("intel" not in v for v in result["vulnerabilities"]))
+
+    async def test_source_uncertainty_and_dates_survive_enrichment(self):
+        intel = deepcopy(FAKE_INTEL)
+        intel["sources"] = {"kev": {"status": "stale", "fetched_at": "2026-10-23T00:00:00Z"}}
+        for entry in intel["entries"]:
+            entry.update(in_kev=None, stale_in_kev=True, kev_status="stale",
+                         epss_date="2026-10-24", patch_priority_basis="EPSS only")
+        with patch.object(vs, "_epss_lookup", AsyncMock(return_value=intel)):
+            result, _ = await self.scan(epss_intel=True)
+        self.assertEqual(result["intel_summary"]["sources"], intel["sources"])
+        for finding in result["vulnerabilities"]:
+            if "intel" in finding:
+                self.assertIsNone(finding["intel"]["in_kev"])
+                self.assertTrue(finding["intel"]["stale_in_kev"])
+                self.assertEqual(finding["intel"]["epss_date"], "2026-10-24")
+                self.assertEqual(finding["intel"]["kev_status"], "stale")
+                self.assertNotEqual(finding["confidence"], "verified")
 
     async def test_intel_failure_never_fails_the_scan(self):
         with patch.object(vs, "_epss_lookup", AsyncMock(side_effect=RuntimeError("FIRST down"))):

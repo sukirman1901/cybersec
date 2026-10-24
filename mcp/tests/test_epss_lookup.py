@@ -55,7 +55,10 @@ class TestEpssLookup(unittest.IsolatedAsyncioTestCase):
                           real(transport=httpx.MockTransport(respond), **kw)):
             result = await ep.epss_lookup([f"CVE-2026-{i:04d}" for i in range(40)])
         self.assertLessEqual(called["n"], 25)
-        self.assertEqual(result["count"], 0)
+        # Requested CVEs remain visible even without EPSS rows (KEV is independent).
+        self.assertEqual(result["count"], 25)
+        self.assertEqual(len(result["unknown_not_in_feed"]), 25)
+        self.assertTrue(all(entry["epss"] is None for entry in result["entries"]))
 
 
 if __name__ == "__main__":
