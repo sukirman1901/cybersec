@@ -1060,7 +1060,14 @@ def bulk_scan(targets: str, tool: str = "port_scan") -> str:
 
 @mcp.tool()
 def vuln_diff(scan_before: str, scan_after: str) -> str:
-    """Novelty-aware diff of two scans (vulnerabilities/findings/open_ports). Labels novel, resolved, changed, regression."""
+    """Offline diff of two stored scans (vulnerabilities/findings/open_ports).
+
+    Labels novel, resolved, changed and regression. Separate intel_changes compare
+    stored EPSS, priority and KEV/source status for matching findings, without
+    changing finding identity or confidence. Timestamp-only changes and fresh vs
+    cached status are ignored. Lost feed availability is degraded data quality,
+    not reduced risk. No network lookups or historical re-enrichment.
+    """
     return _vuln_diff(scan_before, scan_after)
 
 @mcp.tool()
