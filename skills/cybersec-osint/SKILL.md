@@ -6,20 +6,28 @@ description: Use when user asks for advanced OSINT, shodan search, URL history, 
 ## OSINT & Advanced Recon Methodology
 
 ### Execution Rule
-**Create a todo list from the checklist, then execute all steps immediately. Don't ask for confirmation. Just run the tools and mark items complete as you go.**
+Select relevant intelligence sources from the requested domain/query/input.
+Read-only intelligence and offline URL filtering need no engagement. Before active
+target probes require `engagement_gate` `init` + `authorize`; confirmed `extend`
+only for additional user-approved resources. Discovery is not authorization.
+Record coverage/source dates and redact secrets/PII; archive entries are historical,
+not evidence of a currently reachable vulnerable service.
 
 ### Quick Dorking
-If user says "dorking" with a target or category, run `dork_hunt(category, target, probe=True, validate=True)` immediately. One call = full pipeline.
+For dork results only, use `dork_hunt(category=category, target=domain, probe=False, validate=False)`
+or `dork_search`. Do not enable probes/validation or `dork_and_scan` unless the user
+requested active testing and every resulting resource is authorized. Preserve
+scope denials rather than replacing a bounded query with global target discovery.
 
 ### Full OSINT Checklist
-Run in order when doing full recon:
+Choose applicable branches for a full OSINT request; do not run remote directory/API scans for intelligence-only requests:
 
-1. `shodan_lookup(target)` — exposed devices, services, ports, CVEs
-2. `wayback_urls(target)` — historical URLs, hidden endpoints
+1. `shodan_lookup(query=query)` — exposed devices, services, ports, CVEs
+2. `wayback_urls(domain=domain)` — historical URLs, hidden endpoints
 3. `gf_patterns(urls)` — sensitive endpoints from wayback results
 4. `dir_bruteforce(target)` + `api_fuzz(target)` — hidden paths
-5. `crt_search(target)` — certificate transparency, subdomains
-6. `dork_gen(category, target)` → `dork_scan(dorks)` — or just `dork_hunt()` for full pipeline; `dork_and_scan(category="vuln_sites")` for one-call target discovery
+5. `crt_search(domain=domain)` — certificate transparency, subdomains
+6. `dork_gen(category=category, target=domain)` → `dork_scan(dorks=dorks)` — retain a target-bound intelligence query; discovered URLs require separate scope approval before probing
 7. For people investigation: `phone_osint` / `telegram_osint` / `social_osint` / `email_osint`
 
 ### Tools Available
@@ -29,4 +37,6 @@ Run in order when doing full recon:
 OSINT report: exposed services, historical URLs, sensitive endpoints, leaked info, attack surface expansion.
 
 ### Next Skill
-If scanning not yet done, load `cybersec-scanning`. If scanning done, load `cybersec-bugbounty`.
+Stop after the requested intelligence summary. Load `cybersec-scanning` or
+`cybersec-bugbounty` only for separately requested active testing within approved
+scope; an unfinished pentest checklist is not authorization to continue.

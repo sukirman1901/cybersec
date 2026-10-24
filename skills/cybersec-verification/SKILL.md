@@ -7,7 +7,19 @@ description: Use when about to claim scan results, found vulnerabilities, or com
 
 ## Principle
 
-Run the tool. Show the output. Then state the finding.
+Use relevant effect-specific evidence, not an automatic broad rescan. Before
+active target probes require `engagement_gate` `init` + `authorize`; confirmed
+`extend` only for additional user-approved resources. Offline artifact review needs
+no engagement. Record coverage and redact secrets before displaying/exporting
+evidence. 403/timeouts/blocked scans are inconclusive, not clean or false positive.
+
+Verdicts: observed (direct fact), candidate (hypothesis), confirmed-by-execution
+(controlled observed effect), inconclusive (coverage missing), not_reproduced
+(attempt did not reproduce), verified-fixed (patch/runtime evidence plus equivalent
+original PoC/session/control retest). Negative scans alone cannot prove clean/fixed.
+`vuln_validate` scores supplied claims, not execution or cryptographic attestation.
+XSS reflection is not JavaScript execution; require browser-context execution
+evidence. Generated/simulated callbacks are not real OAST confirmation.
 
 ## How To Verify
 
@@ -24,13 +36,13 @@ BEFORE claiming any security finding:
 | Claim | How to verify |
 |-------|---------------|
 | Port is open | `port_scan` output showing "open" |
-| Vulnerability found | `vuln_scan` or `nuclei_scan` output |
+| Vulnerability candidate | `vuln_scan` or `nuclei_scan` alert; confirm exact effect separately |
 | Hash identified | `hash_analyze` output |
 | S3 bucket public | `s3_scanner` output: 200 + listing |
 | Subdomain found | DNS resolution or `crt_search` confirms |
 | CVE exists | `cve_search` output |
 | Exploit works | Actual exploit output |
-| Fix applied | Re-run scan shows issue resolved |
+| Fix verified | Actual source/runtime patch evidence plus equivalent original PoC/session/control retest; blocked or negative scan alone is insufficient |
 
 ### PHP2SHELL evidence gate
 
@@ -69,7 +81,7 @@ Never publish raw phpinfo, environment secrets or session-cookie values.
 
 **Vulnerability:**
 ```
-[nuclei_scan] → critical CVE-2024-XXXX → "Critical CVE detected"
+[nuclei_scan] → CVE alert → "Candidate CVE match; impact unconfirmed"
 ```
 
 **Hash:**
@@ -106,7 +118,7 @@ IDOR/BOLA: dual-role cookies/headers required for HIGH confidence. Single-role e
 - CMS/path scanners (wordpress/joomla/drupal/magento): HIGH disclosure only with **body markers**, never status 403 alone.
 - `sqli_detect` / `xss_detect`: default `preset=observe-first` (bounded). Use `staging-deep` only with approval.
 - CLI wrappers (`nikto`, `sqlmap`, …): `coverage=cli_missing` means the tool did **not** run — do not report clean.
-- `auto_exploit`: requires approved `approval_id`; `exploited=true` only after `vuln_validate` confidence ≥ 60 and dual-proof evidence.
+- `auto_exploit`: requires approved `approval_id`. Score thresholds, controlled-evidence records and `exploited=true` flags are claims, not independent exploit proof. Inspect actual baseline/control/probe execution evidence and state only its demonstrated effect.
 
 ## When To Apply
 

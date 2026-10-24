@@ -7,6 +7,16 @@ description: Use when facing 2+ independent targets, scans, or testing tasks tha
 
 ## Overview
 
+Select relevant independent tasks only when host delegation is exposed and allowed;
+otherwise use sequential tools. Before active target probes require `engagement_gate`
+`init` + `authorize` in the tool session; confirmed `extend` only for additional
+user-approved resources, never discovered hosts/buckets. Workers must not re-init
+shared scope or assume another session's authorization transfers. Record coverage,
+redact secrets before delegation/output, and stop denied branches. Assign a shared
+request/time/concurrency budget divided among workers; cancel remaining probes on
+scope change, throttling, owner cancellation or unexpected side effects. Aggregate
+completed, cancelled and skipped tasks without calling partial coverage complete.
+
 When you have multiple independent targets to scan (different hosts, different services, different testing domains), running them sequentially wastes time. Each scan is independent and can happen in parallel.
 
 **Core principle:** Dispatch one agent per independent target or testing domain. Let them work concurrently.
@@ -75,8 +85,8 @@ Each agent gets:
 ```
 Agent 1 → nmap_scan(target_A) + service_fingerprint on open ports
 Agent 2 → nmap_scan(target_B) + ssl_check on web ports
-Agent 3 → subdomain_enum(target_C) + http_probe_target for each subdomain
-Agent 4 → cloud_enum(company) + s3_scanner for found buckets
+Agent 3 → subdomain_enum(target_C); probe only already-authorized subdomains
+Agent 4 → cloud_enum(company); s3_scanner only for authorized bucket names
 ```
 
 ### 4. Review and Aggregate
@@ -99,10 +109,11 @@ Tools to use: [specific tool names]
 Your task:
 1. Run [tool_1] with appropriate parameters
 2. Run [tool_2] on findings from step 1
-3. Collect ALL output (success + errors)
-4. Return: Raw tool output + summary of what you found
+3. Collect minimal relevant evidence (success + errors), redacting secrets/PII
+4. Return: Redacted evidence + findings/status/coverage summary
 
-Collect ALL output (success + errors). Exploit tools allowed if user requests.
+Keep request/time budget and stop reasons. Exploit requests still require scope,
+technique approval and approval_artifact where required; never escalate automatically.
 ```
 
 ## Common Mistakes
@@ -111,7 +122,7 @@ Collect ALL output (success + errors). Exploit tools allowed if user requests.
 **✅ Specific:** "Scan target_A port 80,443 + probe HTTP services"
 
 **❌ No output requirement:** Agent might just say "Done"
-**✅ Output:** "Return raw output from each tool + summary table"
+**✅ Output:** "Return redacted evidence from each tool + summary/coverage table"
 
 **❌ No constraints:** Agent might run hydra_brute without authorization
 **✅ Constraints:** "Passive recon only, no brute force"

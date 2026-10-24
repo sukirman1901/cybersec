@@ -5,6 +5,14 @@ description: Desktop application security testing methodology — static analysi
 
 ## Desktop App Testing Methodology
 
+Select relevant branches by artifact type and supplied file path; local static
+inspection does not launch an app or probe embedded URLs. Before separately
+requested active target probes require `engagement_gate` `init` + `authorize`;
+confirmed `extend` only for additional user-approved resources. Runtime/mobile
+instrumentation requires the specified device/process and consent, not an assumed
+connected device. Record coverage/missing tools and redact secrets from strings,
+configs, keychain and memory evidence. Missing flags alone are not exploit proof.
+
 ### 1. Static Analysis
 - Extract strings from binaries via `desktop_strings` — find secrets, API keys, URLs
 - Check for hardcoded credentials, tokens, private keys
@@ -38,7 +46,7 @@ description: Desktop application security testing methodology — static analysi
 - Mobile TLS: `ssl_pinning_check` — cert verification behavior, HSTS
 
 ### 7. Reporting
-- Use `report` to generate findings
+- Use `generate_report` to generate findings
 - Include evidence (file paths, strings, config content)
 - Transition to `cybersec-report`
 

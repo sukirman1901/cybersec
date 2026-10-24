@@ -5,6 +5,15 @@ description: AI/LLM security testing methodology — prompt injection, guardrail
 
 ## AI/LLM Testing Methodology
 
+Select relevant tests for the specified endpoint/model, not all categories.
+Offline prompt review needs no engagement. Before active target probes require
+`engagement_gate` `init` + `authorize`; confirmed `extend` is only for additional
+user-approved resources, never discovered tools/services. Stop blocked branches,
+record coverage and redact secrets/PII from prompts and responses. Use synthetic
+canaries and test accounts; DoS needs explicit load approval, request/token/cost
+limits and cancellation criteria, not automatic context escalation. Suspected
+memorization is not proof of training provenance or private-data extraction.
+
 ### 1. Reconnaissance
 - Identify LLM endpoint, API version, model name
 - Document accepted input format, auth method, rate limits
@@ -29,7 +38,7 @@ description: AI/LLM security testing methodology — prompt injection, guardrail
 - Verify agent routing and safety boundaries
 
 ### 6. Reporting
-- Use `report` to generate findings with OWASP AI Top 10 mapping
+- Use `generate_report` to generate findings with OWASP AI Top 10 mapping
 - Include evidence (prompts, responses) and remediation per finding
 - Transition to `cybersec-report` for final documentation
 

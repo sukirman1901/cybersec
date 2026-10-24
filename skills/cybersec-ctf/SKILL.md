@@ -5,6 +5,12 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 
 ## CTF Testing Methodology
 
+Select the relevant challenge only; a CTF label does not authorize every attack.
+Before active target probes require `engagement_gate` `init` + `authorize` for the
+lab origin; confirmed `extend` only for additional user-approved resources, never
+discovered internal hosts. Respect request/time limits and challenge rules. Record
+coverage, redact secrets/flags from public evidence and stop on denied scope.
+
 ### 1. Reconnaissance
 - Probe target with `http_probe_target`, `tech_detect`, `waf_detection`
 - Discover hidden endpoints with `dir_bruteforce`, `param_discovery`
@@ -13,7 +19,8 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Score Board / admin panel discovery
 
 ### 2. Injection Attacks
-- Test SQL/NoSQL injection: `nosql_inject`, `cmd_injection`
+- SQLi primary: `sqli_detect`; optional `sqlmap_check` only for approved deeper validation with the actual input endpoint
+- NoSQL: `nosql_inject` only for NoSQL input; `cmd_injection` is for command execution sinks, not SQLi
 - Test template injection: `ssti_detect`
 - Test XXE: `xxe_detect`
 - Test SSRF: `ssrf_detect`
@@ -43,7 +50,8 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Python deserialization: `pickle_deserialize`
 
 ### 6. XSS & Client-Side
-- Test reflected/stored/DOM XSS: `csp_analyze`, `cookie_audit`
+- XSS primary: `xss_detect`; optional `xsstrike_check` for approved deeper validation. Reflection alone is a candidate, not JavaScript execution; require browser-context execution evidence
+- `csp_analyze` and `cookie_audit` provide supporting configuration evidence, not XSS proof
 - CSP bypass, DOM manipulation
 - HTTP header injection XSS
 - HTTP request splitting: `http_request_splitting`
@@ -69,17 +77,17 @@ description: Capture The Flag methodology — OWASP Juice Shop style challenges 
 - Supply chain: `supply_chain`
 
 ### 10. Reporting
-- Use `report` to document findings with evidence
+- Use `generate_report` to document findings with evidence
 - Map each finding to OWASP Top 10 / ASVS category
 - Include exploit steps, payloads, and remediation
 - Transition to `cybersec-report`
 
 ## Tools
 - Recon: `http_probe_target`, `tech_detect`, `waf_detection`, `dir_bruteforce`, `param_discovery`, `misplaced_files`
-- Injection: `nosql_inject`, `cmd_injection`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `lfi_detect`, `ldap_inject`, `crlf_inject`, `prompt_injection`
+- Injection: `sqli_detect`, `sqlmap_check`, `nosql_inject`, `cmd_injection`, `ssti_detect`, `xxe_detect`, `ssrf_detect`, `lfi_detect`, `ldap_inject`, `crlf_inject`, `prompt_injection`
 - Auth: `jwt_analyze`, `jwt_forgery`, `oauth_scan`, `api_auth`, `hydra_brute`
 - Access: `bypass_403`, `idor_detect`, `csrf_detect`, `race_condition`, `mass_assignment`
 - Input: `upload_bypass`, `captcha_test`, `graphql_introspect`, `api_fuzz`, `pickle_deserialize`
 - Crypto: `jwt_forgery`, `ssl_check`, `stego_detect`
 - Exposure: `metrics_check`, `log_exposure`, `secret_scanner`, `exposed_git`, `exposed_backup`
-- Web: `csp_analyze`, `cookie_audit`, `cors_check`, `open_redirect`, `http_request_splitting`, `graphql_depth_bypass`
+- Web: `xss_detect`, `xsstrike_check`, `csp_analyze`, `cookie_audit`, `cors_check`, `open_redirect`, `http_request_splitting`, `graphql_depth_bypass`
