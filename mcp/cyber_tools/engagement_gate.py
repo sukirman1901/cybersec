@@ -180,6 +180,34 @@ def engagement_gate(action: str, target: str = "", scope_json: str = "",
             state["approved_at"] = datetime.now(timezone.utc).isoformat()
             state["approved_by"] = "client-confirmation"
             result = {"status": "authorized", "scope": state["scope"], "approved_at": state["approved_at"]}
+    elif action == "extend":
+        if not state["active"] or not state["scope"]["authorized"]:
+            result = {"error": "Extend requires an initialized and authorized engagement; "
+                               "call init and authorize first"}
+        elif confirmation.lower() not in ("yes", "y", "approve", "authorized", "confirmed", "true"):
+            result = {"error": "Extending the engagement scope is a new authorization decision; "
+                               "resend the extend call with confirmation='yes'"}
+        elif not scope_json:
+            result = {"error": "extend requires scope_json with the additional resources"}
+        else:
+            try:
+                added_scope = _parse_scope(scope_json)
+            except (ValueError, TypeError, UnicodeError) as error:
+                result = {"error": f"Invalid scope extension: {error}"}
+            else:
+                added = []
+                for kind in ("domains", "ips", "networks", *RESOURCE_KINDS):
+                    values = added_scope.get(kind, [])
+                    existing = state["scope"].setdefault(kind, [])
+                    for value in values:
+                        if value not in existing:
+                            existing.append(value)
+                            added.append(f"{kind}:{value}")
+                state["approved_at"] = datetime.now(timezone.utc).isoformat()
+                state["approved_by"] = "client-confirmation"
+                result = {"status": "extended", "added": added,
+                          "scope": copy.deepcopy(state["scope"]),
+                          "approved_at": state["approved_at"]}
     elif action == "check":
         item = next((r for r in state["rules"] if r["type"] == rule), None)
         result = ({"rule": item, "applies": True, "note": "Rule presence does not grant approval"}
@@ -192,5 +220,5 @@ def engagement_gate(action: str, target: str = "", scope_json: str = "",
                   "rules_active": len(state["rules"]), "authorized": state["scope"]["authorized"],
                   "approved_at": state["approved_at"] or "not yet approved"}
     else:
-        result = {"error": "Unknown action", "actions": ["init", "validate", "check", "add_rule", "authorize", "status"]}
+        result = {"error": "Unknown action", "actions": ["init", "validate", "extend", "check", "add_rule", "authorize", "status"]}
     return json.dumps(result, indent=2)

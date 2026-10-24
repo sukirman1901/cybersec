@@ -196,6 +196,62 @@ class TestDiscoveryBoundaries(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(seen, ["fixture.test"])
 
 
+class TestScopeExtension(unittest.TestCase):
+    def test_extend_merges_scope_and_keeps_authorization(self):
+        with engagement_context(new_engagement()) as current_state:
+            engagement_gate("init", scope_json=json.dumps({"domains": ["fixture.test"]}))
+            engagement_gate("authorize", confirmation="yes")
+            result = json.loads(engagement_gate("extend",
+                scope_json=json.dumps({"buckets": ["company-prod"], "ips": ["192.0.2.10"]}),
+                confirmation="yes"))
+            self.assertEqual(result["status"], "extended")
+            state = json.loads(engagement_gate("status"))
+            self.assertIn("company-prod", state["scope"]["buckets"])
+            self.assertIn("192.0.2.10", state["scope"]["ips"])
+            self.assertIn("fixture.test", state["scope"]["domains"])
+            self.assertTrue(state["scope"]["authorized"])
+            check_dispatch("s3_scanner", {"bucket_name": "company-prod"})
+
+    def test_extend_requires_an_active_authorized_engagement(self):
+        with engagement_context(new_engagement()):
+            engagement_gate("init", scope_json=json.dumps({"domains": ["fixture.test"]}))
+            result = json.loads(engagement_gate("extend",
+                scope_json=json.dumps({"buckets": ["b"]}), confirmation="yes"))
+            self.assertIn("error", result)
+            self.assertIn("authorize", result["error"])
+
+    def test_extend_requires_explicit_confirmation(self):
+        with engagement_context(new_engagement()):
+            engagement_gate("init", scope_json=json.dumps({"domains": ["fixture.test"]}))
+            engagement_gate("authorize", confirmation="yes")
+            result = json.loads(engagement_gate("extend",
+                scope_json=json.dumps({"buckets": ["company-prod"]})))
+            self.assertIn("error", result)
+            self.assertIn("confirmation", result["error"])
+            state = json.loads(engagement_gate("status"))
+            self.assertNotIn("company-prod", state["scope"]["buckets"])
+
+    def test_extend_rejects_invalid_identifiers_and_keeps_scope(self):
+        with engagement_context(new_engagement()):
+            engagement_gate("init", scope_json=json.dumps({"domains": ["fixture.test"]}))
+            engagement_gate("authorize", confirmation="yes")
+            result = json.loads(engagement_gate("extend",
+                scope_json=json.dumps({"buckets": ["fixture@outside.test"]}), confirmation="yes"))
+            self.assertIn("error", result)
+            state = json.loads(engagement_gate("status"))
+            self.assertNotIn("fixture@outside.test", state["scope"].get("buckets", []))
+            self.assertTrue(state["scope"]["authorized"])
+
+    def test_extended_engagement_is_reusable_after_all(self):
+        with engagement_context(new_engagement()):
+            engagement_gate("init", scope_json=json.dumps({"domains": ["fixture.test"]}))
+            engagement_gate("authorize", confirmation="yes")
+            r = json.loads(engagement_gate("extend",
+                scope_json=json.dumps({"domains": ["beta.fixture.test"]}), confirmation="yes"))
+            self.assertEqual(r["status"], "extended")
+            check_dispatch("port_scan", {"target": "https://beta.fixture.test"})
+
+
 class TestMcpParallelism(unittest.IsolatedAsyncioTestCase):
     async def test_two_calls_can_start_in_the_same_session(self):
         from server import mcp
