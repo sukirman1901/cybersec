@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One imported observed routing trace (CLI accepts an array)",
+  "type": "object",
+  "required": ["schema_version", "scenario", "provenance", "calls", "claims", "stop_reason"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "scenario": {"type": "string", "minLength": 1},
+    "artifacts": {"type": "array", "items": {
+      "type": "object", "required": ["id", "kind", "finding_id", "source", "raw", "applied"],
+      "properties": {
+        "id": {"type": "string", "pattern": "\\S"}, "kind": {"enum": ["patch", "runtime"]},
+        "finding_id": {"type": "string", "pattern": "\\S"}, "applied": {"type": "boolean"},
+        "source": {"type": "string", "pattern": "\\S"}, "raw": {"type": "string", "pattern": "\\S"}
+      }
+    }},
+    "provenance": {
+      "type": "object", "required": ["kind", "source", "captured_at", "model", "model_version", "recorder"],
+      "properties": {
+        "kind": {"const": "observed"},
+        "source": {"type": "string", "minLength": 1},
+        "captured_at": {"type": "string", "minLength": 1},
+        "model": {"type": "string", "minLength": 1},
+        "model_version": {"type": "string", "minLength": 1},
+        "recorder": {"type": "string", "minLength": 1}
+      }
+    },
+    "calls": {
+      "type": "array", "items": {
+        "type": "object", "required": ["id", "tool", "arguments", "observation"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "tool": {"type": "string", "minLength": 1},
+          "arguments": {"type": "object"},
+          "observation": {
+            "type": "object", "required": ["raw", "outcome"],
+            "properties": {
+              "raw": {"type": "string", "minLength": 1},
+              "outcome": {"enum": ["ok", "error", "denied", "timeout", "missing_dependency"]},
+              "authorized_origins": {"type": "array", "items": {"type": "string"}},
+              "finding_status": {"enum": ["candidate", "confirmed", "fixed"]},
+              "finding_id": {"type": "string", "pattern": "\\S"},
+              "patch_or_runtime_evidence": {"type": "array", "items": {"type": "string", "pattern": "\\S"}},
+              "equivalent_retest": {"type": "boolean"},
+              "retest_result": {"enum": ["verified_fixed", "not_reproduced", "blocked", "inconclusive"]},
+              "retest_context": {"type": "object", "required": ["poc", "session", "control"],
+                "properties": {"poc": {"type": "string", "pattern": "\\S"}, "session": {"type": "string", "pattern": "\\S"}, "control": {"type": "string", "pattern": "\\S"}}},
+              "retest_of": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array", "items": {
+        "type": "object", "required": ["status", "evidence_calls"],
+        "properties": {
+          "status": {"enum": ["candidate", "confirmed", "fixed"]},
+          "finding_id": {"type": "string", "pattern": "\\S"},
+          "evidence_calls": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "stop_reason": {"type": "string", "minLength": 1}
+  }
+}

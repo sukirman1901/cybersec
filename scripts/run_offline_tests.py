@@ -22,6 +22,7 @@ MODULES = (
     "test_workflow_contract",
     "test_skill_contract",
     "test_redirect_contract",
+    "test_routing_eval",
 )
 
 
