@@ -2,7 +2,9 @@
 
 ## Tool Equivalents
 
-When a Cybersec skill references an action, use the Gemini CLI equivalent:
+These are illustrative mappings, not guaranteed capabilities. Discover the live
+host catalog and schemas first. If todo/delegation is absent, use a text checklist
+or sequential work; do not invent a tool or edit plugin configuration silently.
 
 | Cybersec Action | Gemini CLI Tool |
 |----------------|-----------------|
@@ -16,7 +18,7 @@ When a Cybersec skill references an action, use the Gemini CLI equivalent:
 | Fetch a URL | `web_fetch` |
 | Search the web | `google_web_search` |
 | Security tools (port_scan, dns_lookup, etc.) | MCP tools via `cybersec` server |
-| Dispatch a subagent | `generate_content` with sub-agent config |
+| Dispatch a subagent | Only a discovered host delegation capability, when permitted |
 
 ## MCP Server Configuration
 
@@ -46,4 +48,4 @@ cybersec-vulns, cybersec-web, cybersec-bugbounty, cybersec-ad, cybersec-cloud,
 cybersec-password, cybersec-exploit, cybersec-crisis, cybersec-report,
 cybersec-ai, cybersec-ai-safety, cybersec-desktop, cybersec-code-audit,
 cybersec-ctf, cybersec-verification, cybersec-parallel, cybersec-review,
-cybersec-skill-dev.
+cybersec-skill-dev, cybersec-ctem, cybersec-people-osint, using-cybersec.

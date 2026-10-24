@@ -11,6 +11,12 @@ CTEM is a continuous loop: **Discovery → Validation → Prioritization → Rem
 
 ## Prerequisites
 
+Select relevant phases within an agreed monitoring window, aggregate request/time
+budget and cancellation policy; a planning request returns a schedule, not scans.
+Use confirmed `extend` only for additional user-approved resources; discovered
+hosts remain candidates until authorized. Record coverage gaps and redact secrets.
+Do not infer continuous execution, scheduling or remediation from a returned plan.
+
 - **Establish scope** — define which assets, IP ranges, domains are in scope
 - **engagement_gate** — `init` + `authorize` is required before any active probing (Phase 1 and everything after); read-only intelligence lookups run without an engagement
 - **Preset** — default `observe-first`; opt into `staging-deep` only on authorized staging assets
@@ -21,7 +27,7 @@ CTEM is a continuous loop: **Discovery → Validation → Prioritization → Rem
 
 - [ ] Run `subdomain_enum` on target domain
 - [ ] Run `dns_lookup` to get A/AAAA/MX/NS records
-- [ ] Run `port_scan` on discovered hosts (all common ports)
+- [ ] Run `port_scan` only on authorized hosts and approved ports
 - [ ] Run `http_probe_target` on web services
 - [ ] Run `tech_detect` to identify technologies
 - [ ] Run `crt_search` for certificate transparency data
@@ -50,9 +56,9 @@ JSON attack surface map + stored monitoring snapshot
   - Auth: `authenticated_scan` if login endpoints found
   - Headers: `cors_check`, `csp_analyze`, `cookie_audit`
   - Advanced: `bypass_403`, `smuggling_check`, `log4j_scan`, `jwt_forgery`
-- [ ] For each finding, run `vuln_validate` to confirm exploitability
-- [ ] Filter out false positives (vuln_validate returns is_false_positive)
-- [ ] Add confirmed findings to `findings_manager` (action: add)
+- [ ] Use `vuln_validate` to score supplied evidence/claims, not execution or attestation of an exploit
+- [ ] Preserve candidates and inconclusive results; scoring flags alone cannot discard false positives or confirm impact
+- [ ] Add findings to `findings_manager` with evidence status, confidence and coverage; confirmed requires observed controlled effect
 - [ ] If exploit DB available, run `exploit_db_search` for known exploits
 
 ### MCP Tools
@@ -96,12 +102,12 @@ Prioritized findings list with risk scores and remediation timeline
 
 - [ ] Generate remediation plan using `report_export` (format: html)
 - [ ] For each finding, provide specific fix recommendations
-- [ ] After fixes are applied, run `retest_vuln` to confirm fix
+- [ ] After fixes are applied, run `retest_vuln`; inspect result and original PoC/session/control equivalence, not just a negative scan
 - [ ] Run `vuln_diff` comparing before/after scan results
 - [ ] Update `findings_manager` status:
   - "fixing" → when remediation in progress
-  - "fixed" → when vuln no longer exploitable
-  - "retested" → after successful retest
+  - "fixed" → only with patch/runtime evidence and equivalent original PoC plus controls supporting verified-fixed
+  - "retested" → record actual verdict; `not_reproduced` is not verified-fixed, 403/timeouts are inconclusive
   - "wont_fix" → if risk accepted
 - [ ] Record new scan with `continuous_monitor` (action: record)
 - [ ] Generate final report with `report_export`
@@ -118,12 +124,12 @@ Remediation report, retest results, updated findings database
 
 ## Continuous Loop
 
-After Phase 4, the cycle restarts:
+After Phase 4, restart only within the approved monitoring window and budget:
 
 1. **Schedule** next discovery scan (daily/weekly/monthly based on risk)
 2. **Record** new scan with `continuous_monitor`
 3. **Diff** against previous scan with `continuous_monitor` (action: diff)
-4. **Validate** any new findings with `vuln_validate`
+4. **Assess** new finding evidence with `vuln_validate`; the score is not exploit proof
 5. **Score** new findings with `risk_score`
 6. **Remediate** critical/high findings immediately
 7. **Retest** to confirm fixes
@@ -146,12 +152,12 @@ Use `pentest_workflow` with templates:
 - `findings_manager` (action: stats) → dashboard of all findings
 - `continuous_monitor` (action: diff) → see what changed
 
-## Hard Gate
+## Closure checklist (only requested phases)
 
-- [ ] All 4 phases completed
+- [ ] Requested phases completed or explicitly skipped with reasons
 - [ ] Findings database updated with all confirmed vulns
 - [ ] Risk scores assigned to every finding
 - [ ] Remediation report generated
-- [ ] Retest confirmed all fixes
+- [ ] Retest verdicts preserve inconclusive/not_reproduced; no clean/fixed claim from blocked or negative scans alone
 - [ ] Continuous monitoring snapshot recorded
 - [ ] Next scan scheduled

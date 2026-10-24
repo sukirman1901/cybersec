@@ -5,13 +5,21 @@ description: AI Safety Bug Bounty methodology — OpenAI Safety BB scope coverin
 
 ## AI Safety Bug Bounty Methodology
 
-Scope covers OpenAI Safety BB + general AI safety scenarios.
+Use only the relevant category allowed by the program's current published scope;
+this skill does not establish eligibility, reward amounts or permission. Before
+active target probes require `engagement_gate` `init` + `authorize`; confirmed
+`extend` is only for additional user-approved resources, not discovered endpoints.
+Offline review needs no engagement. Bound requests, cost and accounts; stop on
+denial, throttling or unintended effects. Record coverage and redact secrets/PII.
+Use synthetic canaries, not real victim data. CAPTCHA bypass, load, account trust
+manipulation and platform-integrity checks are separate opt-in branches, never
+automatic consequences of a prompt-injection result.
 
 ### 1. Prompt Injection & Agent Hijack
 - Test third-party prompt injection via `prompt_injection` — system prompt extraction, instruction override
 - Test agent hijack via `llm_agent_hijack` — function call injection, tool misuse
 - Test browser agent hijack via `browser_agent_hijack` — web content injection, hidden fields, autofill steal
-- Verify reproducibility >= 50% (per OpenAI BB rules)
+- Measure reproducibility with trial count, model/version and conditions; verify current program requirements separately
 - Document: injection vector, success rate, exfiltrated data
 
 ### 2. Data Exfiltration
@@ -28,8 +36,8 @@ Scope covers OpenAI Safety BB + general AI safety scenarios.
 
 ### 4. Anti-Automation & Account Integrity
 - Test CAPTCHA bypass via `captcha_test` — token reuse, empty values, param removal
-- Test rate limiting — mass requests without throttling
-- Test account trust signal manipulation, suspension evasion
+- Test rate limiting only within the approved request budget and stop on throttling
+- Review account trust signals using authorized test accounts; no suspension evasion
 - Document: bypass method, success rate, impact scale
 
 ### 5. Platform Integrity
@@ -40,8 +48,8 @@ Scope covers OpenAI Safety BB + general AI safety scenarios.
 
 ### 6. Reporting
 - Each finding must include: clear reproduction steps, impact assessment, recommended mitigations
-- Rewards up to $7,500 for high severity with clear fixes
-- Use `report` to generate structured findings
+- Check current program eligibility and disclosure terms; do not promise rewards
+- Use `generate_report` to generate structured findings
 - Transition to `cybersec-report` for final submission
 
 ## Tools

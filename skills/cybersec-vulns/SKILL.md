@@ -7,7 +7,13 @@ description: Use when user asks to find vulnerabilities, check CVEs, assess PHP2
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant branches by request and supplied input. Before active target probes
+require `engagement_gate` `init` + `authorize`; confirmed `extend` only for additional
+user-approved resources, not discovered services. Record coverage/budgets/skips and
+redact secrets. CVE/version or EPSS-only requests stay intelligence-only: use
+`epss_lookup(cves=["CVE-2026-109618"])` for supplied CVE IDs (external intelligence,
+not a target probe). Inspect the live schema before optional enrichment parameters.
+Missing feeds are unknown, not zero risk, and EPSS is not target exploit proof.
 
 1. **CVE Lookup** — For each detected service + version, call `cve_search(service, version)` for known vulnerabilities
 2. **Vulnerability Scan** — Call `vuln_scan(target)` for common vulnerability patterns
@@ -36,7 +42,7 @@ Create a todo list from the checklist below, then execute all steps immediately.
 10. **Exploit Research** — For critical/high findings, check if public PoC exists via `cve_search`
 
 ### Tools Available
-`cve_search`, `vuln_scan`, `php2shell_scan`, `tech_detect`, `ssl_check`, `crt_search`, `dork_search`, `crlf_inject`, `ldap_inject`, `pickle_deserialize`, `mass_assignment`
+`cve_search`, `epss_lookup`, `vuln_scan`, `php2shell_scan`, `tech_detect`, `ssl_check`, `crt_search`, `dork_search`, `crlf_inject`, `ldap_inject`, `pickle_deserialize`, `mass_assignment`
 
 ### Output
 Prioritized vulnerability list with: CVE ID, CVSS score, affected service, description, and known exploit status.
@@ -108,5 +114,6 @@ References: [PHP advisory](https://www.php.net/archive/2026.php#2026-10-21-5),
 [VulnCheck analysis](https://www.vulncheck.com/blog/php2shell-vulnerabilities).
 
 ### Next Skill
-If web services found, load `cybersec-web` skill for web-specific testing.
-Otherwise load `cybersec-exploit` skill directly.
+Load `cybersec-web` only for requested web testing. Load `cybersec-exploit` only
+when exploit research/execution is explicitly requested; finding a service or CVE
+does not authorize exploitation. Stop after the requested assessment otherwise.

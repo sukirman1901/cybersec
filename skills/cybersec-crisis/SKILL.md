@@ -7,10 +7,16 @@ description: Use when user reports an active incident, breach, or security emerg
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant incident branches from supplied logs/artifacts first; an emergency
+does not waive scope or evidence preservation. Before active target probes require
+`engagement_gate` `init` + `authorize`; confirmed `extend` only for additional
+user-approved resources. Record coverage and redact secrets/victim PII. Agree
+containment changes with the owner, preserve timestamps/hashes and chain of custody,
+and avoid scanning fragile compromised hosts unless specifically approved. Unknown
+services are leads, not proof of compromise; absence is not proof of eradication.
 
 1. **Triage** — Determine scope:
-   - What systems are affected? Call `port_scan(target)` to check for unknown services
+   - What systems are affected? Review owner inventory/logs; use `port_scan(target)` only when live triage scanning is authorized and necessary
    - What's the impact? Data breach? Ransomware? Defacement?
    - When was it detected? How long has it been ongoing?
 

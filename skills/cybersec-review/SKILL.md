@@ -7,6 +7,13 @@ description: Use when receiving peer review of security findings, tool outputs, 
 
 ## Overview
 
+Select relevant evidence review, not an automatic rescan. Before active target
+probes require `engagement_gate` `init` + `authorize`; confirmed `extend` only for
+additional user-approved resources. Offline review needs no engagement. Record
+coverage and redact secrets in quoted evidence; stop when prerequisites are absent.
+403, timeout, network denial and missing CLI are inconclusive, not false positive
+or clean. Repeated alerts and template syntax validation do not prove CVE impact.
+
 Security review requires technical verification, not agreement theater.
 
 **Core principle:** Verify findings before reporting. Question assumptions. False positives waste time, false negatives miss breaches.
@@ -18,7 +25,7 @@ WHEN receiving review of security findings:
 
 1. READ: Complete feedback
 2. VERIFY: Re-run the tool or check the output
-3. EVALUATE: Real finding or false positive?
+3. EVALUATE: Candidate, observed, confirmed, inconclusive or refuted by controls?
 4. RESPOND: Technical acknowledgment or pushback with evidence
 5. IMPLEMENT: Fix methodology, re-scan, or document
 ```
@@ -35,7 +42,7 @@ WHEN receiving review of security findings:
 ```
 IF any finding is unclear:
   RE-RUN the tool with more parameters
-  DOCUMENT: "Ambiguous finding. Re-ran [tool] — output shows [X]. Marking as tested."
+  DOCUMENT: "Ambiguous finding; record available evidence, prerequisites and coverage gap. Do not force a binary verdict."
 ```
 
 **Example:**
@@ -43,7 +50,7 @@ IF any finding is unclear:
 Reviewer: "Port 8080 looks vulnerable to path traversal"
 You: Re-run lfi_detect on port 8080
 Output: No LFI detected (all requests returned 403)
-✅ "Re-ran lfi_detect on 8080 — all requests returned 403. False positive. Marking as tested."
+✅ "All requests returned 403: access-blocked, inconclusive. LFI was not assessed behind the denial; retain the coverage gap."
 ```
 
 ## Source-Specific Handling
@@ -89,9 +96,10 @@ FOR EACH finding before reporting:
 
 ```
 nuclei found "Apache Tomcat CVE-2020-1938"
-✅ Verified: Ran again with -validate, got same result.
-   Manual: curl http://target:8009/ — AJP responder confirmed
-   Confidence: HIGH
+Candidate: Repeating an alert or validating template syntax does not demonstrate
+   CVE-2020-1938. AJP reachability is not file disclosure; HTTP on an AJP port is
+   not a protocol-correct control. Seek approved protocol-specific affected-version
+   and controlled-effect evidence; otherwise retain candidate/inconclusive status.
 
 nikto found "Server leaks inodes via ETags"
 ❌ RE-RAN: Same warning, but this is informational, not exploitable.
@@ -107,12 +115,12 @@ Recon report says "target uses Cloudflare"
 ```
 IF reviewer suggests testing additional targets:
   Check scope:
-    ✅ In scope: Proceed with testing
+    ✅ In scope: Proceed only if the requested technique and remaining budget allow it
     ❌ Out of scope: "This target is out of scope per engagement boundary"
 
 IF reviewer suggests additional tools:
   Check tool availability:
-    ✅ Available as MCP tool: Run it
+    ✅ Available as MCP tool: Check relevance, inputs, authorization and budget before running
     ❌ CLI only: "Requires [tool] CLI which isn't installed. Should we install it?"
 
 IF reviewer suggests deep-dive on low-priority finding:
@@ -173,7 +181,7 @@ When finding IS correct:
 
 ## The Bottom Line
 
-**Security findings are hypotheses until verified.**
+**Security findings are hypotheses until supported by effect-specific evidence.**
 
 Re-run the tool. Show the output. THEN report.
 

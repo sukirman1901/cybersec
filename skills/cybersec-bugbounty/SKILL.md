@@ -7,10 +7,17 @@ description: Use when user asks for bug bounty specific testing, nuclei scanning
 
 ### Checklist
 
-Create a todo list from the checklist below, then execute all steps immediately. Don't ask for confirmation — just run the tools and mark items complete as you go.
+Select relevant branches from the program scope and observed surface. Before
+active target probes require `engagement_gate` `init` + `authorize`; confirmed
+`extend` is only for additional user-approved resources, never discovered URLs.
+Record coverage, request/time limits and skipped prerequisites; redact secrets.
+403 is inconclusive, not permission to bypass. Bypass, smuggling, depth/load and
+OOB tests need explicit technique approval and safe endpoints; stop on denial or
+throttling. JWT analysis takes a supplied token, not a URL. Intelligence-only
+requests do not start scans or exploit execution.
 
 1. **Nuclei Scan** — Run `nuclei_scan(target, severity="critical")` for critical templates first, then expand
-2. **403 Bypass** — If any endpoints return 403, call `bypass_403(url)` to test bypass techniques
+2. **403 Bypass** — Only if bypass testing is requested and approved, call `bypass_403(target=url)` on the scoped endpoint
 3. **Request Smuggling** — Call `smuggling_check(target)` to test CL.TE and TE.CL smuggling
 4. **OOB Testing** — Call `oob_test(target)` for blind SSRF, blind RCE, template injection
 5. **CRLF Injection** — Call `crlf_inject(target)` for header injection and response splitting
