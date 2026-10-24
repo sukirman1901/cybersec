@@ -1,6 +1,7 @@
 """Check for subdomain takeover (dangling DNS CNAME)."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 from urllib.parse import urlparse
 
 
@@ -9,7 +10,7 @@ async def sub_takeover(target: str) -> dict:
         target = urlparse(target).hostname or target
 
     try:
-        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True, verify=False) as client:
+        async with GuardedAsyncClient(timeout=15.0, follow_redirects=True, verify=False) as client:
             resp = await client.get(f"https://{target}")
             text = resp.text.lower()
 

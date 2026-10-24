@@ -1,9 +1,11 @@
 """Bulk scan — scan multiple targets at once."""
 
 import httpx
+from .http_guard import guarded_httpx_get
 import json
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 
 
 def bulk_scan(targets: str, tool: str = "port_scan") -> str:
@@ -21,7 +23,8 @@ def bulk_scan(targets: str, tool: str = "port_scan") -> str:
 
     results = []
     with ThreadPoolExecutor(max_workers=10) as pool:
-        futures = {pool.submit(_scan_single, t, tool): t for t in target_list}
+        # Each worker needs the dispatch session's scope, never the process default.
+        futures = {pool.submit(copy_context().run, _scan_single, t, tool): t for t in target_list}
         for future in futures:
             target = futures[future]
             try:
@@ -78,7 +81,7 @@ def _bulk_http_probe(target: str) -> dict:
     for scheme in ["https", "http"]:
         try:
             url = f"{scheme}://{target}"
-            resp = httpx.get(url, timeout=10, follow_redirects=True, verify=False)
+            resp = guarded_httpx_get(url, timeout=10, follow_redirects=True, verify=False)
             results[scheme] = {
                 "status": resp.status_code,
                 "title": _extract_title(resp.text),
@@ -113,7 +116,7 @@ def _bulk_ssl_check(target: str) -> dict:
 def _bulk_vuln_scan(target: str) -> dict:
     issues = []
     try:
-        resp = httpx.get(f"https://{target}", timeout=10, follow_redirects=True, verify=False)
+        resp = guarded_httpx_get(f"https://{target}", timeout=10, follow_redirects=True, verify=False)
         headers = dict(resp.headers)
 
         security_headers = [

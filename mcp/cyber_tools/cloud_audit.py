@@ -1,6 +1,7 @@
 """Comprehensive cloud security audit — aggregates cloud_enum, S3, IAM, infra, K8s, Docker."""
 import json
 import urllib.request
+from .http_guard import guarded_urlopen
 import socket
 import hashlib
 
@@ -54,7 +55,7 @@ def _cloud_enum(company):
             url = f"https://{bucket}{tld}"
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"}, method="HEAD")
-                resp = urllib.request.urlopen(req, timeout=5)
+                resp = guarded_urlopen(req, timeout=5)
                 if resp.status in (200, 403):
                     findings.append({"type": "cloud_storage_found", "url": url, "http_status": resp.status, "severity": "high" if resp.status == 200 else "medium"})
             except urllib.error.HTTPError as e:
@@ -71,7 +72,7 @@ def _s3_check(bucket_name):
         url = f"https://{bucket_name}.s3.{region}.amazonaws.com/"
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-            resp = urllib.request.urlopen(req, timeout=8)
+            resp = guarded_urlopen(req, timeout=8)
             body = resp.read().decode("utf-8", errors="ignore")
             if "<ListBucketResult" in body:
                 findings.append({"type": "s3_public_listing", "bucket": bucket_name, "region": region, "severity": "critical", "evidence": "Bucket contents are publicly listable"})
@@ -92,7 +93,7 @@ def _k8s_check(target):
     url = f"https://{target}/api/v1" if not target.startswith("http") else f"{target}/api/v1"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-        resp = urllib.request.urlopen(req, timeout=8)
+        resp = guarded_urlopen(req, timeout=8)
         body = resp.read().decode("utf-8", errors="ignore")
         findings.append({"type": "k8s_api_unauthenticated", "target": target, "severity": "critical", "evidence": "K8s API accessible without auth"})
     except urllib.error.HTTPError as e:
@@ -106,7 +107,7 @@ def _k8s_check(target):
     url2 = f"https://{target}/api/v1/namespaces/kube-system/secrets" if not target.startswith("http") else f"{target}/api/v1/namespaces/kube-system/secrets"
     try:
         req = urllib.request.Request(url2, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-        resp = urllib.request.urlopen(req, timeout=8)
+        resp = guarded_urlopen(req, timeout=8)
         findings.append({"type": "k8s_secret_access_unauthenticated", "target": target, "severity": "critical", "evidence": "K8s secrets accessible without auth"})
     except Exception:
         pass
@@ -134,7 +135,7 @@ def _docker_check(target):
             else:
                 url = f"{addr}/containers/json" if proto == "tcp" else f"{addr}/containers/json"
                 req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-                resp = urllib.request.urlopen(req, timeout=8)
+                resp = guarded_urlopen(req, timeout=8)
                 if resp.status == 200:
                     findings.append({"type": "docker_api_exposed", "address": addr, "severity": "critical", "evidence": "Docker API accessible without auth"})
         except Exception:

@@ -5,6 +5,7 @@ Web Shell Connector — connect to an uploaded web shell and execute commands.
 from typing import Any
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 
 async def webshell_connect(
@@ -66,7 +67,7 @@ async def webshell_connect(
         params[param_name] = "echo webshell_alive_check"
 
     try:
-        async with httpx.AsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
+        async with GuardedAsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
             if method == "get":
                 resp = await client.get(shell_url, params=params)
             else:

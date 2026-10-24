@@ -1,6 +1,7 @@
 """Command injection OAST helper — blind CMD + OOB callback correlation."""
 import json
 import urllib.request
+from .http_guard import guarded_urlopen
 import urllib.parse
 import random
 import string
@@ -81,7 +82,7 @@ def _send_payload(target, param, payload, method, timeout=10):
             data = urllib.parse.urlencode({p: payload}).encode()
 
         req = urllib.request.Request(url, data=data, headers={"User-Agent": "CybersecCMDOAST/1.0"})
-        resp = urllib.request.urlopen(req, timeout=timeout)
+        resp = guarded_urlopen(req, timeout=timeout)
         body = resp.read().decode("utf-8", errors="ignore").lower()
 
         if "uid=" in body or "gid=" in body or "www-data" in body or "root:" in body[:200]:

@@ -1,6 +1,7 @@
 """Mass assignment / overposting — test for parameter overwriting in APIs, privilege escalation."""
 
 import httpx
+from .http_guard import GuardedAsyncClient
 import urllib.parse
 import re
 import asyncio
@@ -196,7 +197,7 @@ async def mass_assignment(target: str) -> dict:
     results = []
     framework = "Unknown"
 
-    async with httpx.AsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=12.0, verify=False, follow_redirects=True) as client:
         # Get baseline
         baseline = {"status": 0, "size": 0, "body": "", "headers": {}}
         try:

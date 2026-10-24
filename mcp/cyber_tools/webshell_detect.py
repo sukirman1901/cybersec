@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 import httpx
+from .http_guard import GuardedAsyncClient
 
 # Common web shell signatures (patterns to look for in file content)
 _SIGNATURES = {
@@ -120,7 +121,7 @@ async def webshell_detect(
 
     base = target_url.rstrip("/")
 
-    async with httpx.AsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
         # Phase 1: Try common shell filenames
         scan_urls = [f"{base}/{fn}" for fn in _SHELL_FILENAMES]
 
