@@ -149,10 +149,13 @@ class TestAutoExploitGates(unittest.TestCase):
             def read(self):
                 return b"safe page no script"
 
-        with patch("urllib.request.urlopen", return_value=Resp()):
+        def fetch(url):
+            return {"status": 200, "body": "safe page no script", "headers": {}, "url": url}
+
+        with patch("cyber_tools.auto_exploit._fetch", side_effect=lambda url: fetch(url), create=True):
             ok, evidence = _verify("https://example.test/", "xss", "q")
         self.assertFalse(ok)
-        self.assertIn("not_reflected", evidence)
+        self.assertIn("payload_not_reflected", evidence)
 
     def test_approved_but_validate_gate_can_block_exploit_claim(self):
         from cyber_tools.approval_artifact import approval_artifact

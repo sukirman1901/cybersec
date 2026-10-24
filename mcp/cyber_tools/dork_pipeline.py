@@ -10,6 +10,7 @@ from cyber_tools.dork_scan import dork_scan
 from cyber_tools.sqli_detect import sqli_detect
 from cyber_tools.tech_detect import detect_technologies
 from cyber_tools.vuln_scanner import scan_vulnerabilities
+from cyber_tools.engagement_gate import validate_target
 
 MAX_BULK_SCAN = 50
 
@@ -55,6 +56,9 @@ async def _scan_one(
             "error": None,
             "finding_count": 0,
         }
+        if not validate_target(url)["validated"]:
+            entry["error"] = "outside_authorized_scope"
+            return entry
         try:
             if "tech_detect" in tools:
                 entry["tech"] = await detect_technologies(url)
@@ -164,6 +168,10 @@ async def dork_and_scan(
     else:
         scan_targets = hosts[:max_scan]
 
+    authorized = [url for url in scan_targets if validate_target(url)["validated"]]
+    if len(authorized) != len(scan_targets):
+        result["warnings"].append(f"Skipped {len(scan_targets) - len(authorized)} out-of-scope targets before scanning")
+    scan_targets = authorized
     result["websites"] = scan_targets
     result["summary"]["scan_targets"] = len(scan_targets)
 
