@@ -316,15 +316,18 @@ def tech_detect(target: str) -> str:
     return json.dumps(_run(detect_technologies(target)), indent=2)
 
 @mcp.tool()
-def vuln_scan(target: str) -> str:
+def vuln_scan(target: str, epss_intel: bool = False) -> str:
     """Scan headers, exposed paths and CVE patterns; includes non-destructive PHP2SHELL header assessment.
 
     php2shell.status is potentially_affected, not_affected_by_version or unknown.
     PHP2SHELL findings are probable version correlations, never verified RCE.
     Unknown (including hidden versions) is not safe; check vendor backports.
     No PHP2SHELL crash/load probes are sent. Other existing scan checks still run.
+    When epss_intel=True, CVE findings are enriched with FIRST EPSS probability,
+    percentile, CISA KEV membership and a P0-P3 patch priority (read-only intel
+    only; enrichment failures never fail the scan). Default off.
     """
-    return json.dumps(_run(scan_vulnerabilities(target)), indent=2)
+    return json.dumps(_run(scan_vulnerabilities(target, epss_intel=epss_intel)), indent=2)
 
 # --- CLI Wrapper Tools ---
 
