@@ -90,7 +90,7 @@ class TestIdorDualRole(unittest.TestCase):
                     return b'{"id":1,"secret":true}'
             return Resp()
 
-        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch("cyber_tools.idor_access_validation.guarded_urlopen", side_effect=fake_urlopen, create=True):
             result = json.loads(idor_access_validation(
                 "https://example.test/api/item", resource_ids="1,2",
                 user_a_cookie="sid=a",
@@ -109,7 +109,7 @@ class TestIdorDualRole(unittest.TestCase):
                     return b'{"id":1,"owner":"shared"}'
             return Resp()
 
-        with patch("urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch("cyber_tools.idor_access_validation.guarded_urlopen", side_effect=fake_urlopen, create=True):
             result = json.loads(idor_access_validation(
                 "https://example.test/api/item", resource_ids="1",
                 user_a_cookie="sid=a", user_b_cookie="sid=b",

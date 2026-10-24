@@ -4,6 +4,7 @@ import urllib.request
 import urllib.parse
 import re
 import base64
+from .http_guard import guarded_urlopen
 
 def csrf_extract(target: str, method: str = "get", param_hint: str = "") -> str:
     if not target.startswith("http"):
@@ -18,7 +19,7 @@ def csrf_extract(target: str, method: str = "get", param_hint: str = "") -> str:
 
     try:
         req = urllib.request.Request(target, headers={"User-Agent": "CybersecCSRF/1.0"})
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = guarded_urlopen(req, timeout=10)
         body = resp.read().decode("utf-8", errors="ignore")
         result["status"] = resp.status
         result["content_type"] = resp.headers.get("Content-Type", "")

@@ -7,6 +7,7 @@ import json
 import urllib.error
 import urllib.parse
 import urllib.request
+from .http_guard import guarded_urlopen
 
 
 def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5",
@@ -157,7 +158,7 @@ def _request_raw(url, cookie="", extra_header="", data=None):
 
     try:
         req = urllib.request.Request(url, data=data, headers=headers, method="GET" if data is None else "POST")
-        resp = urllib.request.urlopen(req, timeout=8)
+        resp = guarded_urlopen(req, timeout=8)
         body = resp.read().decode("utf-8", errors="ignore")
         digest = hashlib.sha256(body.encode("utf-8", errors="ignore")).hexdigest()[:16]
         return {

@@ -4,6 +4,7 @@ import urllib.request
 import urllib.parse
 import re
 import time
+from .http_guard import guarded_urlopen
 
 INJECTION_PAYLOADS = {
     "sqli": {
@@ -83,7 +84,7 @@ def _test_payload(target, param, payload, method, inj_type, tech_name):
         data = urllib.parse.urlencode({p: payload}).encode() if method == "post" else None
         t0 = time.time()
         req = urllib.request.Request(url, data=data, headers={"User-Agent": "CybersecInjectionValidator/1.0"})
-        resp = urllib.request.urlopen(req, timeout=15)
+        resp = guarded_urlopen(req, timeout=15)
         elapsed = time.time() - t0
         body = resp.read().decode("utf-8", errors="ignore")
         body_lower = body.lower()

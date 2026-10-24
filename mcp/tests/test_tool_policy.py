@@ -94,6 +94,70 @@ class TestToolKinds(unittest.TestCase):
     def test_search_only_dork_hunt_does_not_need_scanner_scope(self):
         check_dispatch("dork_hunt", {"probe": False, "validate": True})
 
+    def test_local_lab_and_callback_poll_are_not_website_scans(self):
+        for name, args in [("vulnerable_fixture", {"action": "start"}),
+                           ("vulnerable_fixture", {"action": "cleanup"}),
+                           ("oast_callback_server", {"action": "poll"}),
+                           ("oast_callback_server", {"action": "status"})]:
+            with self.subTest(tool=name, action=args["action"]):
+                check_dispatch(name, args)
+
+
+class TestEgressContainment(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.context = engagement_context(new_engagement())
+        self.context.__enter__()
+        base = {"domains": ["fixture.test"], "ips": ["192.0.2.10"], "networks": [],
+                **{k: [] for k in ("providers", "buckets", "companies", "repositories")}}
+        engagement_gate("init", scope_json=json.dumps(base))
+        engagement_gate("authorize", confirmation="yes")
+
+    async def asyncTearDown(self):
+        self.context.__exit__(None, None, None)
+
+    def redirect(self, newurl):
+        from cyber_tools.http_guard import ScopeClampedRedirectHandler
+        import urllib.request as ur
+        req = ur.Request("https://fixture.test/?q=x")
+        return ScopeClampedRedirectHandler().redirect_request(
+            req, None, 302, "Moved", {"Location": newurl}, newurl)
+
+    async def test_in_scope_redirect_is_followed(self):
+        self.assertIsNotNone(self.redirect("https://fixture.test/login"))
+
+    async def test_out_of_scope_redirect_is_refused(self):
+        from urllib.error import HTTPError
+        with self.assertRaises(HTTPError) as ctxman:
+            self.redirect("https://attacker.test/?q=x")
+        self.assertIn("redirect left authorized scope", str(ctxman.exception))
+
+    async def test_active_probe_tools_use_the_guarded_transport(self):
+        import importlib
+        wired = ["cache_poison_check", "csrf_extract", "idor_access_validation",
+                 "injection_validator", "password_audit", "sqli_exploit",
+                 "upload_exploit_chain", "web_fuzz", "waf_detect", "xss_exploit"]
+        for module_name in wired:
+            with self.subTest(tool=module_name):
+                module = importlib.import_module(f"cyber_tools.{module_name}")
+                self.assertFalse(getattr(module, "guarded_urlopen", None) is None
+                                 and "guarded_urlopen" not in vars(module))
+        # and none of them may call the raw redirect-following urlopen anymore
+        import pathlib
+        for module_name in wired:
+            source = pathlib.Path(f"mcp/cyber_tools/{module_name}.py").read_text()
+            with self.subTest(tool=module_name):
+                self.assertNotIn("urllib.request.urlopen(", source)
+
+    async def test_guard_preserves_insecure_ssl_context_support(self):
+        import ssl
+        from cyber_tools.http_guard import guarded_urlopen
+        requests = []
+        with patch("cyber_tools.http_guard._open",
+                   side_effect=lambda opener, request, timeout: requests.append(request) or "resp"):
+            result = guarded_urlopen("https://fixture.test/", timeout=3, context=ssl._create_unverified_context())
+        self.assertEqual(result, "resp")
+        self.assertEqual(len(requests), 1)
+
 
 class TestDiscoveryBoundaries(unittest.IsolatedAsyncioTestCase):
     async def test_pipeline_filters_discovered_hosts_before_scanning(self):
