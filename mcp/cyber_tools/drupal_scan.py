@@ -58,7 +58,11 @@ async def drupal_scan(target: str) -> dict:
                 if resp.status_code not in (200, 403):
                     continue
                 text = resp.text[:4000]
-                content_hit = bool(re.search(indicator, text[:800], re.I))
+                content_hit = (bool(re.search(indicator, text[:800], re.I))
+                               and text.strip() != resp_root.text[:4000].strip())
+                if "settings" in path:
+                    content_hit = content_hit and bool(re.search(
+                        r"\$(?:databases|db_url)\s*(?:\[[^\]]*\]\s*)*=", text))
                 sensitive = any(k in path for k in ("settings", "install", "private", ".htaccess", "CHANGELOG"))
                 if resp.status_code == 200 and content_hit:
                     conf = "HIGH" if severity in ("critical", "high") and (

@@ -54,7 +54,11 @@ async def magento_scan(target: str) -> dict:
                 if resp.status_code not in (200, 403):
                     continue
                 text = resp.text[:4000]
-                content_hit = bool(re.search(indicator, text[:800], re.I))
+                content_hit = (bool(re.search(indicator, text[:800], re.I))
+                               and text.strip() != resp_root.text[:4000].strip())
+                if path.endswith("env.php"):
+                    content_hit = content_hit and bool(re.search(
+                        r"<\?php\b[\s\S]*\breturn\s*(?:\[|array\s*\()", text, re.I))
                 sensitive = any(k in path for k in ("local.xml", "env.php", "log", "downloader", "install"))
                 if resp.status_code == 200 and content_hit:
                     strong = any(m in text.lower() for m in CRED_MARKERS)
