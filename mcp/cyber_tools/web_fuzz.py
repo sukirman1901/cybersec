@@ -2,6 +2,7 @@
 
 import urllib.request
 import ssl
+from .http_guard import guarded_urlopen
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -20,7 +21,7 @@ def dir_bust(target: str, wordlist: list[str], extensions: list[str] = ["", ".ph
             try:
                 req = urllib.request.Request(url, method="HEAD" if not ext else "GET")
                 req.add_header("User-Agent", "Mozilla/5.0")
-                resp = urllib.request.urlopen(req, timeout=3, context=ctx)
+                resp = guarded_urlopen(req, timeout=3, context=ctx)
                 if resp.status < 400 or resp.status == 401 or resp.status == 403:
                     results.append({"url": url, "status": resp.status, "size": resp.length or 0})
                 resp.close()

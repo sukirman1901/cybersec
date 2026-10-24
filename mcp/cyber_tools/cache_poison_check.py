@@ -3,6 +3,7 @@ import json
 import urllib.request
 import urllib.parse
 import re
+from .http_guard import guarded_urlopen
 
 def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = "X-Forwarded-Host,X-Forwarded-For,X-Original-URL,X-Rewrite-URL,X-Custom-IP-Authorization,X-Real-IP") -> str:
     if not target.startswith("http"):
@@ -103,7 +104,7 @@ def _fetch(url, extra_headers=None):
 
     try:
         req = urllib.request.Request(url, headers=headers)
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = guarded_urlopen(req, timeout=10)
         body = resp.read().decode("utf-8", errors="ignore")
         resp_headers = dict(resp.headers)
 

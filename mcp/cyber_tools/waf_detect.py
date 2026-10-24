@@ -3,6 +3,7 @@
 import urllib.request
 import ssl
 import re
+from .http_guard import guarded_urlopen
 
 WAF_SIGNATURES = {
     "Cloudflare": [r"cloudflare", r"__cfduid", r"cf-ray"],
@@ -27,7 +28,7 @@ def waf_detect(target: str) -> dict:
         req = urllib.request.Request(f"https://{target}", method="GET")
         req.add_header("User-Agent", "Mozilla/5.0")
         try:
-            resp = urllib.request.urlopen(req, timeout=5, context=ctx)
+            resp = guarded_urlopen(req, timeout=5, context=ctx)
         except urllib.error.HTTPError as e:
             resp = e
         headers_text = str(resp.headers)

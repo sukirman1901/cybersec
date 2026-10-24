@@ -169,13 +169,10 @@ class TestAutoExploitGates(unittest.TestCase):
         ))
         approval_artifact("approve", artifact_id=req["artifact_id"], approver="tester")
 
-        class Resp:
-            url = "https://example.test/?q=x"
-
-            def read(self):
-                return b"ok"
-
-        with patch("urllib.request.urlopen", return_value=Resp()):
+        fetch = {"status": 200, "body": "ok",
+                 "headers": {"content-type": "text/plain"},
+                 "url": "https://example.test/?q=x"}
+        with patch("cyber_tools.auto_exploit._fetch", return_value=fetch, create=True):
             result = json.loads(auto_exploit(
                 "https://example.test/",
                 vuln_type="xss",

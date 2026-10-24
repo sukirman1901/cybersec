@@ -5,6 +5,7 @@ import urllib.request
 import urllib.parse
 import base64
 import time
+from .http_guard import guarded_urlopen
 
 COMMON_PASSWORDS = [
     "password", "123456", "admin", "root", "toor", "pass123",
@@ -116,7 +117,7 @@ def _http_attempt(url, protocol, user, pwd):
     try:
         data = urllib.parse.urlencode({"username": user, "password": pwd, "user": user, "pass": pwd}).encode()
         req = urllib.request.Request(url, data=data, method="POST")
-        resp = urllib.request.urlopen(req, timeout=8)
+        resp = guarded_urlopen(req, timeout=8)
         body = resp.read().decode("utf-8", errors="ignore").lower()
         if "welcome" in body or "dashboard" in body or "logout" in body:
             return True
