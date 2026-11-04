@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 112,
-  "tests_run": 757,
+  "entry_execution_observed": 137,
+  "tests_run": 893,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -169,9 +169,17 @@
           "symbol": "apk_analyze"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_apk_binary_axml_and_missing_manifest_incomplete",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_apk_http_errors_and_download_bound",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_apk_xml_comments_not_permissions",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_apk_xml_permissions_and_exported_attribute_order",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_directory_and_aggregate_budgets",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_traversal_symlink_duplicate_and_member_bound",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_no_archive_extraction_or_executables"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "approval_artifact",
@@ -424,9 +432,17 @@
           "symbol": "ci_cd_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_integration_adapter_accuracy.CITests.test_compressed_content_not_decoded_without_budget",
+        "test_integration_adapter_accuracy.CITests.test_observation_only_mock_positive_and_invalid_target",
+        "test_integration_adapter_accuracy.CITests.test_oversize_response_incomplete",
+        "test_integration_adapter_accuracy.CITests.test_rate_limit_stops_and_marks_incomplete",
+        "test_integration_adapter_accuracy.CITests.test_root_timeout_is_structured",
+        "test_integration_adapter_accuracy.CITests.test_secret_candidate_redacted_and_requests_bounded",
+        "test_integration_adapter_accuracy.CITests.test_soft404_is_not_accessible_config"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cleanup_tracking",
@@ -564,9 +580,18 @@
           "symbol": "continuous_monitor"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_integration_adapter_accuracy.AdapterTests.test_input_and_store_budgets",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_persists_and_does_not_claim_remediation",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_rejects_invalid_empty_and_corrupt_state",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_rejects_swap_after_stat",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_same_count_change_not_empty_diff",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_symlink_and_secrets",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_target_name_is_not_a_credential_field",
+        "test_integration_adapter_accuracy.AdapterTests.test_monitor_url_target_roundtrip_and_atomic_failure"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cookie_audit",
@@ -723,9 +748,16 @@
           "symbol": "csrf_extract"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_arbitrary_hidden_fields_meta_param_and_comments_not_tokens",
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_blocked_failure_oversize_and_unsupported_method",
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_explicit_hint_and_boolean_attributes",
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_structural_tokens_redacted_and_not_protection_proof",
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_token_cap_repeated_cookie_headers_and_no_value_previews",
+        "test_web_observation_accuracy.CsrfExtractionAccuracy.test_transport_failure_and_processing_deadline_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "custom_wordlist",
@@ -971,9 +1003,15 @@
           "symbol": "dork_gen"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_dork_generation_accuracy.DorkGenerationAccuracy.test_domain_scope_cannot_contain_search_operators",
+        "test_dork_generation_accuracy.DorkGenerationAccuracy.test_invalid_limits_and_types_are_structured",
+        "test_dork_generation_accuracy.DorkGenerationAccuracy.test_query_link_roundtrips_exactly",
+        "test_dork_generation_accuracy.DorkGenerationAccuracy.test_unknown_category_does_not_echo_unbounded_input",
+        "test_dork_generation_accuracy.DorkGenerationAccuracy.test_unknown_selector_does_not_echo_supplied_value"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "dork_hunt",
@@ -1330,9 +1368,18 @@
           "symbol": "github_issue"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_integration_adapter_accuracy.AdapterTests.test_input_and_store_budgets",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_missing_and_malformed_inputs_make_no_write",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_outgoing_evidence_and_url_redacted",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_paths_are_validated",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_positive_mock_receipts_and_bounded_read",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_receipts_required_for_created",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_timeouts_and_http_errors_do_not_export_secrets",
+        "test_integration_adapter_accuracy.AdapterTests.test_receipt_size_limit_and_single_attempt"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "gitleaks_check",
@@ -1457,9 +1504,16 @@
           "symbol": "host_header"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_observation_accuracy.WebObservationAccuracy.test_async_deadline_cancels_inflight_mock",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_blocking_redirect_server_failure_and_body_cap",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_host_reflection_is_observation_not_poisoning",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_only_get_requests_and_small_request_budgets",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_status_prose_and_catchalls_are_not_vulnerabilities",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_transport_failure_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "http_ingest",
@@ -1542,9 +1596,20 @@
           "symbol": "hydra_brute"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_credential_adapter_accuracy.HydraAccuracy.test_bounded_redacted_protocol_positive",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_cancellation_removes_private_input",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_empty_zero_exit_is_not_complete",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_exception_cleanup_and_redaction",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_execution_failures_incomplete_and_private",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_invalid_arguments_do_not_open_input_or_run",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_no_default_unbounded_wordlist",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_wordlist_descriptor_identity_type_and_size",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_wordlist_symlink_fifo_and_swap_rejected",
+        "test_credential_adapter_accuracy.HydraAccuracy.test_wrong_host_positive_is_not_a_finding"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "idor_access_validation",
@@ -1594,9 +1659,20 @@
           "symbol": "ios_data_storage"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_directory_and_aggregate_budgets",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_multiple_apps_and_binary_plist",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_traversal_symlink_duplicate_and_member_bound",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_inventory_and_storage_display_limits",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_ipa_plist_entity_is_rejected",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_input_types_size_and_symlinks",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_open_time_swaps_and_read_failures",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_zip_missing_invalid_non_object",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_no_archive_extraction_or_executables",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_storage_values_redacted_and_not_nsuserdefaults_proof"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ios_frida",
@@ -1630,9 +1706,21 @@
           "symbol": "ios_signing"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_directory_and_aggregate_budgets",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_multiple_apps_and_binary_plist",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_traversal_symlink_duplicate_and_member_bound",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_ipa_plist_entity_is_rejected",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_input_types_size_and_symlinks",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_open_time_swaps_and_read_failures",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_zip_missing_invalid_non_object",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_no_archive_extraction_or_executables",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_signing_adhoc_and_malformed_profiles",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_signing_development_not_adhoc_and_private_values_redacted",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_signing_device_platform_limits_and_flag_types"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ipa_analyze",
@@ -1642,9 +1730,20 @@
           "symbol": "ipa_analyze"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_directory_and_aggregate_budgets",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_multiple_apps_and_binary_plist",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_archive_traversal_symlink_duplicate_and_member_bound",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_inventory_and_storage_display_limits",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_ipa_main_plist_not_framework_and_no_fake_entitlements",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_ipa_plist_entity_is_rejected",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_input_types_size_and_symlinks",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_open_time_swaps_and_read_failures",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_zip_missing_invalid_non_object",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_no_archive_extraction_or_executables"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "java_deserialize",
@@ -1666,9 +1765,18 @@
           "symbol": "jira_create"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_integration_adapter_accuracy.AdapterTests.test_input_and_store_budgets",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_missing_and_malformed_inputs_make_no_write",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_outgoing_evidence_and_url_redacted",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_paths_are_validated",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_positive_mock_receipts_and_bounded_read",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_receipts_required_for_created",
+        "test_integration_adapter_accuracy.AdapterTests.test_issue_timeouts_and_http_errors_do_not_export_secrets",
+        "test_integration_adapter_accuracy.AdapterTests.test_receipt_size_limit_and_single_attempt"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "joomla_scan",
@@ -1763,9 +1871,18 @@
           "symbol": "ldap_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_all_adapters_have_total_deadline_and_cleanup",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_declared_response_caps_stop_reads_and_close",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_fragmented_frames_preserve_positive_evidence",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_invalid_target_never_connects",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_ldap_result_code_not_length_controls_bind_result",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_ldap_supplied_credentials_are_not_silently_ignored",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_ldap_unmatched_or_malformed_bytes_are_unknown",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_timeout_and_refused_have_distinct_states"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ldap_inject",
@@ -2046,9 +2163,15 @@
           "symbol": "notify_webhook"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_integration_adapter_accuracy.AdapterTests.test_input_and_store_budgets",
+        "test_integration_adapter_accuracy.AdapterTests.test_receipt_size_limit_and_single_attempt",
+        "test_integration_adapter_accuracy.AdapterTests.test_webhook_failure_hides_url_secret",
+        "test_integration_adapter_accuracy.AdapterTests.test_webhook_positive_receipts_filter_and_count",
+        "test_integration_adapter_accuracy.AdapterTests.test_webhook_validates_severity_and_receipt"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "nuclei_scan",
@@ -2086,9 +2209,18 @@
           "symbol": "oauth_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_observation_accuracy.WebObservationAccuracy.test_async_deadline_cancels_inflight_mock",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_blocking_redirect_server_failure_and_body_cap",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_narrowed_path_coverage_and_missing_sharepoint_hint",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_oauth_malformed_json_not_discovery",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_oauth_metadata_and_error_are_observations",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_only_get_requests_and_small_request_budgets",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_status_prose_and_catchalls_are_not_vulnerabilities",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_transport_failure_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "oob_test",
@@ -2158,9 +2290,23 @@
           "symbol": "password_audit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_budget_exact_across_users",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_ftp_smtp_positive_and_error_cleanup",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_hard_cap_twenty",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_http_keywords_are_only_candidates_and_response_closed",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_invalid_arguments_never_attempt",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_missing_library_is_incomplete",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_password_only_ssh_and_auth_timeouts",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_protocol_authentication_rejections",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_ssh_timeout_closes_and_redacts_error",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_success_and_failure_are_indexed_redacted",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_target_url_secrets_are_not_returned",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_unsupported_is_not_failed_authentication",
+        "test_credential_adapter_accuracy.PasswordAccuracy.test_zero_and_negative_budget"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "pentest_workflow",
@@ -2219,9 +2365,16 @@
           "symbol": "phone_osint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_country_is_country_not_area_description",
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_invalid_input_and_oversize_never_parse",
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_invalid_number_has_no_lookup_links",
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_line_type_uses_library_enum_values",
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_lookup_links_use_canonical_e164",
+        "test_phone_metadata_accuracy.PhoneMetadataAccuracy.test_metadata_failure_is_structured_without_raw_error"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "php2shell_scan",
@@ -2384,9 +2537,19 @@
           "symbol": "redis_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_all_adapters_have_total_deadline_and_cleanup",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_declared_response_caps_stop_reads_and_close",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_fragmented_frames_preserve_positive_evidence",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_invalid_target_never_connects",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_noauth_does_not_mean_info_permission",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_redis_embedded_pong_is_not_protocol_evidence",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_redis_noauth_error_identifies_protocol_not_nonredis",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_redis_positive_read_access_is_scoped_without_config_secret",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_timeout_and_refused_have_distinct_states"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "report_export",
@@ -2648,9 +2811,18 @@
           "symbol": "sharepoint_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_observation_accuracy.WebObservationAccuracy.test_async_deadline_cancels_inflight_mock",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_blocking_redirect_server_failure_and_body_cap",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_narrowed_path_coverage_and_missing_sharepoint_hint",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_only_get_requests_and_small_request_budgets",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_sharepoint_config_and_api_are_structural_observations",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_sharepoint_denied_and_catchall_paths_not_exposure",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_status_prose_and_catchalls_are_not_vulnerabilities",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_transport_failure_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "shodan_lookup",
@@ -2681,9 +2853,19 @@
           "symbol": "smb_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_all_adapters_have_total_deadline_and_cleanup",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_declared_response_caps_stop_reads_and_close",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_fragmented_frames_preserve_positive_evidence",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_invalid_target_never_connects",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smb_error_response_is_protocol_evidence_not_access",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smb_protocol_header_required_and_positive_retained",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smb_request_frame_length_matches_payload",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smb_truncated_body_and_wrong_message_id_are_incomplete",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_timeout_and_refused_have_distinct_states"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "smtp_enum",
@@ -2693,9 +2875,18 @@
           "symbol": "smtp_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_all_adapters_have_total_deadline_and_cleanup",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_invalid_target_never_connects",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smtp_expansion_and_forwarding_are_not_verified_users",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smtp_multiline_cap_and_code_mismatch_are_incomplete",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smtp_multiline_consumed_and_252_not_user_proof",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smtp_positive_is_reported_not_independently_confirmed",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_smtp_user_injection_and_budget_rejected_before_connect",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_timeout_and_refused_have_distinct_states"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "smuggling_check",
@@ -2717,9 +2908,14 @@
           "symbol": "snmp_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_all_adapters_have_total_deadline_and_cleanup",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_invalid_target_never_connects",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_snmp_tcp_reachability_is_not_snmp_or_community_proof",
+        "test_remaining_protocol_accuracy.RemainingProtocolAccuracy.test_timeout_and_refused_have_distinct_states"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "social_osint",
@@ -2874,9 +3070,19 @@
           "symbol": "ssl_pinning_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_bounded_await_reports_worker_lifetime_and_closes_later",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_findings_have_confidence_and_coverage",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_invalid_hostname_labels_no_connection",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_invalid_inputs_no_connection",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_malformed_metadata_and_hsts_error_redaction",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_nested_certificate_names_not_error_or_pinning_proof",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_url_and_ipv6_host_parsing",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_verification_failure_is_not_pinning",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_tls_worker_does_not_block_async_heartbeat"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "sslyze_check",
@@ -2936,9 +3142,18 @@
           "symbol": "stego_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_input_types_size_and_symlinks",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_local_open_time_swaps_and_read_failures",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_bmp_not_png_and_bad_crc",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_jpeg_exif_positive_and_xmp_negative",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_real_png_trailing_data_not_fake_iend",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_secret_values_redacted_and_word_boundaries",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_size_and_exif_presence_not_steganography_proof",
+        "test_mobile_artifact_accuracy.MobileArtifactAccuracy.test_stego_string_limits"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "sub_takeover",
@@ -3314,9 +3529,20 @@
           "symbol": "websocket_test"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_observation_accuracy.WebObservationAccuracy.test_async_deadline_cancels_inflight_mock",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_bad_upgrade_and_external_links_are_not_trusted",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_blocking_redirect_server_failure_and_body_cap",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_engine_io_structure_without_session_id_output",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_malformed_upgrade_and_engine_packet_incomplete",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_only_get_requests_and_small_request_budgets",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_status_prose_and_catchalls_are_not_vulnerabilities",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_transport_failure_redacted",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_websocket_discovery_cap_and_source_path_privacy",
+        "test_web_observation_accuracy.WebObservationAccuracy.test_websocket_valid_upgrade_is_not_auth_exploit"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "whois_lookup",

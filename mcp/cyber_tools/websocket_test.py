@@ -1,63 +1,74 @@
-import httpx
-import re
+"""Bounded same-origin HTTP handshake observations; no frames or auth tests."""
+import base64
+import hashlib
 import json
-import urllib.parse
+import os
+import re
+import httpx
+from .surface_probe import SurfaceProbe
+
 
 async def websocket_test(target: str) -> dict:
-    findings = []
-    base = target.rstrip("/")
-
-    async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
-        # Check for WebSocket endpoint in page
-        try:
-            resp = await client.get(base)
-            ws_urls = re.findall(r'(wss?://[^"\'\s]+)', resp.text)
-            if not ws_urls:
-                # Try common WS endpoints
-                ws_urls = [
-                    base.replace("https://", "wss://").replace("http://", "ws://") + "/ws",
-                    base.replace("https://", "wss://").replace("http://", "ws://") + "/websocket",
-                    base.replace("https://", "wss://").replace("http://", "ws://") + "/socket.io/",
-                ]
-                findings.append({"test": "ws_endpoint_check", "note": "No WS URLs in page, trying common paths", "risk": "INFO"})
-        except Exception:
-            return {"target": target, "error": "Could not fetch page", "findings": []}
-
-        for ws_url in ws_urls:
-            # Check if endpoint accepts connections (via HTTP upgrade)
-            try:
-                # HTTP upgrade request simulation
-                parsed = urllib.parse.urlparse(ws_url)
-                http_url = f"{'https' if ws_url.startswith('wss') else 'http'}://{parsed.netloc}{parsed.path or '/'}"
-                upgrade_headers = {
-                    "Upgrade": "websocket",
-                    "Connection": "Upgrade",
-                    "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==",
-                    "Sec-WebSocket-Version": "13",
-                }
-                hr = await client.get(http_url, headers=upgrade_headers)
-                if hr.status_code == 101 or "upgrade" in hr.headers.get("connection", "").lower():
-                    findings.append({"test": "ws_endpoint_accessible", "endpoint": ws_url, "risk": "INFO"})
-
-                    # Check origin validation
-                    fake_origin = {"Origin": "https://evil.com"}
-                    hr2 = await client.get(http_url, headers={**upgrade_headers, **fake_origin})
-                    if hr2.status_code == 101:
-                        findings.append({"test": "ws_no_origin_check", "endpoint": ws_url, "note": "WebSocket accepts connections from any origin (CSWSH risk)", "risk": "CRITICAL"})
-                    else:
-                        findings.append({"test": "ws_origin_check", "endpoint": ws_url, "note": "Origin validation appears active", "risk": "INFO"})
-                else:
-                    findings.append({"test": "ws_endpoint_not_accessible", "endpoint": ws_url, "status": hr.status_code, "risk": "INFO"})
-            except Exception:
-                pass
-
-        # Check Socket.io endpoints
-        for path in ["/socket.io/", "/socket.io/?EIO=4"]:
-            try:
-                sr = await client.get(base + path)
-                if sr.status_code == 200:
-                    findings.append({"test": "socket_io_detected", "path": path, "risk": "MEDIUM", "note": "Socket.IO detected — check for misconfigurations"})
-            except Exception:
-                pass
-
-    return {"target": target, "findings": findings, "vulnerable": any(f.get("risk") in ["CRITICAL", "HIGH"] for f in findings)}
+    result = {'target':'[invalid target]','findings':[],'observations':[],'vulnerable':False,
+              'coverage_complete':False,'assessment':'not_auth_tested','scope_authorized':False,
+              'coverage':'One page, first 32 URL matches, up to three same-origin HTTP upgrades and one Engine.IO GET; accept hash/header validation only, no WebSocket frames; custom paths redacted',
+              'unsupported_detection':['CSWSH/authentication','cross-origin endpoints','query-dependent endpoints','message protocol','Socket.IO application semantics','origin-policy enforcement']}
+    try:
+        url = httpx.URL(target if '://' in target else 'https://' + target)
+        if url.scheme not in ('http','https') or not url.host or url.userinfo:
+            raise ValueError('Invalid target')
+        url = url.copy_with(query=None,fragment=None)
+        result['target'] = str(url)
+    except (httpx.InvalidURL,ValueError,TypeError):
+        return {**result,'error':'Invalid HTTP target'}
+    async with httpx.AsyncClient(timeout=5.0,verify=False,trust_env=False,follow_redirects=False) as client:
+        probe = SurfaceProbe(client,max_requests=5)
+        root = await probe.request('GET',url)
+        if root is not None and root.status_code == 200:
+            endpoints = []
+            for index, match in enumerate(re.finditer(r'wss?://[^"\'\s<>]+',root.text)):
+                if index >= 32:
+                    result['links_truncated'] = True
+                    break
+                value = match.group(0)
+                try:
+                    ws = httpx.URL(value)
+                    endpoint = ws.copy_with(scheme='https' if ws.scheme=='wss' else 'http',query=None,fragment=None)
+                except httpx.InvalidURL:
+                    continue
+                if not ws.userinfo and (endpoint.scheme,endpoint.host,endpoint.port)==(url.scheme,url.host,url.port) and endpoint not in endpoints:
+                    endpoints.append(endpoint)
+            if not endpoints:
+                endpoints = [url.copy_with(path=path) for path in ('/ws','/websocket','/socket.io/')]
+            result['endpoints_deferred'] = max(0,len(endpoints)-3)
+            for index, endpoint in enumerate(endpoints[:3]):
+                key = base64.b64encode(os.urandom(16)).decode()
+                headers = {'Upgrade':'websocket','Connection':'Upgrade','Sec-WebSocket-Version':'13','Sec-WebSocket-Key':key}
+                response = await probe.request('GET',endpoint,headers=headers)
+                if response is None:
+                    break
+                expected = base64.b64encode(hashlib.sha1((key+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11').encode()).digest()).decode()
+                if response.status_code==101 and response.headers.get('upgrade','').strip().lower()=='websocket' and 'upgrade' in {x.strip().lower() for x in response.headers.get('connection','').split(',')} and response.headers.get('sec-websocket-accept')==expected:
+                    result['observations'].append({'type':'websocket_handshake','endpoint_index':index,
+                        'endpoint':endpoint.path if endpoint.path in ('/ws','/websocket','/socket.io/') else '[redacted path]',
+                        'assessment':'valid_upgrade_response_not_auth_proof','confidence':'HIGH','coverage':result['coverage']})
+                elif response.status_code == 101:
+                    probe.errors.append('invalid_websocket_upgrade_headers')
+            if not probe.stopped:
+                response = await probe.request('GET',url.copy_with(path='/socket.io/',query=b'EIO=4&transport=polling'))
+                if response is not None and response.status_code==200 and response.text.startswith('0'):
+                    try:
+                        data = json.loads(response.text[1:])
+                        if isinstance(data,dict) and isinstance(data.get('sid'),str) and data['sid'] and isinstance(data.get('upgrades'),list) and all(isinstance(x,str) for x in data['upgrades']) and all(type(data.get(k)) is int and data[k]>0 for k in ('pingInterval','pingTimeout')):
+                            result['observations'].append({'type':'engine_io_open_packet','assessment':'protocol_structure_only','endpoint':'/socket.io/',
+                                'confidence':'HIGH','coverage':'Initial Engine.IO v4 polling GET returned a structurally valid open packet; no session continuation, frames or authentication tests'})
+                        else:
+                            probe.errors.append('malformed_engine_io_packet')
+                    except (ValueError,RecursionError):
+                        probe.errors.append('malformed_engine_io_packet')
+        elif root is not None:
+            probe.errors.append('root_not_successful')
+    result.update(probe.summary())
+    if result.get('endpoints_deferred') or result.get('links_truncated'):
+        result.update(coverage_complete=False,execution_status='partial')
+    return result

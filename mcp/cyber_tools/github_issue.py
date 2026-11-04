@@ -1,11 +1,70 @@
 """Create GitHub issue from a security finding."""
 import json
 import urllib.request
+import urllib.error
+import re
+from urllib.parse import urlsplit, urlunsplit
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _check(value):
+    """1 MiB text, 1000 items/container, 10000 nodes, depth 32."""
+    stack, nodes, size = [(value, 0)], 0, 0
+    while stack:
+        v, depth = stack.pop()
+        nodes += 1
+        if depth > 32 or nodes > 10000:
+            raise ValueError('Structure budget exceeded')
+        if isinstance(v, str):
+            if len(v) > 1048576:
+                raise ValueError('Text budget exceeded')
+            size += len(v.encode('utf-8'))
+            if size > 1048576:
+                raise ValueError('Text budget exceeded')
+        elif isinstance(v, (list, dict)):
+            if len(v) > 1000:
+                raise ValueError('Collection budget exceeded')
+            stack.extend((x, depth + 1) for x in (list(v.keys()) + list(v.values()) if isinstance(v, dict) else v))
+
+
+def _redact(value, key=''):
+    """Named secrets/raw evidence and HTTP URL credentials/query/fragment, not arbitrary prose."""
+    if re.search(r'password|secret|token|authorization|cookie|api[_-]?key', key, re.I) or key.lower() in ('evidence','response','raw','body','headers'):
+        return '[REDACTED]'
+    if isinstance(value, dict):
+        return {_redact(k): _redact(v,k) for k,v in value.items()}
+    if isinstance(value, list):
+        return [_redact(v) for v in value]
+    if isinstance(value, str):
+        def clean(m):
+            try:
+                p=urlsplit(m.group())
+                return urlunsplit((p.scheme,p.netloc.rsplit('@',1)[-1],p.path,'[REDACTED]' if p.query else '', '[REDACTED]' if p.fragment else ''))
+            except ValueError:
+                return '[REDACTED URL]'
+        return re.sub(r'https?://[^\s<>"\']+',clean,value,flags=re.I)
+    return value
 
 def github_issue(finding_json: str, repo: str = "", token: str = "", labels: str = "security,vulnerability") -> str:
     try:
+        for value in (finding_json,repo,token,labels):
+            _check(value)
         finding = json.loads(finding_json) if isinstance(finding_json, str) else finding_json
-    except Exception:
+        _check(finding)
+        if not isinstance(finding,dict) or not finding or not any(finding.get(k) for k in ('title','type')):
+            raise ValueError('Finding required')
+        if any(not isinstance(finding[k],str) for k in ('title','type','severity','status','target','host','remediation','fix') if k in finding):
+            raise ValueError('Invalid field type')
+        if not isinstance(repo,str) or not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+',repo) or repo.split('/')[-1] in ('.','..'):
+            raise ValueError('Invalid repository')
+        if not isinstance(token,str) or not isinstance(labels,str):
+            raise ValueError('Invalid credentials or labels')
+        finding=_redact(finding)
+    except (ValueError,TypeError,RecursionError):
         return json.dumps({"error": "Invalid finding JSON"}, indent=2)
 
     if not repo or not token:
@@ -23,7 +82,7 @@ def github_issue(finding_json: str, repo: str = "", token: str = "", labels: str
 
     sev_emoji = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢", "info": "🔵"}.get(sev, "⚪")
 
-    body = f"""## {sev_emoji} Security Vulnerability — {title_finding}
+    body = f"""## {sev_emoji} Security Finding (supplied, not independently verified) — {title_finding}
 
 ### Summary
 | Field | Value |
@@ -69,20 +128,27 @@ def github_issue(finding_json: str, repo: str = "", token: str = "", labels: str
     try:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(api_url, data=data, headers=headers, method="POST")
-        resp = urllib.request.urlopen(req, timeout=15)
-        body = json.loads(resp.read().decode("utf-8"))
+        with urllib.request.build_opener(_NoRedirect()).open(req, timeout=15) as resp:
+            if resp.status != 201:
+                raise ValueError('Creation not acknowledged')
+            raw=resp.read(65537)
+        if len(raw)>65536:
+            raise ValueError('Receipt exceeds 64 KiB')
+        body = json.loads(raw.decode('utf-8'))
+        if not isinstance(body,dict) or type(body.get('number')) is not int or body['number'] <= 0 or body.get('html_url') != f"https://github.com/{repo}/issues/{body['number']}":
+            raise ValueError('Invalid creation receipt')
         return json.dumps({
             "status": "created",
             "issue_number": body.get("number"),
             "issue_url": body.get("html_url"),
-            "labels": label_list,
+            "labels": label_list[:10],
             "repository": repo,
         }, indent=2)
     except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="ignore")
+        e.close()
         return json.dumps({
             "error": f"GitHub API returned {e.code}",
-            "response": json.loads(err_body).get("message", err_body)[:300] if err_body else "",
+            "status": "incomplete", "creation_confirmed": False,
         }, indent=2)
-    except Exception as e:
-        return json.dumps({"error": str(e)}, indent=2)
+    except (OSError,ValueError,TypeError,RecursionError):
+        return json.dumps({"error": "GitHub creation not confirmed; response invalid or request failed", "status":"incomplete", "creation_confirmed":False}, indent=2)

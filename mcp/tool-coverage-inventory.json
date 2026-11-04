@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 149,
+  "with_static_test_references": 166,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -219,13 +219,19 @@
         "mcp/cyber_tools/apk_analyze.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
         "io",
         "re",
+        "stat",
+        "struct",
+        "urllib",
+        "xml",
         "zipfile"
       ],
       "static_test_references": [
-        "mcp/tests/test_audit_regressions.py"
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_mobile_artifact_accuracy.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -536,10 +542,14 @@
         "mcp/cyber_tools/ci_cd_scan.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
-        "re"
+        "re",
+        "time",
+        "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_integration_adapter_accuracy.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -730,9 +740,15 @@
         "datetime",
         "hashlib",
         "json",
-        "os"
+        "os",
+        "re",
+        "stat",
+        "tempfile",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_integration_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -878,13 +894,16 @@
         "mcp/cyber_tools/csrf_extract.py"
       ],
       "import_roots": [
-        "base64",
+        "html",
+        "http",
+        "httpx",
         "json",
         "re",
-        "urllib"
+        "time"
       ],
       "static_test_references": [
-        "mcp/tests/test_tool_policy.py"
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_web_observation_accuracy.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -1114,9 +1133,13 @@
         "mcp/cyber_tools/dork_gen.py"
       ],
       "import_roots": [
-        "typing"
+        "re",
+        "typing",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_dork_generation_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1529,9 +1552,11 @@
       ],
       "import_roots": [
         "json",
+        "re",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_integration_adapter_accuracy.py",
         "mcp/tests/test_redirect_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -1683,12 +1708,12 @@
         "mcp/cyber_tools/host_header.py"
       ],
       "import_roots": [
-        "asyncio",
         "httpx",
-        "re",
-        "urllib"
+        "uuid"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_observation_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1780,9 +1805,17 @@
         "mcp/cyber_tools/hydra_brute.py"
       ],
       "import_roots": [
-        "asyncio"
+        "asyncio",
+        "os",
+        "pathlib",
+        "re",
+        "stat",
+        "tempfile",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_credential_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1851,11 +1884,18 @@
         "mcp/cyber_tools/ios_data_storage.py"
       ],
       "import_roots": [
+        "io",
         "os",
         "plistlib",
+        "re",
+        "stat",
+        "struct",
+        "xml",
         "zipfile"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_mobile_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1901,11 +1941,19 @@
         "mcp/cyber_tools/ios_signing.py"
       ],
       "import_roots": [
+        "datetime",
+        "io",
         "os",
         "plistlib",
+        "re",
+        "stat",
+        "struct",
+        "xml",
         "zipfile"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_mobile_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1917,11 +1965,18 @@
         "mcp/cyber_tools/ipa_analyze.py"
       ],
       "import_roots": [
+        "io",
         "os",
         "plistlib",
+        "re",
+        "stat",
+        "struct",
+        "xml",
         "zipfile"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_mobile_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1950,9 +2005,11 @@
       "import_roots": [
         "base64",
         "json",
+        "re",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_integration_adapter_accuracy.py",
         "mcp/tests/test_redirect_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2065,7 +2122,9 @@
       "import_roots": [
         "asyncio"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_protocol_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2403,9 +2462,11 @@
       ],
       "import_roots": [
         "json",
+        "re",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_integration_adapter_accuracy.py",
         "mcp/tests/test_redirect_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2464,9 +2525,11 @@
       ],
       "import_roots": [
         "httpx",
-        "re"
+        "uuid"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_observation_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2553,16 +2616,17 @@
         "mcp/cyber_tools/password_audit.py"
       ],
       "import_roots": [
-        "base64",
         "ftplib",
+        "ipaddress",
         "json",
         "paramiko",
+        "re",
         "smtplib",
-        "socket",
         "time",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_credential_adapter_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2624,6 +2688,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_phone_metadata_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2812,9 +2877,12 @@
         "mcp/cyber_tools/redis_enum.py"
       ],
       "import_roots": [
-        "asyncio"
+        "asyncio",
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_protocol_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3084,9 +3152,13 @@
       ],
       "import_roots": [
         "httpx",
-        "re"
+        "re",
+        "uuid",
+        "xml"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_observation_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3118,9 +3190,12 @@
         "mcp/cyber_tools/smb_enum.py"
       ],
       "import_roots": [
-        "asyncio"
+        "asyncio",
+        "struct"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_protocol_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3132,9 +3207,12 @@
         "mcp/cyber_tools/smtp_enum.py"
       ],
       "import_roots": [
-        "asyncio"
+        "asyncio",
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_protocol_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3166,7 +3244,9 @@
       "import_roots": [
         "asyncio"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_protocol_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3324,11 +3404,17 @@
         "mcp/cyber_tools/ssl_pinning_check.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
+        "ipaddress",
+        "re",
         "socket",
-        "ssl"
+        "ssl",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_mobile_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3408,9 +3494,13 @@
       "import_roots": [
         "os",
         "re",
-        "struct"
+        "stat",
+        "struct",
+        "zlib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_mobile_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3850,12 +3940,16 @@
         "mcp/cyber_tools/websocket_test.py"
       ],
       "import_roots": [
+        "base64",
+        "hashlib",
         "httpx",
         "json",
-        "re",
-        "urllib"
+        "os",
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_observation_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

@@ -1,136 +1,104 @@
-"""CSRF token extraction — parse, decode, and test anti-CSRF tokens."""
+"""Redacted CSRF token-like metadata from one GET; no protection attestation."""
 import json
-import urllib.request
-import urllib.parse
 import re
-import base64
-from .http_guard import guarded_urlopen
+import time
+from html.parser import HTMLParser
+from http.cookies import SimpleCookie, CookieError
+
+import httpx
+from .http_guard import GuardedClient, guarded_urlopen  # legacy transport import compatibility
+
+_NAMES = {'csrf-token','csrf_token','csrfmiddlewaretoken','_csrf','__requestverificationtoken',
+          'authenticity_token','csrftoken','xsrf-token','xsrf_token'}
+_HEADERS = ('x-csrf-token','x-csrftoken','csrf-token','x-xsrf-token')
+
+
+class _TokenParser(HTMLParser):
+    def __init__(self, record, hint):
+        super().__init__(convert_charrefs=True)
+        self.record, self.hint = record, hint
+
+    def handle_starttag(self, tag, attrs):
+        values = dict(attrs)
+        name = (values.get('name') or '').lower()
+        if name not in _NAMES and (not self.hint or name != self.hint):
+            return
+        label = name if name in _NAMES else 'custom_hint'
+        if tag == 'meta':
+            self.record('meta_tag',label,values.get('content'))
+        elif tag == 'input' and (values.get('type') or '').lower() == 'hidden':
+            self.record('hidden_input',label,values.get('value'))
+
 
 def csrf_extract(target: str, method: str = "get", param_hint: str = "") -> str:
-    if not target.startswith("http"):
-        target = "http://" + target
-
-    result = {
-        "target": target,
-        "tokens_found": [],
-        "extraction_methods": [],
-        "token_analysis": []
-    }
-
+    result = {'target':'[invalid target]','tokens_found':[],'extraction_methods':[],
+              'token_analysis':[],'total_tokens':0,'csrf_protected':None,
+              'assessment':'token_metadata_only','coverage_complete':False,'requests_attempted':0,
+              'coverage':'One GET; known hidden/meta/header/cookie names or explicit hint; values always redacted; 100 token records, 256 KiB body, 10s processing deadline and 5s per-I/O timeout',
+              'unsupported_detection':['server token validation','CSRF exploitability','JS variables/forms','token randomness/strength','non-GET methods']}
     try:
-        req = urllib.request.Request(target, headers={"User-Agent": "CybersecCSRF/1.0"})
-        resp = guarded_urlopen(req, timeout=10)
-        body = resp.read().decode("utf-8", errors="ignore")
-        result["status"] = resp.status
-        result["content_type"] = resp.headers.get("Content-Type", "")
-        result["body_size"] = len(body)
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="ignore")
-        result["status"] = e.code
-        result["error"] = str(e)[:100]
-        if e.code in (200, 403):
-            pass
-        else:
-            return json.dumps(result, indent=2)
-    except Exception as e:
-        return json.dumps({"error": str(e)}, indent=2)
-
-    # 1. Scan meta tags
-    meta_patterns = [
-        r'<meta\s+[^>]*name=["\']csrf-token["\'][^>]*content=["\']([^"\']+)["\']',
-        r'<meta\s+[^>]*name=["\']csrf-param["\'][^>]*content=["\']([^"\']+)["\']',
-        r'<meta\s+[^>]*name=["\']_csrf["\'][^>]*content=["\']([^"\']+)["\']',
-    ]
-    for pat in meta_patterns:
-        for m in re.finditer(pat, body, re.IGNORECASE):
-            result["tokens_found"].append({"source": "meta_tag", "value": m.group(1)})
-            result["extraction_methods"].append("meta_tag")
-
-    # 2. Scan hidden inputs
-    input_patterns = [
-        r'<input[^>]*name=["\']csrf_token["\'][^>]*value=["\']([^"\']+)["\']',
-        r'<input[^>]*name=["\']csrfmiddlewaretoken["\'][^>]*value=["\']([^"\']+)["\']',
-        r'<input[^>]*name=["\']_csrf["\'][^>]*value=["\']([^"\']+)["\']',
-        r'<input[^>]*name=["\']__RequestVerificationToken["\'][^>]*value=["\']([^"\']+)["\']',
-        r'<input[^>]*name=["\']token["\'][^>]*value=["\']([^"\']+)["\']',
-        r'<input[^>]*type=["\']hidden["\'][^>]*name=["\']([^"\']+)["\'][^>]*value=["\']([^"\']+)["\']',
-    ]
-    for pat in input_patterns:
-        for m in re.finditer(pat, body, re.IGNORECASE):
-            groups = m.groups()
-            if len(groups) == 2:
-                result["tokens_found"].append({"source": "hidden_input", "param": groups[0], "value": groups[1]})
-            else:
-                result["tokens_found"].append({"source": "hidden_input", "value": groups[0]})
-            result["extraction_methods"].append("hidden_input")
-
-    # 3. Scan for JS variables
-    js_patterns = [
-        r'csrf_token\s*[:=]\s*["\']([^"\']+)["\']',
-        r'csrfToken\s*[:=]\s*["\']([^"\']+)["\']',
-        r'__csrf\s*[:=]\s*["\']([^"\']+)["\']',
-        r'"csrfToken"\s*:\s*"([^"]+)"',
-        r"'csrfToken'\s*:\s*'([^']+)'",
-    ]
-    for pat in js_patterns:
-        for m in re.finditer(pat, body, re.IGNORECASE):
-            result["tokens_found"].append({"source": "js_variable", "value": m.group(1)})
-            result["extraction_methods"].append("js_variable")
-
-    # 4. Scan headers
-    header_names = ["X-CSRF-Token", "X-CSRFToken", "CSRF-Token", "X-XSRF-Token"]
-    for h in header_names:
-        val = resp.headers.get(h) if hasattr(resp, 'headers') else None
-        val = resp.headers.get(h) if hasattr(resp, 'headers') else None
-    # Re-read headers from response
-    for h in header_names:
-        val = resp.headers.get(h) if hasattr(resp, 'headers') else None
-
-    # 5. Scan cookies
-    set_cookie = resp.headers.get("Set-Cookie", "") if hasattr(resp, 'headers') else ""
-    cookie_patterns = [
-        r'csrf[^=]*=([^;]+)',
-        r'XSRF-TOKEN=([^;]+)',
-        r'csrf-token=([^;]+)',
-    ]
-    for pat in cookie_patterns:
-        m = re.search(pat, set_cookie, re.IGNORECASE)
-        if m:
-            result["tokens_found"].append({"source": "cookie_set-cookie", "value": m.group(1), "cookie_match": True})
-            result["extraction_methods"].append("cookie")
-
-    # Analyze tokens
-    seen = set()
-    for t in result["tokens_found"]:
-        val = t.get("value", "")
-        if val in seen or len(val) < 8:
-            continue
-        seen.add(val)
-        analysis = {"value_length": len(val), "value_prefix": val[:20]}
-
-        if re.match(r'^[A-Za-z0-9+/=]+$', val):
-            try:
-                decoded = base64.b64decode(val).decode("utf-8", errors="replace")
-                analysis["encoding"] = "base64"
-                analysis["decoded_preview"] = decoded[:50]
-            except Exception:
-                analysis["encoding"] = "base64_like"
-        elif re.match(r'^[a-f0-9]{32,}$', val, re.IGNORECASE):
-            analysis["encoding"] = "md5_like"
-        elif re.match(r'^[a-f0-9]{40,}$', val, re.IGNORECASE):
-            analysis["encoding"] = "sha1_like"
-        elif re.match(r'^[a-f0-9]{64,}$', val, re.IGNORECASE):
-            analysis["encoding"] = "sha256_like"
-        elif re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', val, re.IGNORECASE):
-            analysis["encoding"] = "uuid"
-        else:
-            analysis["encoding"] = "unknown"
-        t["analysis"] = analysis
-        result["token_analysis"].append(analysis)
-
-    result["total_tokens"] = len(result["tokens_found"])
-    result["extraction_summary"] = f"Extracted {len(result['tokens_found'])} CSRF tokens via {', '.join(set(result['extraction_methods']))}" if result["tokens_found"] else "No CSRF tokens found"
-    result["csrf_protected"] = len(result["tokens_found"]) > 0
-    result["remediation"] = "CSRF tokens found — ensure they are validated server-side and tied to session. Consider SameSite=Strict cookies."
-
-    return json.dumps(result, indent=2)
+        if not isinstance(method,str) or method.lower() != 'get':
+            raise ValueError('Only GET observations supported')
+        if not isinstance(param_hint,str) or (param_hint and not re.fullmatch(r'[A-Za-z0-9_-]{1,64}',param_hint)):
+            raise ValueError('Invalid parameter hint')
+        url = httpx.URL(target if '://' in target else 'http://' + target)
+        if url.scheme not in ('http','https') or not url.host or url.userinfo:
+            raise ValueError('Invalid target')
+        result['target'] = str(url.copy_with(query=None,fragment=None))
+        deadline = time.monotonic() + 10
+        with GuardedClient(timeout=5.0,trust_env=False,follow_redirects=False) as client:
+            result['requests_attempted'] = 1
+            with client.stream('GET',url,headers={'User-Agent':'CybersecCSRF/1.0'},follow_redirects=False) as response:
+                result['status'] = response.status_code
+                if response.status_code != 200:
+                    result['error'] = 'Non-success response; extraction incomplete'
+                    return json.dumps(result,indent=2)
+                if sum(len(k)+len(v) for k,v in response.headers.raw)>16384:
+                    raise ValueError('Header limit')
+                body = bytearray()
+                for chunk in response.iter_bytes(chunk_size=16384):
+                    if time.monotonic()>deadline:
+                        raise TimeoutError('Processing deadline')
+                    if len(body)+len(chunk)>262144:
+                        raise ValueError('Body limit')
+                    body.extend(chunk)
+                if time.monotonic()>deadline:
+                    raise TimeoutError('Processing deadline')
+                result['body_size'] = len(body)
+                def record(source, name, value):
+                    if not isinstance(value,str) or not value:
+                        return
+                    if len(result['tokens_found']) >= 100:
+                        result['token_limit_reached'] = True
+                        return
+                    metadata = {'source':source,'name':name,'value_present':True,
+                                'value_length':len(value),'value':'[redacted]',
+                                'confidence':'MEDIUM','coverage':'Nonempty value under a recognized token-like name or explicit hint; server validation and CSRF protection not tested'}
+                    result['tokens_found'].append(metadata)
+                    result['token_analysis'].append({'source':source,'value_length':len(value)})
+                    if source not in result['extraction_methods']:
+                        result['extraction_methods'].append(source)
+                content_type = response.headers.get('content-type','').split(';',1)[0].strip().lower()
+                is_html = content_type in ('text/html','application/xhtml+xml')
+                result['content_type'] = content_type if is_html else 'uninspected_body_format'
+                if is_html:
+                    parser = _TokenParser(record,param_hint.lower())
+                    parser.feed(bytes(body).decode('utf-8',errors='replace'))
+                    parser.close()
+                for name in _HEADERS:
+                    record('response_header',name,response.headers.get(name))
+                for header in response.headers.get_list('set-cookie'):
+                    cookies = SimpleCookie()
+                    try:
+                        cookies.load(header)
+                    except CookieError:
+                        continue
+                    for name, morsel in cookies.items():
+                        if name.lower() in _NAMES and morsel['max-age'] != '0':
+                            record('cookie_set-cookie',name.lower(),morsel.value)
+                result['total_tokens'] = len(result['tokens_found'])
+                result['coverage_complete'] = is_html and not result.get('token_limit_reached',False)
+                result['extraction_summary'] = 'Token-like metadata observed; values redacted' if result['total_tokens'] else 'No supported token metadata observed'
+    except (httpx.HTTPError,httpx.InvalidURL,ValueError,TypeError,TimeoutError) as exc:
+        result.update(error=type(exc).__name__,coverage_complete=False)
+    return json.dumps(result,indent=2)

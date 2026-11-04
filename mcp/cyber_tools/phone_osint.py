@@ -37,7 +37,7 @@ def phone_osint(phone_number: str, default_region: str = "") -> dict:
         lookup URLs, and error.
     """
     result: dict[str, Any] = {
-        "input": phone_number,
+        "input": "[REDACTED]",
         "valid": False,
         "international_format": "",
         "national_format": "",
@@ -50,10 +50,18 @@ def phone_osint(phone_number: str, default_region: str = "") -> dict:
         "timezones": [],
         "lookup_urls": [],
         "error": None,
+        "coverage_complete": False,
+        "assessment": "numbering_plan_metadata_only",
+        "identity_verified": False,
+        "external_requests": 0,
+        "coverage": "Offline numbering-plan metadata; not identity, reachability, current carrier or physical-location verification. Lookup links are untested templates; normalized input number remains in results.",
     }
 
-    if not phone_number:
-        result["error"] = "phone_number is required."
+    if not isinstance(phone_number, str) or not phone_number.strip() or len(phone_number) > 128:
+        result["error"] = "phone_number must be a nonempty string of at most 128 characters."
+        return result
+    if not isinstance(default_region, str) or (default_region and (len(default_region) != 2 or not default_region.isalpha())):
+        result['error'] = 'default_region must be a two-letter region code.'
         return result
 
     if not _HAS_PHONENUMBERS:
@@ -63,60 +71,37 @@ def phone_osint(phone_number: str, default_region: str = "") -> dict:
         return result
 
     try:
-        parsed = phonenumbers.parse(phone_number, default_region or None)
+        parsed = phonenumbers.parse(phone_number, default_region.upper() or None)
     except NumberParseException as exc:
-        result["error"] = f"Failed to parse phone number: {exc.error_type} — {exc._msg}"
+        result["error"] = f"Failed to parse phone number (code {exc.error_type})."
         return result
     except Exception as exc:
-        result["error"] = f"Failed to parse phone number: {exc}"
+        result["error"] = "Phone-number parser unavailable or input unsupported."
         return result
 
-    result["valid"] = phonenumbers.is_valid_number(parsed)
-    result["international_format"] = phonenumbers.format_number(
-        parsed, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-    )
-    result["national_format"] = phonenumbers.format_number(
-        parsed, phonenumbers.PhoneNumberFormat.NATIONAL
-    )
-    result["country_code"] = parsed.country_code
-    result["national_number"] = parsed.national_number
+    try:
+        result["valid"] = phonenumbers.is_valid_number(parsed)
+        if not result['valid']:
+            result.update(coverage_complete=True, error='Number does not match a valid numbering-plan allocation.')
+            return result
+        result.update(
+            international_format=phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.INTERNATIONAL),
+            national_format=phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.NATIONAL),
+            country_code=parsed.country_code, national_number=parsed.national_number,
+            country=ph_geocoder.country_name_for_number(parsed, 'en') or '',
+            region=phonenumbers.region_code_for_number(parsed) or '',
+            carrier=ph_carrier.name_for_number(parsed, 'en') or 'unknown',
+            line_type=phonenumbers.PhoneNumberType.to_string(phonenumbers.number_type(parsed)),
+            timezones=list(ph_timezone.time_zones_for_number(parsed)),
+        )
+        canonical = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+    except Exception:
+        result['error'] = 'Numbering-plan metadata unavailable or unsupported.'
+        return result
 
-    # Region / country
-    region_desc = ph_geocoder.description_for_number(parsed, "en")
-    result["country"] = region_desc or ""
-    regions = ph_geocoder.region_code_for_number(parsed)
-    result["region"] = regions if regions else ""
-
-    # Carrier
-    carrier_name = ph_carrier.name_for_number(parsed, "en")
-    result["carrier"] = carrier_name or "unknown"
-
-    # Line type
-    number_type = ph_carrier.number_type(parsed)
-    _LINE_TYPES = {
-        0: "UNKNOWN",
-        1: "FIXED_LINE",
-        2: "MOBILE",
-        3: "FIXED_LINE_OR_MOBILE",
-        4: "TOLL_FREE",
-        5: "PREMIUM_RATE",
-        6: "SHARED_COST",
-        7: "VOIP",
-        8: "PERSONAL_NUMBER",
-        9: "PAGER",
-        10: "UAN",
-        11: "VOICEMAIL",
-        12: "UNKNOWN",
-    }
-    result["line_type"] = _LINE_TYPES.get(int(number_type), str(number_type))
-
-    # Timezones
-    tz_list = ph_timezone.time_zones_for_number(parsed)
-    result["timezones"] = list(tz_list) if tz_list else []
-
-    # Generate lookup URLs
-    intl_raw = result["international_format"].replace(" ", "").replace("+", "")
-    e164 = result["international_format"].replace(" ", "")
+    # Templates only: no lookup service is contacted or verified.
+    intl_raw = canonical.removeprefix('+')
+    e164 = quote(canonical, safe='')
     result["lookup_urls"] = [
         {
             "service": "Truecaller",
@@ -145,7 +130,7 @@ def phone_osint(phone_number: str, default_region: str = "") -> dict:
         },
         {
             "service": "Google Search",
-            "url": f"https://www.google.com/search?q=%22{quote(e164)}%22",
+            "url": f"https://www.google.com/search?q=%22{e164}%22",
             "description": "Search for this number on Google",
         },
         {
@@ -170,4 +155,5 @@ def phone_osint(phone_number: str, default_region: str = "") -> dict:
         },
     ]
 
+    result['coverage_complete'] = True
     return result

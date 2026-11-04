@@ -50,6 +50,13 @@ MODULES = (
     "test_protocol_adapter_accuracy",
     "test_discovery_intel_accuracy",
     "test_source_artifact_accuracy",
+    "test_phone_metadata_accuracy",
+    "test_dork_generation_accuracy",
+    "test_remaining_protocol_accuracy",
+    "test_integration_adapter_accuracy",
+    "test_credential_adapter_accuracy",
+    "test_mobile_artifact_accuracy",
+    "test_web_observation_accuracy",
 )
 
 

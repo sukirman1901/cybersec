@@ -8,6 +8,8 @@ upload_forms, exposed_cms, shell_upload, deface_target.
 """
 
 from typing import Any
+import re
+from urllib.parse import urlencode
 
 _CATEGORIES: dict[str, list[str]] = {
     "vuln_sites": [
@@ -701,7 +703,25 @@ async def dork_gen(
         "sources": [],
         "count": 0,
         "error": None,
+        "execution_status": "generated_only",
+        "external_requests": 0,
+        "scope_authorized": False,
+        "coverage": "Existing static query templates only; no search results, vulnerability evidence or target authorization. Limit is per selected source (at most three).",
     }
+
+    if any(not isinstance(value, str) or len(value) > 64 for value in (category, tech, vuln_type)):
+        result['error'] = 'Selectors must be strings of at most 64 characters.'
+        return result
+    if type(limit) is not int or not 1 <= limit <= 100:
+        result['error'] = 'limit must be an integer from 1 to 100 per source.'
+        return result
+    if not isinstance(target, str) or len(target) > 253:
+        result['error'] = 'Target must be a domain of at most 253 characters.'
+        return result
+    target = target.lower().rstrip('.')
+    if target and not re.fullmatch(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?', target):
+        result['error'] = 'Target must be a plain domain without URL credentials or search operators.'
+        return result
 
     dorks: list[str] = []
     site_prefix = f"site:{target} " if target else ""
@@ -709,7 +729,7 @@ async def dork_gen(
     if category:
         if category not in _CATEGORIES:
             result["error"] = (
-                f"Unknown category: '{category}'. Available: {', '.join(sorted(_CATEGORIES))}"
+                f"Unknown category. Available: {', '.join(sorted(_CATEGORIES))}"
             )
             return result
         cat_dorks = _CATEGORIES[category][:limit]
@@ -719,7 +739,7 @@ async def dork_gen(
     if tech:
         if tech not in _TECH_DORKS:
             result["error"] = (
-                f"Unknown tech: '{tech}'. Available: {', '.join(sorted(_TECH_DORKS))}"
+                f"Unknown tech. Available: {', '.join(sorted(_TECH_DORKS))}"
             )
             return result
         tech_dorks = _TECH_DORKS[tech][:limit]
@@ -729,7 +749,7 @@ async def dork_gen(
     if vuln_type:
         if vuln_type not in _VULN_DORKS:
             result["error"] = (
-                f"Unknown vuln_type: '{vuln_type}'. Available: {', '.join(sorted(_VULN_DORKS))}"
+                f"Unknown vuln_type. Available: {', '.join(sorted(_VULN_DORKS))}"
             )
             return result
         vuln_dorks = _VULN_DORKS[vuln_type][:limit]
@@ -751,6 +771,6 @@ async def dork_gen(
             seen.add(d)
             unique.append(d)
 
-    result["dorks"] = [{"dork": d, "google_link": f"https://www.google.com/search?q={d.replace(' ', '+')}"} for d in unique]
+    result["dorks"] = [{"dork": d, "google_link": 'https://www.google.com/search?' + urlencode({'q': d})} for d in unique]
     result["count"] = len(result["dorks"])
     return result

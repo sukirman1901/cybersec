@@ -460,6 +460,76 @@ run** remain explicit gaps. A source comparison found no changes to existing pub
 function signatures across the 17 changed implementation modules. Aggregate test
 counts and trace coverage still do not establish all-action operational accuracy.
 
+## Autonomous cycle 4 — verified source integration
+
+Five independent groups cover mobile artifact adapters, remaining network-protocol
+adapters, mocked external integrations, web observations, and mocked credential-audit
+boundaries. No real integrations
+are posted, devices contacted or credentials attempted by these suites.
+
+Parent fixes:
+- `phone_osint`: corrected off-by-one line-type mapping using library enum names;
+  country is now country metadata rather than a city/area description. Invalid
+  numbers produce no lookup links; normalized E164 is used in URL templates.
+  Inputs are bounded, parser/metadata exceptions are generic, and output explicitly
+  distinguishes numbering-plan metadata from identity/location/reachability proof.
+  Original input is redacted; normalized supplied numbers remain in results by
+  design. No external lookup services contacted. Fixtures use a fictional NANPA
+  number and the installed library's example-number metadata.
+- `dork_gen`: validates selector/limit/domain syntax, prevents search operators
+  from entering the supplied site scope, uses URL query encoding, and labels
+  results as generated templates only. Existing query templates were not expanded;
+  no search or target access occurs.
+
+Red phases reproduced **10** phone and **11** query-generator failures/subtest
+failures, plus three follow-up unknown-selector error-redaction failures. Combined
+targeted green run: **11 tests + 18 subtests passed**. Phone
+metadata fixtures require the optional installed phonenumbers package; skips must
+not be treated as execution evidence on environments without that dependency.
+
+Completed protocol/integration groups reviewed:
+- Redis/LDAP/SMB/SMTP retain selected protocol-positive observations, distinguish
+  refused connections from unknown transport failures, redact banners/config or
+  credential data and bound reads/commands. SNMP remains explicitly TCP-only;
+  UDP/community validity is not assessed. Credentialed LDAP binds are unsupported.
+- GitHub/Jira creation and Slack/Discord/Teams delivery acknowledge only validated
+  mocked receipts; redirects are disabled and outgoing raw evidence/URL secrets
+  redacted. Jira description uses ADF. No issue or message was actually created.
+- Monitoring uses temporary persistent-store fixtures, atomic writes and read-race
+  checks; disappearance of findings no longer means remediation. CI/CD observations
+  are bounded candidates with soft-404 controls, not successful exploitation.
+
+Parent combined check for these groups plus phone/query utilities: **58 tests + 36
+subtests passed**. A test module's missing standalone import path was reproduced and
+corrected before that run. Credential-adapter review identified a key-auth ambiguity
+in Paramiko's defaults and requested password-only auth options, bounded auth/banner
+waits, input validation and no-follow wordlist reads before integration.
+
+Credential and mobile review follow-ups verified together: **56 tests + 66
+subtests passed**. SSH explicitly disables agent/key lookup and bounds banner/auth
+waits; all authentication and Hydra execution remain mocked. Hydra output must
+match the supplied host/service, with bounded regular-file wordlist reads.
+Mobile archive inspection remains in-memory; binary AXML, signing validity,
+runtime device protection and pinning are explicitly unverified. Blocking TLS
+observation now runs off-loop with a bounded await; synthetic heartbeat and cleanup
+fixtures pass. Resolver workers may outlive cancellation until their blocking call
+returns; this is not a hard DNS execution deadline. No devices or real login
+attempts were used. Web review follow-up completed before source freeze:
+Engine.IO uses `EIO=4&transport=polling`; strict fixtures enforce the five-request
+cap, empty GET bodies and absence of authentication probes. Handshake observations
+carry confidence and coverage, without inferring authentication or origin-policy
+security. Source edits stopped before integration.
+
+Stable cycle-4 integration:
+- Full pytest: **926 tests + 1903 subtests passed**, 97 warnings, **107.50 seconds**.
+- Network-disabled trace: **893 tests passed**, **53.103 seconds**, no failures/errors.
+- Actual mapped entries observed: **137/209**, up from 112. **72 entries remain
+  unobserved in this trace**; operational coverage and real-world accuracy across
+  all tools are not established.
+- Inventory, trace and 209-tool disposition refreshed. External provider/device
+  interoperability remains unverified. Connected MCP startup identity has not been
+  refreshed by these source tests.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the
