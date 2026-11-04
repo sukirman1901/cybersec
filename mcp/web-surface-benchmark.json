@@ -1,0 +1,156 @@
+{
+  "before": {
+    "environment": "httpx.MockTransport; sequential",
+    "runs": 5,
+    "groups": {
+      "exposed_git": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 15,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 3.375,
+        "requests_by_case": {
+          "positive": 12,
+          "catchall": 12,
+          "negative": 12,
+          "blocked": 12,
+          "transport": 12,
+          "malformed": 12,
+          "incidental": 12
+        },
+        "blocked_marked_incomplete": false
+      },
+      "nextjs_scan": {
+        "counts": {
+          "tp": 0,
+          "tn": 10,
+          "fp": 10,
+          "fn": 5
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 5,
+        "mock_processing_p95_ms": 3.582,
+        "requests_by_case": {
+          "positive": 12,
+          "catchall": 12,
+          "negative": 12,
+          "blocked": 12,
+          "transport": 1,
+          "malformed": 12,
+          "incidental": 12
+        },
+        "blocked_marked_incomplete": false
+      },
+      "graphql_introspect": {
+        "counts": {
+          "tp": 5,
+          "tn": 10,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 15,
+        "excluded": 20,
+        "exceptions": 10,
+        "mock_processing_p95_ms": 1.974,
+        "requests_by_case": {
+          "positive": 1,
+          "catchall": 4,
+          "negative": 4,
+          "blocked": 4,
+          "transport": 4,
+          "malformed": 1,
+          "incidental": 1
+        },
+        "blocked_marked_incomplete": false
+      }
+    },
+    "limitations": [
+      "Selected synthetic fixtures, not production precision/recall.",
+      "p95 measures local Python processing, not network latency.",
+      "Blocked/transport cases excluded from accuracy counts; exceptions reported separately."
+    ]
+  },
+  "after": {
+    "environment": "httpx.MockTransport; sequential",
+    "runs": 5,
+    "groups": {
+      "exposed_git": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 2.216,
+        "requests_by_case": {
+          "positive": 5,
+          "catchall": 5,
+          "negative": 5,
+          "blocked": 1,
+          "transport": 1,
+          "malformed": 5,
+          "incidental": 5
+        },
+        "blocked_marked_incomplete": true
+      },
+      "nextjs_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 1.216,
+        "requests_by_case": {
+          "positive": 2,
+          "catchall": 1,
+          "negative": 1,
+          "blocked": 1,
+          "transport": 1,
+          "malformed": 2,
+          "incidental": 1
+        },
+        "blocked_marked_incomplete": true
+      },
+      "graphql_introspect": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 1.779,
+        "requests_by_case": {
+          "positive": 1,
+          "catchall": 4,
+          "negative": 4,
+          "blocked": 1,
+          "transport": 1,
+          "malformed": 4,
+          "incidental": 4
+        },
+        "blocked_marked_incomplete": true
+      }
+    },
+    "limitations": [
+      "Selected synthetic fixtures, not production precision/recall.",
+      "p95 measures local Python processing, not network latency.",
+      "Blocked/transport cases excluded from accuracy counts; exceptions reported separately."
+    ]
+  }
+}

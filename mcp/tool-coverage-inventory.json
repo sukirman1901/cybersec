@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 98,
+  "with_static_test_references": 101,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -1317,9 +1317,12 @@
       ],
       "import_roots": [
         "httpx",
-        "re"
+        "re",
+        "struct"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_surface_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1536,9 +1539,11 @@
       ],
       "import_roots": [
         "httpx",
-        "json"
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_surface_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2194,9 +2199,12 @@
       ],
       "import_roots": [
         "httpx",
-        "re"
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_web_surface_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

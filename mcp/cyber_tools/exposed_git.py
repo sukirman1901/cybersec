@@ -1,40 +1,38 @@
-import httpx
+"""Detect recognizable Git metadata, not arbitrary successful paths."""
 import re
+import struct
+import httpx
+from .surface_probe import SurfaceProbe
 
-GIT_PATHS = [
-    "/.git/config",
-    "/.git/HEAD",
-    "/.git/index",
-    "/.git/logs/HEAD",
-    "/.git/refs/heads/master",
-    "/.git/refs/heads/main",
-    "/.gitignore",
-    "/.gitattributes",
-    "/.gitmodules",
-    "/.git/objects/info/packs",
-    "/.git/info/exclude",
-    "/.git/description",
-]
-
-INTERESTING_FILES = [
-    "/.git/config",
-    "/.git/logs/HEAD",
-    "/.git/index",
-]
+GIT_PATHS = ['/.git/HEAD', '/.git/config', '/.git/index', '/.git/refs/heads/main', '/.git/refs/heads/master']
 
 
 async def exposed_git(target: str) -> dict:
     findings = []
-    base = target.rstrip("/")
-    async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
+    base = target.rstrip('/')
+    coverage = 'Five Git metadata paths; signatures only, no repository reconstruction or object downloads'
+    async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
+        probe = SurfaceProbe(client, max_requests=len(GIT_PATHS))
         for path in GIT_PATHS:
-            url = f"{base}{path}"
-            try:
-                resp = await client.get(url)
-                if resp.status_code == 200 and len(resp.text) > 5:
-                    content_sample = resp.text[:200]
-                    severity = "critical" if path in INTERESTING_FILES else "high"
-                    findings.append({"path": path, "status": 200, "size": len(resp.text), "severity": severity, "preview": content_sample[:100]})
-            except httpx.HTTPError:
+            response = await probe.request('GET', base + path)
+            if response is None:
+                break
+            if response.status_code != 200:
                 continue
-    return {"target": target, "findings": findings, "git_exposed": len(findings) > 0, "count": len(findings)}
+            text = response.text.strip()
+            signature = None
+            if path.endswith('/HEAD') and re.fullmatch(r'ref: refs/[A-Za-z0-9_./-]+|[a-fA-F0-9]{40}|[a-fA-F0-9]{64}', text):
+                signature = 'Git HEAD reference'
+            elif '/refs/heads/' in path and re.fullmatch(r'[a-fA-F0-9]{40}|[a-fA-F0-9]{64}', text):
+                signature = 'Git object reference'
+            elif path.endswith('/config') and re.search(r'(?m)^\[core\]\s*$', text) and re.search(r'(?m)^\s*repositoryformatversion\s*=\s*\d+\s*$', text) and '<html' not in text.lower():
+                signature = 'Git core configuration'
+            elif path.endswith('/index') and len(response.content) >= 12 and response.content[:4] == b'DIRC' and struct.unpack('>I', response.content[4:8])[0] in (2, 3, 4):
+                signature = 'Git index header'
+            if signature:
+                findings.append({'path': path, 'target':base + path, 'status':200,
+                                 'severity':'high' if path.endswith(('/config','/index')) else 'medium',
+                                 'evidence':signature, 'confidence':'HIGH', 'coverage':coverage,
+                                 'assessment':'observed_metadata_exposure', 'size':len(response.content)})
+    return {'target':target, 'findings':findings, 'git_exposed':bool(findings),
+            'count':len(findings), 'coverage':coverage, **probe.summary()}

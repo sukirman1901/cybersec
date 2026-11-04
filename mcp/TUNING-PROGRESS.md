@@ -44,6 +44,52 @@ static references in test files; 111 do not. References may be mocks, strings or
 contract tests and do not establish executed coverage. Every row explicitly marks
 accuracy unmeasured by the inventory and latency/request metrics null.
 
+## Batch 2 — shallow web surfaces (2026-11-04)
+
+Selected previously unreferenced tools: `exposed_git`, `nextjs_scan`, and
+`graphql_introspect`. Root causes reproduced: status/length-only Git exposure,
+generic `next` substring and successful-path Next.js findings, repeated homepage
+downloads, source-map matching that missed normal links, and unvalidated GraphQL
+JSON indexing. Initial suite exposed 15 failures across tests/subtests.
+
+Changes:
+- Git: require recognized HEAD/config/index/ref signatures; do not export raw
+  config contents or label .gitignore as exposed repository metadata.
+- Next.js: use framework-specific hints; reuse root response; inspect up to three
+  explicitly linked same-origin maps with valid source-map JSON. Build IDs and
+  public bundles are not vulnerabilities. Embedded source is an observation,
+  not automatic high/critical secret leakage.
+- GraphQL: validate nested JSON shape, avoid crashing on unrelated schema text
+  or null schema, respect an explicitly supplied endpoint, request type names
+  rather than full field inventories. Open introspection is a capability,
+  not exploit confirmation.
+- Shared probe: 15-second overall deadline, explicit request cap, 256 KiB decoded
+  body cap, no redirect following, stop on denial/rate-limit/server failure.
+  Preserve incomplete results rather than empty clean scans.
+
+Verification: **402 tests and 1294 subtests passed**, 50 existing deprecation
+warnings; **369 offline tests OK**. Regression suite includes deadline cancellation,
+request/response limits and blocking behavior. No production traffic in this batch.
+
+`web-surface-benchmark.json` preserves before/after results. Seven unique synthetic
+cases per tool, five repetitions (105 executions per snapshot). Repetitions are
+not independent targets. After: 75 scored executions, zero FP/FN; 30 deliberate
+blocked/transport executions excluded and marked incomplete, zero exceptions.
+Before: Git 15 FP; Next.js 10 FP/5 FN plus transport exceptions; GraphQL 10 malformed
+response exceptions (excluded, not counted clean).
+
+| Tool | Local mock-processing p95 before → after (ms) | Request change |
+|---|---|---|
+| exposed_git | 3.375 → 2.216 | 12 → 5 normal; 12 → 1 blocked |
+| nextjs_scan | 3.582 → 1.216 | 12 → 1 non-Next; 12 → 2 linked-map positive |
+| graphql_introspect | 1.974 → 1.779 | positive remains 1; blocked 4 → 1 |
+
+These timings measure Python/mock transport, not real network p95. Resource/RSS
+usage has not been benchmarked. Reduced request counts partly reflect narrower,
+explicit coverage: Git now checks five signature-bearing metadata paths; Next.js
+no longer probes generic directories/API/404/sitemap or retrieves unlinked maps.
+No claim that omitted paths or unlinked artifacts are secure.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the
