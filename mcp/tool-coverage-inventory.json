@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 170,
+  "with_static_test_references": 171,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -1247,12 +1247,13 @@
         "dns",
         "hashlib",
         "httpx",
+        "itertools",
         "re",
-        "socket",
         "typing",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_osint_privacy_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2693,6 +2694,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_osint_privacy_accuracy.py",
         "mcp/tests/test_redirect_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -3022,10 +3024,13 @@
         "mcp/cyber_tools/s3_scanner.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
-        "re"
+        "re",
+        "xml"
       ],
       "static_test_references": [
+        "mcp/tests/test_discovery_bounds_accuracy.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
@@ -3284,10 +3289,12 @@
       "import_roots": [
         "asyncio",
         "httpx",
+        "re",
         "typing"
       ],
       "static_test_references": [
         "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_osint_privacy_accuracy.py",
         "mcp/tests/test_redirect_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -3618,12 +3625,12 @@
         "mcp/cyber_tools/telegram_osint.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
-        "re",
-        "typing",
-        "urllib"
+        "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_osint_privacy_accuracy.py",
         "mcp/tests/test_redirect_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -3733,10 +3740,14 @@
         "mcp/cyber_tools/vhost_discovery.py"
       ],
       "import_roots": [
+        "asyncio",
+        "html",
         "httpx",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_discovery_bounds_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

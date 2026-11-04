@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 147,
-  "tests_run": 965,
+  "entry_execution_observed": 153,
+  "tests_run": 1011,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -1116,9 +1116,14 @@
           "symbol": "email_osint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_email_async_header_waits_have_wall_timeout",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_email_dns_output_does_not_export_provider_strings",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_email_links_are_generated_and_sensitive_values_omitted",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_input_rejection_precedes_io"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "engagement_gate",
@@ -2438,9 +2443,17 @@
           "symbol": "people_osint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_input_rejection_precedes_io",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_email_only_counts_mx_answers",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_github_match_has_no_personal_metadata",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_github_mismatch_not_a_profile",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_http_error_is_incomplete_not_not_found",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_oversize_and_failures_are_recorded",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_people_status_is_not_identity_and_errors_retained"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "phone_osint",
@@ -2739,9 +2752,21 @@
           "symbol": "s3_scanner"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_body_limit",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_generic_status_is_not_identity",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_invalid_input_no_requests_or_echo",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_listing_identity_and_privacy",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_malformed_or_wrong_identity",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_result_limit_and_dtd_rejection",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_bucket_truncation_is_not_total_inventory",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_malformed_or_encoded_responses_incomplete",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_stream_limit_closes_without_consuming_tail",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_total_deadlines",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_transport_errors_are_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "sast_review",
@@ -3010,9 +3035,20 @@
           "symbol": "social_osint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_input_rejection_precedes_io",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_absence_is_observation",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_aggregate_timeout_preserves_completed_and_cleans_pending",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_blocking_and_timeout_are_incomplete",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_caller_cancellation_cleans_workers",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_generic_200_is_not_profile_evidence",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_match_is_candidate_not_identity",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_numeric_limits_rejected",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_oversize_is_incomplete",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_social_request_wall_timeout_closes_stream"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "spring_scan",
@@ -3326,9 +3362,16 @@
           "symbol": "telegram_osint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_input_rejection_precedes_io",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_telegram_candidate_minimizes_metadata",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_telegram_failure_is_incomplete_and_redacted",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_telegram_generic_200_not_confirmed",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_telegram_oversize_and_absence",
+        "test_osint_privacy_accuracy.PrivacyAccuracy.test_telegram_wall_timeout_closes_stream"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "testssl_check",
@@ -3408,9 +3451,23 @@
           "symbol": "vhost_discovery"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_malformed_or_encoded_responses_incomplete",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_soft404_baseline_never_complete",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_stream_limit_closes_without_consuming_tail",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_total_deadlines",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_transport_errors_are_redacted",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_aggregate_bytes_and_result_limits",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_generic_differences_not_discovery",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_identity_candidate_without_authorization",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_invalid_target_no_requests",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_rate_limit_stops",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_reflected_catchall_not_discovery",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_request_and_body_budgets",
+        "test_discovery_bounds_accuracy.DiscoveryBoundsAccuracy.test_vhost_soft404_is_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "vuln_database",

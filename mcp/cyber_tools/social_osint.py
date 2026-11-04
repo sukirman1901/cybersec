@@ -1,15 +1,18 @@
 """
 Social Media OSINT — cross-platform username search across 100+ platforms.
 
-Checks if a username exists on social media platforms by probing URL patterns.
-No API keys required — uses HTTP status codes and page content to determine existence.
-Based on the Sherlock-style approach.
+Observes URL-pattern responses and candidate username mentions, not identities.
+Blocking, redirects, generic pages and failed reads remain incomplete.
 """
 
 import asyncio
+import re
 from typing import Any
 
 import httpx
+
+_MAX_REQUEST_SECONDS = 60
+_MAX_TOTAL_SECONDS = 120
 
 # Platform definitions: (name, URL pattern, detection method)
 # Detection: "status" = check HTTP status, "content" = check page content for not-found text
@@ -144,28 +147,15 @@ _NOT_FOUND_MARKERS = (
 
 
 def _profile_exists(username: str, url: str, status_code: int, body: str) -> bool:
-    """Heuristic: avoid counting generic 200/403 pages as existing profiles."""
-    if status_code in (404, 410, 451):
-        return False
-    if status_code == 429:
+    """Candidate username mention only; never evidence of a person's identity."""
+    if status_code != 200:
         return False
 
     body_lower = body[:8000].lower()
     if any(marker in body_lower for marker in _NOT_FOUND_MARKERS):
         return False
 
-    if status_code == 403:
-        # Protected but may exist — require username in body/title
-        return username.lower() in body_lower
-
-    if status_code != 200:
-        return False
-
-    # Require username mention or platform-specific profile signals
-    if username.lower() in body_lower:
-        return True
-    profile_signals = ("followers", "following", "posts", "joined", "member since", "profile")
-    return any(sig in body_lower for sig in profile_signals)
+    return bool(re.search(r"(?<![\w.-])" + re.escape(username.lower()) + r"(?![\w.-])", body_lower))
 
 
 async def social_osint(
@@ -175,8 +165,8 @@ async def social_osint(
 ) -> dict:
     """Search for a username across 100+ social media platforms.
 
-    Probes each platform's URL pattern and checks HTTP status to determine
-    if the username exists. No API keys required.
+    Probes each platform's URL pattern for candidate mentions. The legacy
+    found/found_count fields count candidates, never confirmed identities.
 
     Args:
         username:  Username to search for (without @ prefix).
@@ -187,24 +177,33 @@ async def social_osint(
         A dict with found accounts, total checked, found count, and error.
     """
     result: dict[str, Any] = {
-        "username": username,
+        "username": "[redacted]",
         "found": [],
         "not_found": [],
+        "incomplete": [],
+        "identity_confirmed": False,
+        "found_semantics": "Candidate username mentions, not confirmed accounts or identities",
         "total_checked": 0,
         "found_count": 0,
         "error": None,
     }
 
-    if not username:
-        result["error"] = "username is required."
+    if not isinstance(username, str) or len(username) > 65:
+        result["error"] = "Invalid username (maximum 64 characters, optional @)."
         return result
 
     username = username.strip().lstrip("@")
+    if not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}", username):
+        result["error"] = "Invalid username."
+        return result
+    if (type(timeout) is not int or not 1 <= timeout <= 60 or
+            type(concurrent) is not int or not 1 <= concurrent <= 50):
+        result["error"] = "timeout must be 1..60 seconds; concurrent must be 1..50."
+        return result
 
     async with httpx.AsyncClient(
         timeout=float(timeout),
-        verify=False,
-        follow_redirects=True,
+        follow_redirects=False,
         headers=_HEADERS,
     ) as client:
         semaphore = asyncio.Semaphore(concurrent)
@@ -212,30 +211,57 @@ async def social_osint(
         async def check_platform(name: str, url: str) -> tuple[str, str, bool, int]:
             async with semaphore:
                 try:
-                    resp = await client.get(url)
-                    exists = _profile_exists(username, url, resp.status_code, resp.text)
-                    return name, url, exists, resp.status_code
+                    async with asyncio.timeout(min(timeout, _MAX_REQUEST_SECONDS)), client.stream("GET", url) as resp:
+                        if resp.status_code != 200:
+                            return name, url, False, resp.status_code
+                        body = bytearray()
+                        async for chunk in resp.aiter_bytes(chunk_size=4096):
+                            if len(body) + len(chunk) > 65536:
+                                return name, url, False, 0
+                            body.extend(chunk)
+                        candidate = _profile_exists(username, url, resp.status_code, body.decode("utf-8", "replace"))
+                        return name, url, candidate, resp.status_code
                 except Exception:
                     return name, url, False, 0
 
-        tasks = [
-            check_platform(name, url_template.format(username))
-            for name, url_template, _, _ in _PLATFORMS
+        targets = [
+            (name, url_template.format(username))
+            for name, url_template, _, _ in _PLATFORMS[:128]
         ]
-        responses = await asyncio.gather(*tasks)
+        tasks = [asyncio.create_task(check_platform(name, url)) for name, url in targets]
+        try:
+            async with asyncio.timeout(_MAX_TOTAL_SECONDS):
+                await asyncio.gather(*tasks)
+        except TimeoutError:
+            result["error"] = "Aggregate deadline exceeded; unfinished checks are incomplete."
+        finally:
+            # Also join workers on caller cancellation before the client closes.
+            for task in tasks:
+                if not task.done():
+                    task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+        responses = [
+            (name, url, False, 0) if task.cancelled() else task.result()
+            for (name, url), task in zip(targets, tasks)
+        ]
 
     for name, url, exists, status_code in responses:
         result["total_checked"] += 1
         entry = {
             "platform": name,
-            "url": url,
+            "url": url.replace(username, "[redacted]"),
+            "url_kind": "generated_template_redacted",
             "status_code": status_code,
-            "exists": exists,
+            "exists": False if status_code in (404, 410) else None,
+            "identity_confirmed": False,
+            "observation": "username_mention" if exists else ("request_incomplete" if status_code == 0 else "http_status_only"),
         }
         if exists:
             result["found"].append(entry)
             result["found_count"] += 1
-        else:
+        elif status_code in (404, 410):
             result["not_found"].append(entry)
+        else:
+            result["incomplete"].append(entry)
 
     return result

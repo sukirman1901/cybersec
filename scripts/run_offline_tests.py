@@ -60,6 +60,8 @@ MODULES = (
     "test_search_metadata_accuracy",
     "test_dork_wrapper_accuracy",
     "test_cloud_adapter_accuracy",
+    "test_discovery_bounds_accuracy",
+    "test_osint_privacy_accuracy",
 )
 
 

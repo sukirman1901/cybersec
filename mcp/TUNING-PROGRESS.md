@@ -565,6 +565,38 @@ Stable integration after source freeze:
   GET `/` returned **200**, with four recorded security headers present. Response
   body cancelled unread; no cloud/scanner validation inferred from this smoke.
 
+## Autonomous cycle 6 — verified source integration
+
+Prioritized privacy, false-positive controls and bounded execution per the request
+to accelerate remaining work. Parent combined verification: **41 tests + 30
+subtests passed** for discovery and fictional-identifier OSINT fixtures.
+- S3 requires listing structure and matching bucket identity; ambiguous statuses
+  remain unknown. No pagination or object downloads.
+- Vhost results are unconfirmed candidates; body/request/time/output budgets apply.
+  Canonical-host signals remain heuristic, not authorization or identity proof.
+- Four OSINT adapters omit sensitive metadata and distinguish generated links,
+  mentions and blocked requests from verified identity. No real-person lookups.
+- OSINT suite moved into `mcp/tests` for inclusion in full/offline runs. Final
+  review requested wall-clock bounds around async streaming, since per-I/O timeout
+  alone does not bound slowly delivered responses.
+
+Agent reported an accidental broader regression attempt that launched local
+fixture subprocesses and timed out, with none left afterward. Parent's own scoped
+test run above was successful; no live-provider validation is inferred.
+
+Streaming follow-up completed: social requests/body reads honor requested wall
+timeouts with a 120-second aggregate cap; unfinished workers are cancelled/joined
+and completed observations preserved. Telegram uses its requested wall timeout;
+email async calls use ten seconds. Synchronous people metadata remains unchanged.
+Five added timeout/cancellation fixtures brought the OSINT suite to 26 tests.
+
+After all edits stopped, full integration passed **1044 tests + 1948 subtests**,
+97 warnings, **118.53 seconds**. Network-disabled trace passed **1011 tests** in
+**60.029 seconds**, zero failures/errors. Mapped entries observed: **153/209**;
+**56 remain unobserved** in this trace. These are local fixture measurements, not
+operational accuracy or complete action coverage. Trace/inventory/disposition
+refreshed; no live OSINT, DNS or cloud requests were made in this cycle.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the
