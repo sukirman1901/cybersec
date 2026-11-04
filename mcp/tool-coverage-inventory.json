@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 104,
+  "with_static_test_references": 107,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -2135,7 +2135,9 @@
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_rails_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2183,9 +2185,13 @@
         "mcp/cyber_tools/metrics_check.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "secrets"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_metrics_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2649,9 +2655,13 @@
         "mcp/cyber_tools/rails_scan.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "secrets"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_rails_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

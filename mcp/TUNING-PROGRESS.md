@@ -136,6 +136,32 @@ resource/RSS and real-world accuracy remain unmeasured. Soft-404 equality only
 recognizes identical response bodies; dynamic variants and unsupported formats
 remain limits of these shallow detectors.
 
+## Batch 4a — read-only Rails and metrics recognition (2026-11-04)
+
+- `rails_scan`: removed implicit user-creation POST and status-only mass-assignment
+  claim. Header fingerprints are observations, not vulnerabilities. Source/route
+  findings require structural signatures; dynamic HTML catch-alls are rejected.
+  Mass assignment, console execution, encrypted credential validation, logs and
+  admin access validation are explicitly not performed. Existing path probes are
+  retained with bounded GETs (26 maximum including root and missing-path control).
+- `metrics_check`: recognizes numeric Prometheus records rather than keywords;
+  requires two samples or a declared matching type plus sample. Raw snippets,
+  label values and metric values are omitted. Identical missing-path responses
+  are rejected. JSON health/info and OpenMetrics exemplars remain unsupported.
+- Both stop on blocked/error/redirect responses and report incomplete coverage;
+  transport failure is structured and never a PASS. Limits inherited from
+  SurfaceProbe: 15 seconds total, 256 KiB per body. Metrics uses 10 requests
+  normally instead of nine due to the missing-path control; blocked fixtures
+  use one instead of nine. Rails blocked fixtures use one instead of 26.
+- Red phase reproduced 8 Rails and 10 metrics failing tests/subtests. Green:
+  **420 tests + 1334 subtests passed**, 50 existing deprecation warnings;
+  **387 offline tests OK**. No production requests. These fixtures do not measure
+  real-world accuracy, network p95 or RSS. Framework detection is currently only
+  the explicit header hint, not proof of the runtime behind a discovered file.
+
+Still pending from this group: Django, Express, Spring and technology detection.
+The full 209-tool validation objective is not complete.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

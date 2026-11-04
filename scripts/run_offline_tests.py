@@ -27,6 +27,8 @@ MODULES = (
     "test_accuracy_tuning",
     "test_web_surface_accuracy",
     "test_discovery_accuracy",
+    "test_rails_accuracy",
+    "test_metrics_accuracy",
 )
 
 
