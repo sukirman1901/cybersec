@@ -1,7 +1,49 @@
 """Risk score calculator — CVSS + business impact + likelihood."""
 
 import json
+import re
+from urllib.parse import urlsplit, urlunsplit
 from datetime import datetime
+
+
+def _input_ok(value):
+    """Bound each input: 1 MiB UTF-8 text, 1000/container, 10000 nodes, depth 64."""
+    stack, size, nodes = [(value, 0)], 0, 0
+    while stack:
+        item, depth = stack.pop()
+        nodes += 1
+        if nodes > 10000 or depth > 64:
+            return False
+        if isinstance(item, str):
+            if len(item) > 1048576:
+                return False
+            size += len(item.encode('utf-8', errors='replace'))
+            if size > 1048576:
+                return False
+        elif isinstance(item, (dict, list)):
+            if len(item) > 1000:
+                return False
+            children = list(item.keys()) + list(item.values()) if isinstance(item, dict) else item
+            stack.extend((child, depth + 1) for child in children)
+    return True
+
+
+def _redact_urls(value):
+    """Redact HTTP URL userinfo, query and fragment; not arbitrary prose secrets."""
+    if isinstance(value, dict):
+        return {_redact_urls(k): _redact_urls(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_redact_urls(v) for v in value]
+    if not isinstance(value, str):
+        return value
+    def clean(match):
+        try:
+            parsed = urlsplit(match.group())
+            return urlunsplit((parsed.scheme, parsed.netloc.rsplit('@', 1)[-1], parsed.path,
+                               '[REDACTED]' if parsed.query else '', '[REDACTED]' if parsed.fragment else ''))
+        except ValueError:
+            return '[REDACTED URL]'
+    return re.sub(r'https?://[^\s<>"\']+', clean, value, flags=re.I)
 
 CVSS_WEIGHTS = {
     "critical": 9.5,
@@ -41,10 +83,21 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
     Combines CVSS severity, business impact, and exploitability likelihood.
     target_asset_value: low, medium, high, critical (business value of the target)
     """
+    if not all(_input_ok(v) for v in (finding_json, target_asset_value)):
+        return json.dumps({'error': 'Input exceeds 1 MiB/1000-item/10000-node/depth-64 budget'})
     try:
         finding = json.loads(finding_json)
-    except json.JSONDecodeError:
+    except (ValueError, TypeError, RecursionError):
         return json.dumps({"error": "Invalid JSON"}, indent=2)
+    if not _input_ok(finding):
+        return json.dumps({'error': 'Parsed input exceeds collection/depth budget'})
+    finding = _redact_urls(finding)
+    if not isinstance(finding, dict) or not finding or not isinstance(finding.get('severity'), str) or finding['severity'].lower() not in CVSS_WEIGHTS:
+        return json.dumps({"error": "Expected a finding with a recognized severity"})
+    if not isinstance(finding.get('type', ''), str) or any(type(finding[k]) is not bool for k in LIKELIHOOD_FACTORS if k in finding):
+        return json.dumps({"error": "Type must be a string and likelihood factors must be booleans"})
+    if target_asset_value not in ('low', 'medium', 'high', 'critical'):
+        return json.dumps({"error": "Unknown asset value"})
 
     vuln_type = finding.get("type", "").lower()
     severity = finding.get("severity", "info").lower()
@@ -66,9 +119,6 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
             likelihood += weight
             factors.append(f"+{weight} {factor}")
 
-    if finding.get("has_public_exploit"):
-        likelihood += 2
-        factors.append("+2 public_exploit_available")
     if finding.get("cve"):
         likelihood += 1
         factors.append("+1 cve_assigned")
@@ -94,6 +144,7 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
             "type": vuln_type,
             "severity": severity,
             "host": finding.get("host", "unknown"),
+            "status": finding.get("status", "candidate"),
         },
         "scores": {
             "cvss_base": cvss_base,
@@ -110,6 +161,7 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
         },
         "recommendation": _get_recommendation(level, vuln_type),
         "calculated_at": datetime.now().isoformat(),
+        "limitations": "Heuristic triage, not a calculated CVSS vector or evidence of exploitation. Input status is not independently verified.",
     }
 
     return json.dumps(result, indent=2)
@@ -118,7 +170,7 @@ def risk_score(finding_json: str, target_asset_value: str = "medium") -> str:
 def _get_recommendation(level, vuln_type):
     recs = {
         "critical": f"CRITICAL — Fix immediately. {vuln_type} poses severe risk. Patch within 24 hours.",
-        "high": f"HIGH — Fix within 7 days. {vuln_type} is exploitable and has significant impact.",
+        "high": f"HIGH — Prioritize validation and remediation of {vuln_type}; exploitability remains unverified.",
         "medium": f"MEDIUM — Fix within 30 days. {vuln_type} has moderate risk but should be addressed.",
         "low": f"LOW — Fix when possible. {vuln_type} has minimal impact but still worth addressing.",
         "info": f"INFO — Informational. {vuln_type} noted for awareness. No immediate action required.",

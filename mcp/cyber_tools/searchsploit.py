@@ -1,26 +1,42 @@
 import asyncio
+import re
+
+from .cli_tools import _run_cli
 
 
 async def searchsploit(search_term: str) -> dict:
     cmd = ["searchsploit", search_term]
-    try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
-        output = stdout.decode(errors="replace")
-        lines = [l.strip() for l in output.split("\n") if l.strip() and not l.startswith("--")]
-        exploits = []
-        for line in lines:
-            if "|" in line:
-                parts = [p.strip() for p in line.split("|")]
-                exploits.append({
-                    "path": parts[0] if len(parts) > 0 else "",
-                    "title": parts[1] if len(parts) > 1 else "",
-                    "type": parts[2] if len(parts) > 2 else "",
-                })
-        return {"search": search_term, "results": exploits[:30], "count": len(exploits)}
-    except FileNotFoundError:
-        return {"search": search_term, "error": "searchsploit not found. Install: git clone https://github.com/offensive-security/exploitdb.git /opt/exploitdb && ln -sf /opt/exploitdb/searchsploit /usr/bin/searchsploit"}
-    except asyncio.TimeoutError:
-        return {"search": search_term, "error": "searchsploit timed out"}
+    run = await _run_cli(cmd, timeout=30)
+    output = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', run.get('stdout', ''))
+    exploits = []
+    recognized = False
+    malformed = False
+    for line in output.splitlines():
+        line = line.strip()
+        if not line or set(line) <= set('-+| '):
+            continue
+        if re.fullmatch(r'(?:Exploit|Shellcode) Title\s*\|\s*Path', line, re.I):
+            recognized = True
+            continue
+        if re.fullmatch(r'(?:Exploits|Shellcodes):\s*No Results', line, re.I):
+            recognized = True
+            continue
+        if '|' not in line:
+            continue
+        title, path = (part.strip() for part in line.rsplit('|', 1))
+        if not title or not re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/\d+\.[A-Za-z0-9]+', path):
+            malformed = True
+            continue
+        recognized = True
+        record = {'path': path, 'title': title, 'type': '',
+                  'confidence': 'LOW', 'coverage': 'External exploit database match only; target applicability unverified'}
+        if record not in exploits:
+            exploits.append(record)
+    problem = '' if recognized and not malformed else 'Unrecognized or malformed searchsploit output'
+    if run.get('exit_code') != 0:
+        problem = 'Searchsploit execution failed or timed out; lookup incomplete'
+    return {'search': search_term, 'results': exploits[:30], 'count': len(exploits),
+            'exit_code': run.get('exit_code'), 'coverage_complete': not problem,
+            'execution_status': 'error' if problem else 'completed', 'confidence': 'LOW',
+            'coverage': 'External exploit database lookup; no exploitation or applicability verification',
+            **({'error': problem} if problem else {})}

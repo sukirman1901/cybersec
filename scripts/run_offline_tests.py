@@ -38,6 +38,13 @@ MODULES = (
     "test_local_utility_accuracy",
     "test_cors_accuracy",
     "test_remaining_http_accuracy",
+    "test_hash_detect_accuracy",
+    "test_gf_patterns_accuracy",
+    "test_intel_adapter_accuracy",
+    "test_report_utility_accuracy",
+    "test_cli_adapter_accuracy",
+    "test_cli_remaining_accuracy",
+    "test_artifact_accuracy",
 )
 
 

@@ -1,4 +1,7 @@
 import asyncio
+import xml.etree.ElementTree as ET
+
+from .cli_tools import _run_cli
 
 
 async def nmap_scan(target: str, ports: str = "", scripts: str = "") -> dict:
@@ -11,14 +14,17 @@ async def nmap_scan(target: str, ports: str = "", scripts: str = "") -> dict:
         cmd.extend(["--script", scripts])
     cmd.append("-sV")
 
+    run = await _run_cli(cmd, timeout=180)
+    hosts = []
+    problem = ''
     try:
-        proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=180)
-
-        import xml.etree.ElementTree as ET
-        root = ET.fromstring(stdout)
-        hosts = []
-        for host in root.findall(".//host"):
+        root = ET.fromstring(run.get('stdout', ''))
+        if root.tag != 'nmaprun':
+            raise ValueError('Unexpected XML root')
+        finished = root.find('runstats/finished')
+        if finished is None or finished.get('exit') != 'success':
+            problem = 'Nmap completion not confirmed by XML'
+        for host in root.findall("host"):
             addr = host.find(".//address")
             ip = addr.get("addr") if addr is not None else ""
             ports_found = []
@@ -35,8 +41,13 @@ async def nmap_scan(target: str, ports: str = "", scripts: str = "") -> dict:
                     })
             hosts.append({"ip": ip, "open_ports": ports_found, "count": len(ports_found)})
 
-        return {"target": target, "hosts": hosts, "total_open": sum(h["count"] for h in hosts)}
-    except FileNotFoundError:
-        return {"target": target, "error": "nmap not found. Install: brew install nmap"}
-    except asyncio.TimeoutError:
-        return {"target": target, "error": "nmap scan timed out (180s)"}
+    except (ET.ParseError, ValueError):
+        problem = 'Invalid Nmap XML output'
+    if run.get('exit_code') != 0:
+        problem = 'Nmap execution failed or timed out; scan incomplete'
+    return {"target": target, "hosts": hosts, "total_open": sum(h["count"] for h in hosts),
+            'exit_code': run.get('exit_code'), 'coverage_complete': not problem,
+            'execution_status': 'error' if problem else 'completed',
+            'confidence': 'LOW' if problem else 'MEDIUM',
+            'coverage': 'External Nmap XML port observations; no independent service verification',
+            **({'error': problem} if problem else {})}

@@ -6,6 +6,8 @@ Each function checks if the CLI is installed before running.
 import json
 import shutil
 import asyncio
+import ipaddress
+import re
 from typing import Dict, Any
 from .tool_paths import isolated_cli
 
@@ -195,33 +197,78 @@ async def wpscan_check(target: str) -> Dict:
     }, "wpscan", r)
 
 
+def _adapter_text(run: Dict) -> str:
+    """Text-mode CLIs may write result lines to either output channel."""
+    return re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '',
+                  run.get('stdout', '') + '\n' + run.get('stderr', ''))
+
+
+def _adapter_result(payload: Dict, tool: str, run: Dict, problem: str = '') -> Dict:
+    """Preserve the actual exit code and parser failure independently."""
+    if problem:
+        payload = {**payload, 'error': problem}
+    # stderr often echoes credential-bearing URLs. Keep status and parsed
+    # observations, never raw process diagnostics in the public error field.
+    result = _stamp_ok(payload, tool, {**run, 'stderr': ''})
+    if run.get('exit_code') != 0:
+        result['error'] = f'{tool} execution failed or timed out; diagnostics withheld'
+        result['error_type'] = 'execution_error'
+    elif problem:
+        result['error'] = problem
+        result['error_type'] = 'invalid_output'
+    return result
+
+
 async def masscan_scan(target: str, ports: str = "80,443", rate: int = 1000) -> Dict:
     """Ultra-fast TCP port scanner using masscan CLI."""
-    if not _check("masscan"):
+    binary = _which("masscan")
+    if not binary:
         return _err("masscan")
-    r = await _run_cli(["masscan", target, "-p", ports, "--rate", str(rate)])
+    r = await _run_cli([binary, target, "-p", ports, "--rate", str(rate)])
     ports_found = []
-    for line in r.get("stdout", "").split("\n"):
-        if "open" in line and "tcp" in line:
-            parts = line.strip().split()
-            if len(parts) >= 4:
-                ports_found.append({"port": parts[3], "protocol": parts[2], "ip": parts[5] if len(parts) > 5 else target})
-    return _stamp_ok({"open_ports": ports_found, "count": len(ports_found)}, "masscan", r)
+    problem = ''
+    for line in _adapter_text(r).splitlines():
+        match = re.fullmatch(r'\s*Discovered open port (\d+)/(tcp|udp) on (\S+)\s*', line)
+        if not match:
+            if line.strip().startswith('Discovered open port'):
+                problem = 'Malformed masscan port record'
+            continue
+        port, protocol, host = match.groups()
+        try:
+            ipaddress.ip_address(host)
+            if not 1 <= int(port) <= 65535:
+                raise ValueError('port')
+        except ValueError:
+            problem = 'Malformed masscan port record'
+            continue
+        record = {'port': port, 'protocol': protocol, 'ip': host}
+        if record not in ports_found:
+            ports_found.append(record)
+    return _adapter_result({"open_ports": ports_found, "count": len(ports_found)}, "masscan", r, problem)
 
 
 async def xsstrike_check(target: str) -> Dict:
     """XSS detection using xsstrike CLI."""
-    if not _check("xsstrike"):
+    binary = _which("xsstrike")
+    if not binary:
         return _err("xsstrike")
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
-    r = await _run_cli(["xsstrike", "-u", target, "--silent"])
-    out = r.get("stdout", "")
-    vuln = "XSS" in out or "vulnerable" in out.lower()
-    return _stamp_ok({
-        "vulnerable": vuln, "output": out[:1000],
+    r = await _run_cli([binary, "-u", target, "--silent"])
+    out = _adapter_text(r)
+    vuln = any(re.fullmatch(r'\s*(?:\[\+\]\s*)?(?:XSS (?:vulnerability )?(?:found|detected)[.!]?|Vulnerable webpage:\s*\S+)\s*',
+                           line, re.I) for line in out.splitlines())
+    negative = any(re.fullmatch(r'\s*(?:\[-\]\s*)?(?:No reflection found|No XSS found|No vulnerabilities found|Target is not vulnerable)[.!]?\s*',
+                               line, re.I) for line in out.splitlines())
+    return _adapter_result({
+        "vulnerable": vuln,
+        "output": ('External tool reported possible XSS; raw output withheld' if vuln else
+                   'No XSS reported in supported tool output' if negative else
+                   'Unrecognized tool output; raw output withheld'),
+        "candidate": vuln, "evidence_type": "external_tool_report", "browser_confirmed": False,
         "confidence": "MEDIUM" if vuln else "LOW",
-    }, "xsstrike", r)
+        "coverage": "XSStrike text report only; browser execution not independently verified",
+    }, "xsstrike", r, '' if vuln or negative else 'Unrecognized XSStrike result; absence of XSS not assessed')
 
 
 async def gitleaks_check(path: str) -> Dict:
@@ -242,65 +289,100 @@ async def gitleaks_check(path: str) -> Dict:
 
 async def cmseek_check(target: str) -> Dict:
     """CMS detection using cmseek CLI."""
-    if not _check("cmseek"):
+    binary = _which("cmseek")
+    if not binary:
         return _err("cmseek")
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
-    r = await _run_cli(["cmseek", "-u", target])
-    import re
+    r = await _run_cli([binary, "-u", target])
     cms = None
     version = None
-    for line in r.get("stdout", "").split("\n"):
-        m = re.search(r"CMS Detected: (.*)", line)
+    for line in _adapter_text(r).splitlines():
+        m = re.fullmatch(r"\s*(?:\[\+\]\s*)?CMS Detected\s*:\s*(.+?)\s*", line)
         if m:
             cms = m.group(1).strip()
-        m = re.search(r"CMS Version: (.*)", line)
+        m = re.fullmatch(r"\s*(?:\[\+\]\s*)?CMS Version\s*:\s*(.+?)\s*", line)
         if m:
             version = m.group(1).strip()
-    return _stamp_ok({"cms": cms, "version": version}, "cmseek", r)
+    negative = any(re.fullmatch(r'\s*(?:\[-\]\s*)?(?:CMS not detected|Unable to detect CMS)[.!]?\s*', line, re.I)
+                   for line in _adapter_text(r).splitlines())
+    return _adapter_result({"cms": cms, "version": version}, "cmseek", r,
+                           '' if cms or negative else 'Unrecognized CMSeeK result; CMS identification incomplete')
 
 
 async def testssl_check(target: str, port: int = 443) -> Dict:
     """SSL/TLS server testing using testssl CLI."""
-    if not _check("testssl"):
+    binary = _which("testssl")
+    if not binary:
         return _err("testssl")
-    r = await _run_cli([_which("testssl"), "--quiet", "--jsonfile", "/dev/stdout", f"{target}:{port}"])
+    r = await _run_cli([binary, "--quiet", "--jsonfile", "/dev/stdout", f"{target}:{port}"])
+    problem = ''
+    findings = []
     try:
         data = json.loads(r.get('stdout', ''))
-        findings = data if isinstance(data, list) else [data]
-    except json.JSONDecodeError:
-        findings = []
-        r = {**r, 'exit_code': -1, 'stderr': 'Invalid testssl JSON; ' + r.get('stderr', '')}
-    return _stamp_ok({"findings": findings, "count": len(findings)}, "testssl", r)
+        if not isinstance(data, list):
+            raise ValueError('shape')
+        for item in data:
+            if not isinstance(item, dict) or not all(isinstance(item.get(key), str) and item[key] for key in ('id', 'severity', 'finding')):
+                problem = 'Invalid testssl JSON record'
+            else:
+                findings.append(item)
+                if item['severity'].upper() in ('FATAL', 'ERROR'):
+                    problem = 'testssl reported an incomplete scan'
+    except ValueError:
+        problem = 'Invalid testssl JSON schema'
+    return _adapter_result({"findings": findings, "count": len(findings)}, "testssl", r, problem)
 
 
 async def sslyze_check(target: str, port: int = 443) -> Dict:
     """Fast SSL/TLS scanning using sslyze CLI."""
-    if not _check("sslyze"):
+    binary = _which("sslyze")
+    if not binary:
         return _err("sslyze")
-    r = await _run_cli([_which("sslyze"), "--json_out", "-", f"{target}:{port}"])
+    r = await _run_cli([binary, "--json_out", "-", f"{target}:{port}"])
+    problem = ''
     try:
-        data = json.loads(r.get("stdout", "{}"))
-    except json.JSONDecodeError:
-        data = {"raw": r.get("stdout", "")[:1000]}
-    return _stamp_ok(data if isinstance(data, dict) else {"raw": data}, "sslyze", r)
+        data = json.loads(r.get("stdout", ""))
+        if not isinstance(data, dict) or not isinstance(data.get('server_scan_results'), list):
+            raise ValueError('shape')
+        records = data['server_scan_results']
+        if not records or data.get('invalid_server_strings'):
+            problem = 'SSLyze did not complete all requested servers'
+        for record in records:
+            if not isinstance(record, dict) or record.get('scan_status') != 'COMPLETED' or not isinstance(record.get('scan_result'), dict):
+                problem = 'SSLyze server scan incomplete'
+                continue
+            for command in record['scan_result'].values():
+                if isinstance(command, dict) and command.get('status') not in (None, 'COMPLETED', 'NOT_SCHEDULED'):
+                    problem = 'SSLyze scan command incomplete'
+    except ValueError:
+        data = {}
+        problem = 'Invalid SSLyze JSON schema'
+    return _adapter_result(data, "sslyze", r, problem)
 
 
 async def gobuster_dir(target: str, wordlist: str = "") -> Dict:
     """Directory brute-forcing using gobuster CLI."""
-    if not _check("gobuster"):
+    binary = _which("gobuster")
+    if not binary:
         return _err("gobuster")
     if not wordlist:
         wordlist = "/usr/share/wordlists/dirb/common.txt"
     import os
     if not os.path.isfile(wordlist):
-        return {'error': 'Wordlist not found; supply an explicit installed wordlist', 'ran': False, 'coverage_complete': False}
-    r = await _run_cli(["gobuster", "dir", "-u", target, "-w", wordlist, "-q"])
+        return {'error': 'Wordlist not found; supply an explicit installed wordlist', 'ran': False,
+                'coverage_complete': False, 'execution_status': 'not_started', 'available': True,
+                'confidence': 'LOW', 'coverage': 'wordlist_missing', 'entries': [], 'count': 0}
+    r = await _run_cli([binary, "dir", "-u", target, "-w", wordlist, "-q"])
     entries = []
-    for line in r.get("stdout", "").split("\n"):
-        if "(" in line and ")" in line:
-            entries.append(line.strip())
-    return _stamp_ok({"entries": entries, "count": len(entries)}, "gobuster", r)
+    problem = ''
+    for line in _adapter_text(r).splitlines():
+        if re.fullmatch(r'\s*/\S*\s+\(Status:\s*[1-5]\d{2}\)(?:\s+\[Size:\s*\d+\])?(?:\s+\[--> .*\])?\s*', line):
+            if line.strip() not in entries:
+                entries.append(line.strip())
+        elif line.strip():
+            problem = 'Unrecognized gobuster quiet output; results may be incomplete'
+    return _adapter_result({"entries": entries, "count": len(entries)}, "gobuster", r, problem)
 
 
 async def ffuf_fuzz(target: str, wordlist: str = "") -> Dict:

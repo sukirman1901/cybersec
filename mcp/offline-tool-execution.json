@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 72,
-  "tests_run": 518,
+  "entry_execution_observed": 96,
+  "tests_run": 636,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -196,9 +196,16 @@
           "symbol": "asn_lookup"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_intel_adapter_accuracy.AsnAccuracy.test_dns_error_is_redacted_and_does_not_open_provider_connection",
+        "test_intel_adapter_accuracy.AsnAccuracy.test_empty_and_oversized_responses_not_complete",
+        "test_intel_adapter_accuracy.AsnAccuracy.test_explicit_no_mapping_and_wrong_prefix",
+        "test_intel_adapter_accuracy.AsnAccuracy.test_header_skipped_and_matching_ip_prefix_validated",
+        "test_intel_adapter_accuracy.AsnAccuracy.test_writer_closed_on_drain_failure",
+        "test_intel_adapter_accuracy.AsnAccuracy.test_wrong_ip_malformed_and_timeout_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "attack_surface_map",
@@ -493,9 +500,18 @@
           "symbol": "cmseek_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_cmseek_ansi_spacing_and_stderr",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_explicit_text_negative_is_supported",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_text_only_banner_is_not_completed_negative"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "compliance_map",
@@ -620,9 +636,17 @@
           "symbol": "crt_search"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_crt_filters_names_to_domain_boundary_and_retains_missing_ids",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_crt_limit_and_empty_are_distinct",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_invalid_json_and_body_limits",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_malformed_shapes_not_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_provider_failures_incomplete_not_empty_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_transport_errors_redacted",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_valid_empty_provider_responses"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "csp_analyze",
@@ -744,9 +768,27 @@
           "symbol": "desktop_electron"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_artifact_accuracy.ArtifactAccuracy.test_all_tools_missing_and_wrong_input",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_asar_rejects_traversal_links_and_bad_offsets",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_asar_resource_limits",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_asar_scans_without_extracting",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_comments_strings_and_substrings",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_display_truncation_is_explicit",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_malformed_archive_and_binary_header",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_no_supported_sources_is_unknown",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_object_options_and_observation_scope",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_quoted_property_options",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_remaining_review_patterns",
+        "test_artifact_accuracy.ArtifactAccuracy.test_electron_unterminated_comment_is_not_code",
+        "test_artifact_accuracy.ArtifactAccuracy.test_missing_inputs_have_explicit_incomplete_status",
+        "test_artifact_accuracy.ArtifactAccuracy.test_open_time_swaps_are_rejected",
+        "test_artifact_accuracy.ArtifactAccuracy.test_oversize_files_are_bounded",
+        "test_artifact_accuracy.ArtifactAccuracy.test_read_errors_are_explicit_and_redacted",
+        "test_artifact_accuracy.ArtifactAccuracy.test_safe_open_flags"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "desktop_entitlements",
@@ -756,9 +798,21 @@
           "symbol": "desktop_entitlements"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_artifact_accuracy.ArtifactAccuracy.test_all_tools_missing_and_wrong_input",
+        "test_artifact_accuracy.ArtifactAccuracy.test_directory_file_budgets_and_package_pruning",
+        "test_artifact_accuracy.ArtifactAccuracy.test_directory_symlinks_do_not_escape",
+        "test_artifact_accuracy.ArtifactAccuracy.test_entitlements_embedded_and_binary_plists",
+        "test_artifact_accuracy.ArtifactAccuracy.test_entitlements_invalid_and_non_object_are_not_clean",
+        "test_artifact_accuracy.ArtifactAccuracy.test_entitlements_only_boolean_true_and_redaction",
+        "test_artifact_accuracy.ArtifactAccuracy.test_missing_inputs_have_explicit_incomplete_status",
+        "test_artifact_accuracy.ArtifactAccuracy.test_open_time_swaps_are_rejected",
+        "test_artifact_accuracy.ArtifactAccuracy.test_oversize_files_are_bounded",
+        "test_artifact_accuracy.ArtifactAccuracy.test_read_errors_are_explicit_and_redacted",
+        "test_artifact_accuracy.ArtifactAccuracy.test_safe_open_flags"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "desktop_packages",
@@ -768,9 +822,24 @@
           "symbol": "desktop_packages"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_artifact_accuracy.ArtifactAccuracy.test_all_tools_missing_and_wrong_input",
+        "test_artifact_accuracy.ArtifactAccuracy.test_directory_file_budgets_and_package_pruning",
+        "test_artifact_accuracy.ArtifactAccuracy.test_missing_inputs_have_explicit_incomplete_status",
+        "test_artifact_accuracy.ArtifactAccuracy.test_open_time_swaps_are_rejected",
+        "test_artifact_accuracy.ArtifactAccuracy.test_oversize_files_are_bounded",
+        "test_artifact_accuracy.ArtifactAccuracy.test_package_display_truncation_is_explicit",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_duplicate_sections_are_not_silently_overwritten",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_exact_mock_advisory_candidates",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_invalid_manifests_not_clean",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_invalid_semver_not_a_release",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_manifest_symlink_is_skipped",
+        "test_artifact_accuracy.ArtifactAccuracy.test_packages_ranges_urls_and_other_ecosystems_not_pinned",
+        "test_artifact_accuracy.ArtifactAccuracy.test_read_errors_are_explicit_and_redacted",
+        "test_artifact_accuracy.ArtifactAccuracy.test_safe_open_flags"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "desktop_strings",
@@ -780,9 +849,23 @@
           "symbol": "desktop_strings"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_artifact_accuracy.ArtifactAccuracy.test_all_tools_missing_and_wrong_input",
+        "test_artifact_accuracy.ArtifactAccuracy.test_display_truncation_is_explicit",
+        "test_artifact_accuracy.ArtifactAccuracy.test_missing_inputs_have_explicit_incomplete_status",
+        "test_artifact_accuracy.ArtifactAccuracy.test_open_time_swaps_are_rejected",
+        "test_artifact_accuracy.ArtifactAccuracy.test_oversize_files_are_bounded",
+        "test_artifact_accuracy.ArtifactAccuracy.test_read_errors_are_explicit_and_redacted",
+        "test_artifact_accuracy.ArtifactAccuracy.test_safe_open_flags",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_false_positives_and_information_risk",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_invalid_min_length",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_json_assignments_and_valid_ip",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_redacts_credentials_and_url",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_scan_budget_is_disclosed",
+        "test_artifact_accuracy.ArtifactAccuracy.test_strings_secret_pattern_families"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "dir_bruteforce",
@@ -1016,9 +1099,16 @@
           "symbol": "evidence_manifest"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_report_utility_accuracy.ReportUtilityTests.test_chain_detects_link_and_content_tampering",
+        "test_report_utility_accuracy.ReportUtilityTests.test_empty_and_unknown_manifest_not_verified",
+        "test_report_utility_accuracy.ReportUtilityTests.test_manifest_invalid_add_is_not_recorded",
+        "test_report_utility_accuracy.ReportUtilityTests.test_manifest_snapshot_filter_summary_and_diff",
+        "test_report_utility_accuracy.ReportUtilityTests.test_manifest_verifies_stored_content_and_expected_hash",
+        "test_report_utility_accuracy.ReportUtilityTests.test_oversize_inputs_rejected_before_json_parse"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "executive_summary",
@@ -1028,9 +1118,16 @@
           "symbol": "executive_summary"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_report_utility_accuracy.ReportUtilityTests.test_collection_limits_reject_without_partial_ingest",
+        "test_report_utility_accuracy.ReportUtilityTests.test_oversize_inputs_rejected_before_json_parse",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_url_query_and_fragment_redacted",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_urls_do_not_disclose_credentials",
+        "test_report_utility_accuracy.ReportUtilityTests.test_summary_malformed_and_empty_not_safe",
+        "test_report_utility_accuracy.ReportUtilityTests.test_summary_preserves_candidate_and_confirmed"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "exploit_db_detail",
@@ -1177,9 +1274,15 @@
           "symbol": "gf_patterns"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_gf_patterns_accuracy.GfPatternsAccuracy.test_entry_limit_explicit",
+        "test_gf_patterns_accuracy.GfPatternsAccuracy.test_invalid_inputs_report_incomplete",
+        "test_gf_patterns_accuracy.GfPatternsAccuracy.test_malformed_url_skipped_without_losing_valid_neighbor",
+        "test_gf_patterns_accuracy.GfPatternsAccuracy.test_query_credentials_fragment_are_not_exported",
+        "test_gf_patterns_accuracy.GfPatternsAccuracy.test_query_value_does_not_misclassify_endpoint"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ghdb_search",
@@ -1227,9 +1330,17 @@
           "symbol": "gobuster_dir"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_gobuster_diagnostics_not_entries",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_gobuster_missing_wordlist_not_started",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "graphql_depth_bypass",
@@ -1302,9 +1413,15 @@
           "symbol": "hash_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_hash_detect_accuracy.HashDetectAccuracy.test_argon2_variants_recognized_without_guessing_cracker_mode",
+        "test_hash_detect_accuracy.HashDetectAccuracy.test_hex_ambiguity_and_no_raw_input",
+        "test_hash_detect_accuracy.HashDetectAccuracy.test_invalid_bcrypt_cost_rejected",
+        "test_hash_detect_accuracy.HashDetectAccuracy.test_invalid_type_and_oversize_structured",
+        "test_hash_detect_accuracy.HashDetectAccuracy.test_sha_crypt_rounds_and_salt_alphabet"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "host_header_injection",
@@ -1326,9 +1443,20 @@
           "symbol": "http_ingest"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_report_utility_accuracy.ReportUtilityTests.test_batch_auto_recognizes_har_not_fake_url",
+        "test_report_utility_accuracy.ReportUtilityTests.test_collection_limits_reject_without_partial_ingest",
+        "test_report_utility_accuracy.ReportUtilityTests.test_curl_redacts_authorization_in_original",
+        "test_report_utility_accuracy.ReportUtilityTests.test_dedup_keeps_distinct_hosts_and_accepts_list",
+        "test_report_utility_accuracy.ReportUtilityTests.test_ingest_credentials_redacted_in_output_and_store",
+        "test_report_utility_accuracy.ReportUtilityTests.test_ingest_empty_formats_and_batch_report_error",
+        "test_report_utility_accuracy.ReportUtilityTests.test_ingest_invalid_url_does_not_mutate",
+        "test_report_utility_accuracy.ReportUtilityTests.test_ingest_list_rejects_invalid_port",
+        "test_report_utility_accuracy.ReportUtilityTests.test_invalid_har_rolls_back_partial_ingest",
+        "test_report_utility_accuracy.ReportUtilityTests.test_oversize_inputs_rejected_before_json_parse"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "http_logger",
@@ -1741,9 +1869,16 @@
           "symbol": "masscan_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_masscan_fields_and_stderr_records",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "mcp_abuse_test",
@@ -1840,9 +1975,18 @@
           "symbol": "nmap_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_existing_timeouts_and_nmap_options_are_preserved",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_malformed_and_wrong_root_are_structured_incomplete",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_missing_binary_is_generic_error",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_nmap_failure_marker_overrides_zero_exit",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_nmap_positive_open_ports_and_argv",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_nonzero_retains_structured_partial_results",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_supported_empty_results",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_timeout_reaps_process_and_is_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "nosql_inject",
@@ -2204,9 +2348,18 @@
           "symbol": "report_export"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_report_utility_accuracy.ReportUtilityTests.test_collection_limits_reject_without_partial_ingest",
+        "test_report_utility_accuracy.ReportUtilityTests.test_csv_roundtrips_quotes_and_neutralizes_formula",
+        "test_report_utility_accuracy.ReportUtilityTests.test_empty_markdown_not_clean_bill",
+        "test_report_utility_accuracy.ReportUtilityTests.test_export_html_escapes_and_preserves_status",
+        "test_report_utility_accuracy.ReportUtilityTests.test_exports_validate_input",
+        "test_report_utility_accuracy.ReportUtilityTests.test_oversize_inputs_rejected_before_json_parse",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_url_query_and_fragment_redacted",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_urls_do_not_disclose_credentials"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "report_schema_v2",
@@ -2252,9 +2405,17 @@
           "symbol": "reverse_ip"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_invalid_json_and_body_limits",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_malformed_shapes_not_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_provider_failures_incomplete_not_empty_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_transport_errors_redacted",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_reverse_ip_limits_source_counts_and_partial_ptr_failure",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_reverse_ip_no_ptr_and_empty_ct_are_empty_not_failure",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_reverse_ip_requires_ip_association_not_arbitrary_certificate_names"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "risk_score",
@@ -2264,9 +2425,15 @@
           "symbol": "risk_score"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_report_utility_accuracy.ReportUtilityTests.test_oversize_inputs_rejected_before_json_parse",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_url_query_and_fragment_redacted",
+        "test_report_utility_accuracy.ReportUtilityTests.test_report_urls_do_not_disclose_credentials",
+        "test_report_utility_accuracy.ReportUtilityTests.test_risk_invalid_input_and_boolean_types",
+        "test_report_utility_accuracy.ReportUtilityTests.test_risk_public_exploit_counted_once_no_exploit_claim"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "s3_scanner",
@@ -2326,9 +2493,18 @@
           "symbol": "searchsploit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_existing_timeouts_and_nmap_options_are_preserved",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_malformed_and_wrong_root_are_structured_incomplete",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_missing_binary_is_generic_error",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_nonzero_retains_structured_partial_results",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_search_header_excluded_and_columns_preserved",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_search_result_cap_preserves_total_count",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_supported_empty_results",
+        "test_cli_remaining_accuracy.CliRemainingAccuracy.test_timeout_reaps_process_and_is_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "secret_scanner",
@@ -2402,9 +2578,18 @@
           "symbol": "shodan_lookup"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_invalid_json_and_body_limits",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_malformed_shapes_not_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_provider_failures_incomplete_not_empty_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_transport_errors_redacted",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_shodan_malformed_match_and_nested_truncation",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_shodan_query_and_key_are_encoded_separately",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_shodan_safe_parameters_paging_and_typed_fields",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_valid_empty_provider_responses"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "smb_enum",
@@ -2607,9 +2792,17 @@
           "symbol": "sslyze_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_sslyze_internal_failures_not_completed",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_tls_json_wrong_shapes_are_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ssrf_detect",
@@ -2727,9 +2920,17 @@
           "symbol": "testssl_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_testssl_fatal_records_and_partial_valid_records",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_tls_json_wrong_shapes_are_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "tool_health",
@@ -2906,9 +3107,17 @@
           "symbol": "wayback_urls"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_invalid_json_and_body_limits",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_malformed_shapes_not_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_provider_failures_incomplete_not_empty_success",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_http_transport_errors_redacted",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_valid_empty_provider_responses",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_wayback_header_scope_redaction_and_limit",
+        "test_intel_adapter_accuracy.IntelAdapterAccuracy.test_wayback_reordered_columns_and_invalid_limits"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "webshell_connect",
@@ -3061,9 +3270,19 @@
           "symbol": "xsstrike_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_adapter_errors_do_not_echo_credentials_or_query_secrets",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_explicit_text_negative_is_supported",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_missing_dependency_never_dispatches",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_nonzero_and_timeout_keep_partial_evidence_incomplete",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_resolved_executable_and_arguments_preserved",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_supported_positive_outputs_retained",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_text_only_banner_is_not_completed_negative",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_xsstrike_banner_and_negation_not_positive",
+        "test_cli_adapter_accuracy.CliAdapterAccuracy.test_xsstrike_report_is_redacted_candidate_not_browser_proof"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "xxe_detect",

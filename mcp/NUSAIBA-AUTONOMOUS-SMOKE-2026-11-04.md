@@ -42,3 +42,17 @@ ports, cloud, AD and mobile behavior were not tested against this site.
 The missing route returning 404 is a useful real-site negative observation. It is
 not evidence that every route lacks a catch-all or that the site is vulnerability
 free. Local synthetic detector tests remain separate from this live smoke.
+
+## Cycle 2 repeat — 16:57:21 UTC
+
+The existing engagement gate again returned `in_scope=true`, `authorized=true`,
+no violations for `https://nusaiba.dev`. Una MCP remained unavailable; the persistent
+isolated CLI browser was still on the homepage and produced a fresh snapshot.
+Two explicit GET requests (same paths above) used credentials omitted, manual
+redirects and a five-second abort; response streams were cancelled without reading
+their bodies. No new navigation or resource crawl was requested.
+
+Observed root **200**, missing-path control **404**, and presence of all four
+previously listed security headers on both responses. These are fresh availability
+and header-presence observations, not policy correctness or scanner exploit proof.
+The browser and daemon were left running. No raw body, cookies or tokens saved.

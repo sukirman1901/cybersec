@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 122,
+  "with_static_test_references": 141,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -160,6 +160,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -258,9 +259,13 @@
       ],
       "import_roots": [
         "asyncio",
+        "ipaddress",
+        "re",
         "socket"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_intel_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -668,13 +673,16 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -799,9 +807,10 @@
       ],
       "import_roots": [
         "httpx",
-        "urllib"
+        "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_intel_adapter_accuracy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -928,11 +937,15 @@
         "mcp/cyber_tools/desktop_electron.py"
       ],
       "import_roots": [
+        "json",
         "os",
         "re",
-        "subprocess"
+        "stat",
+        "struct"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -946,9 +959,12 @@
       "import_roots": [
         "os",
         "plistlib",
-        "re"
+        "stat",
+        "xml"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -962,9 +978,12 @@
       "import_roots": [
         "json",
         "os",
-        "re"
+        "re",
+        "stat"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -976,10 +995,14 @@
         "mcp/cyber_tools/desktop_strings.py"
       ],
       "import_roots": [
+        "ipaddress",
         "os",
-        "re"
+        "re",
+        "stat"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_artifact_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1252,7 +1275,9 @@
         "json",
         "time"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_report_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1265,9 +1290,13 @@
       ],
       "import_roots": [
         "datetime",
-        "json"
+        "json",
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_report_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1384,6 +1413,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -1444,9 +1474,12 @@
         "mcp/cyber_tools/gf_patterns.py"
       ],
       "import_roots": [
-        "re"
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_gf_patterns_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1497,6 +1530,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -1520,13 +1554,16 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1607,10 +1644,12 @@
         "mcp/cyber_tools/hash_detect.py"
       ],
       "import_roots": [
+        "collections",
         "math",
         "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_hash_detect_accuracy.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -1645,7 +1684,9 @@
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_report_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2183,13 +2224,16 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2274,6 +2318,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -2298,7 +2343,9 @@
         "asyncio",
         "xml"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_remaining_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2744,10 +2791,17 @@
         "mcp/cyber_tools/report_export.py"
       ],
       "import_roots": [
+        "csv",
         "datetime",
-        "json"
+        "html",
+        "io",
+        "json",
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_report_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2802,11 +2856,15 @@
         "mcp/cyber_tools/reverse_ip.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
-        "socket",
-        "urllib"
+        "ipaddress",
+        "re",
+        "socket"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_intel_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2819,9 +2877,13 @@
       ],
       "import_roots": [
         "datetime",
-        "json"
+        "json",
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_report_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2886,9 +2948,12 @@
         "mcp/cyber_tools/searchsploit.py"
       ],
       "import_roots": [
-        "asyncio"
+        "asyncio",
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_remaining_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2989,9 +3054,12 @@
         "mcp/cyber_tools/shodan_lookup.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "ipaddress",
+        "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_intel_adapter_accuracy.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
@@ -3148,6 +3216,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -3223,13 +3292,16 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3392,13 +3464,16 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3619,9 +3694,11 @@
         "mcp/cyber_tools/wayback_urls.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_intel_adapter_accuracy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -3761,6 +3838,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -3831,6 +3909,7 @@
       "import_roots": [
         "asyncio",
         "datetime",
+        "ipaddress",
         "json",
         "os",
         "re",
@@ -3838,6 +3917,7 @@
         "typing"
       ],
       "static_test_references": [
+        "mcp/tests/test_cli_adapter_accuracy.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",

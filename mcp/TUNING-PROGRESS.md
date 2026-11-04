@@ -312,6 +312,85 @@ New evidence accounting:
 Continue feasible offline work automatically. AD/cloud/device operational coverage
 still needs appropriate labs; `nusaiba.dev` cannot establish those capabilities.
 
+## Autonomous cycle 2 — verified source integration
+
+Cycle 2 covers artifact scanners, report/evidence utilities, intelligence response
+adapters and external CLI parsing using synthetic local fixtures and mocked
+dependencies. Integration ran after all four agents stopped source edits.
+No external binaries, live OSINT providers or personal desktop applications are
+used by these new suites.
+
+Parent-owned regressions:
+- `hash_detect`: Argon2id/i/d shapes, invalid bcrypt cost, SHA-crypt rounds/salt
+  alphabet, ambiguous hexadecimal shapes, secret-free output, input limits and
+  character-entropy caveat. Initial run reproduced 8 failures/subtest failures;
+  SHA-crypt follow-up reproduced 2 additional failures. Final targeted run:
+  **5 tests + 8 subtests passed**. No hash cracking or algorithm verification.
+- `gf_patterns`: URL query values no longer classify endpoint paths; credentials,
+  query values and fragments omitted from exported URLs; malformed inputs and
+  1000-entry/8192-character URL/1 Mi-character aggregate bounds are explicit.
+  Red phase reproduced **7 failures/subtest failures**. Combined parent suites:
+  **10 tests + 11 subtests passed**. URL paths remain visible; classification is
+  an offline hint, not a vulnerability verdict or general secret detector.
+
+Reviewer follow-ups requested before integration: remove raw CLI stderr/XSStrike
+output from result errors, fix independently reproduced nmap/searchsploit parser
+failures, bound report inputs, and redact report URL query/fragment values.
+
+Reviewed agent groups (selected fixtures only):
+- Intelligence: ASN response identity/prefix validation and cleanup, CT schema and
+  domain boundary filtering, reverse-IP certificate/PTR association, Wayback column
+  ordering and URL redaction, Shodan query encoding/schema/limits. Red phase: 47
+  failures/subtest failures. Historical certificate associations do not establish
+  current shared hosting; discovered results never extend authorized scope.
+- Reports: ingest malformed/empty input handling and rollback, local evidence
+  content/chain consistency, candidate-status preservation, HTML escaping and CSV
+  quoting/formula neutralization. Five entry points now have explicit input and
+  collection limits; report URL credentials/query/fragment values are redacted.
+  Local consistency is not provenance. Export APIs return strings, not disk files.
+- CLI adapters: resolved executable/argv preservation, structured parsing and
+  failure status for masscan, CMSeeK, XSStrike, testssl, SSLyze and gobuster; nmap
+  malformed XML and searchsploit column/header/exit handling. All subprocesses were
+  mocked. External-tool reports are not independent exploit confirmation; shared
+  subprocess output-collection limits remain a separate unresolved concern.
+- Parent integration of these completed groups plus hash/GF suites passed
+  **82 tests + 113 subtests**, with 10 existing datetime deprecation warnings.
+
+Live repeat at **16:57:21 UTC**: two credential-free same-origin GETs through the
+existing una browser returned root 200 and control 404, with all four previously
+observed security headers present. Streams were cancelled without body reads.
+See `NUSAIBA-AUTONOMOUS-SMOKE-2026-11-04.md`; no external CLI/provider validation
+is inferred from this smoke check.
+
+Connected-runtime check during cycle 2: `tool_health(include_optional=False)`
+reported `files_on_disk.mcp_vs_startup=different`. The connected server still has
+its 15:21:42 UTC startup snapshot; source tests exercise newer disk code. No MCP
+reload operation is exposed in the discovered host tools, and no server/browser
+process was killed to force reconnection. Loaded-runtime validation remains open
+until the host reconnects the server; do not describe source fixes as already
+active in this connected MCP process.
+
+Artifact review completed: all four scanners use bounded regular-file reads with
+no-follow/nonblocking opens and post-open device/inode checks. ASAR inspection is
+in-memory rather than extraction; linked/unpacked/unsafe or oversized archives
+are explicitly unsupported. Secret string matches are redacted. Electron lexical
+matches remain candidates, not a complete JavaScript parser. Entitlements support
+synthetic XML/binary/embedded plist cases. Package comparisons distinguish exact
+npm declarations from ranges/other ecosystems; unreliable bundled CVE associations
+were removed, and legacy thresholds are review hints, not safe-version guarantees.
+Agent's final artifact suite: **36 tests passed**, with synthetic read races and
+truncation coverage. No installed apps, platform executable or advisory feeds ran.
+
+Stable integration evidence:
+- Full pytest: **669 tests + 1660 subtests passed**, 69 deprecation warnings,
+  97.90 seconds on this machine.
+- Network-disabled traced run: **636 tests passed**, 42.470 seconds.
+- Actual mapped entry calls: **96/209** observed, up from 72 in cycle 1.
+  The other 113 entries remain unobserved in this specific trace. No inference of
+  complete operational coverage, real-world precision/recall or network p95.
+- `offline-tool-execution.json`, inventory and disposition refreshed from these
+  results. These timings are test-run measurements, not target performance.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

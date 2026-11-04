@@ -3,7 +3,68 @@ import json
 import re
 import urllib.parse
 
+
+def _input_ok(value):
+    """Bound each input: 1 MiB UTF-8 text, 1000/container, 10000 nodes, depth 64."""
+    stack, size, nodes = [(value, 0)], 0, 0
+    while stack:
+        item, depth = stack.pop()
+        nodes += 1
+        if nodes > 10000 or depth > 64:
+            return False
+        if isinstance(item, str):
+            if len(item) > 1048576:
+                return False
+            size += len(item.encode('utf-8', errors='replace'))
+            if size > 1048576:
+                return False
+        elif isinstance(item, (dict, list)):
+            if len(item) > 1000:
+                return False
+            children = list(item.keys()) + list(item.values()) if isinstance(item, dict) else item
+            stack.extend((child, depth + 1) for child in children)
+    return True
+
 def http_ingest(action: str, data: str = "", format: str = "url", target: str = "", output: str = "json") -> str:
+    if not all(_input_ok(v) for v in (action, data, format, target, output)):
+        return json.dumps({'error': 'Input exceeds 1 MiB/1000-item/10000-node/depth-64 budget'})
+    before = len(INGESTED)
+    try:
+        if format in ('har', 'openapi') or action == 'deduplicate':
+            parsed = json.loads(data) if isinstance(data, str) and data else data
+            if not _input_ok(parsed):
+                raise ValueError('Parsed input exceeds collection/depth budget')
+        result = json.loads(_dispatch(action, data, format, target, output))
+        # Session inventory is bounded too, including multi-call ingestion.
+        if len(INGESTED) > 1000:
+            result = {'error': 'Session inventory exceeds 1000 records'}
+        if action == 'ingest' and result.get('ingested') == 0:
+            result['error'] = 'No supported HTTP records parsed'
+    except (ValueError, TypeError, AttributeError, IndexError, RecursionError):
+        result = {"error": "Malformed HTTP ingest input"}
+    if "error" in result:
+        del INGESTED[before:]
+    else:
+        INGESTED[before:] = [_redact(e) for e in INGESTED[before:]]
+    return json.dumps(_redact(result), indent=2)
+
+
+def _redact(value, key=""):
+    if re.search(r"password|passwd|secret|token|authorization|cookie|api[_-]?key", key, re.I):
+        return "[REDACTED]"
+    if key in ("body", "post_data", "raw_request"):
+        return "[REDACTED]" if value else ""
+    if isinstance(value, dict):
+        return {k: ('[REDACTED]' if k == 'original' and value.get('type') == 'curl' else _redact(v, k)) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_redact(v) for v in value]
+    if isinstance(value, str):
+        value = re.sub(r"(https?://)[^/\s@]+@", r"\1[REDACTED]@", value)
+        value = re.sub(r"(?i)((?:token|password|secret|api_key|access_token)=)[^&\s\"']+", r"\1[REDACTED]", value)
+    return value
+
+
+def _dispatch(action, data, format, target, output):
     if action == "ingest":
         if format == "url":
             return _ingest_url(data, target)
@@ -34,11 +95,15 @@ INGESTED = []
 
 def _ingest_url(data, target):
     entries = []
-    urls = [u.strip() for u in data.replace("\n", " ").split() if u.strip().startswith(("http://", "https://"))]
+    urls = data.split()
+    if len(urls) > 1000:
+        raise ValueError('At most 1000 URLs per call')
     if not urls:
-        urls = [data]
+        raise ValueError("No URLs")
     for url in urls:
         parsed = urllib.parse.urlparse(url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            raise ValueError("Invalid URL")
         entry = {
             "type": "url",
             "original": url,
@@ -207,10 +272,16 @@ def _ingest_openapi(data):
 
 def _ingest_list(data):
     lines = [l.strip() for l in data.strip().split("\n") if l.strip()]
+    if len(lines) > 1000:
+        raise ValueError('At most 1000 URLs per call')
     entries = []
     for line in lines:
         if line.startswith(("http://", "https://")):
             parsed = urllib.parse.urlparse(line)
+            if not parsed.hostname:
+                raise ValueError('Invalid URL host')
+            # Accessing .port validates numeric syntax and the 0..65535 range.
+            parsed.port
             entry = {
                 "type": "url_list",
                 "url": line,
@@ -224,8 +295,10 @@ def _ingest_list(data):
 
 def _batch_ingest(data, format, target):
     results = []
+    tried = 0
     if format == "auto":
         for f in ["url", "curl", "raw", "har", "openapi", "list"]:
+            tried += 1
             try:
                 result = json.loads(http_ingest("ingest", data=data, format=f, target=target))
                 if result.get("ingested", 0) > 0:
@@ -234,17 +307,25 @@ def _batch_ingest(data, format, target):
             except Exception:
                 continue
     else:
+        tried = 1
         result = json.loads(http_ingest("ingest", data=data, format=format, target=target))
         results.append({format: result})
-    return json.dumps({"batch": True, "formats_tried": len(results), "results": results}, indent=2)
+    result = {"batch": True, "formats_tried": tried, "results": results}
+    if not results or all('error' in v for item in results for v in item.values()):
+        result['error'] = 'No supported HTTP records parsed'
+    return json.dumps(result, indent=2)
 
 
 def _deduplicate(data):
     seen = set()
     unique = []
-    for entry in INGESTED + (json.loads(data) if isinstance(data, str) and data.startswith("{") else []):
-        key = f"{entry.get('method', 'GET')}:{entry.get('url', '')}:{entry.get('path', '')}"
+    supplied = json.loads(data) if data else []
+    if not isinstance(supplied, list) or any(not isinstance(e, dict) for e in supplied):
+        raise ValueError("Expected entry list")
+    entries = INGESTED + supplied
+    for entry in entries:
+        key = (entry.get('method', 'GET'), entry.get('url', entry.get('original', '')), entry.get('host'), entry.get('path', ''))
         if key not in seen:
             seen.add(key)
             unique.append(entry)
-    return json.dumps({"total": len(unique), "deduplicated": len(INGESTED) - len(unique), "unique_entries": unique}, indent=2)
+    return json.dumps({"total": len(unique), "deduplicated": len(entries) - len(unique), "unique_entries": unique}, indent=2)
