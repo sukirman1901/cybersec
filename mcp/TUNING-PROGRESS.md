@@ -159,8 +159,61 @@ remain limits of these shallow detectors.
   real-world accuracy, network p95 or RSS. Framework detection is currently only
   the explicit header hint, not proof of the runtime behind a discovered file.
 
-Still pending from this group: Django, Express, Spring and technology detection.
-The full 209-tool validation objective is not complete.
+The rest of this group is covered in batch 4b below.
+
+## Batch 4b — Django, Express, Spring and technology hints (2026-11-04)
+
+Tools: `django_scan`, `express_scan`, `spring_scan`, `tech_detect`.
+
+- Framework path scans now share bounded root/control/path handling. Successful
+  status alone, incidental prose, generic security headers and login/health pages
+  no longer become vulnerabilities. Informational evidence is in `observations`.
+- Django source checks recognize settings, management scripts, env assignments,
+  dependency manifests and admin login markup. Cookie auditing, debug execution
+  and API authorization are explicitly not performed by this shallow scan.
+- Express recognizes env, Git HEAD, package manifests, stack frames and directory
+  indexes. No raw header values/cookies or stack content is exported. A 5xx stack
+  remains incomplete under the shared stop policy, not a negative finding.
+- Spring requires Actuator JSON structure; denial is incomplete, never exposure.
+  Heapdump URLs are not requested. Legacy trace/dump formats and write operations
+  are explicitly outside this detector's assessment.
+- Technology hints use parsed resource attributes, generator metadata, exact
+  cookie names and selected header names. Arbitrary article text, HTML comments,
+  ordinary links, resource queries and cookie values do not supply fingerprints.
+  Only recognized server product names are returned in `headers`, rather than raw
+  response headers. No redirects or script execution; non-200 is incomplete.
+- Final parser edge-case fixture catches boolean meta attributes without crashing.
+
+Verification: initial red phase had **24 failures/subtest failures**; a subsequent
+malformed-attribute fixture reproduced one parser error and was fixed. Final full
+suite: **430 tests + 1366 subtests passed**, 50 existing deprecation warnings.
+Network-disabled runner: **397 tests OK**. No production requests in this batch.
+
+`scripts/benchmark_frameworks.py --revision 1ddff85` compares the committed baseline
+against the same fixture runner. `mcp/framework-benchmark.json` retains snapshots:
+24 unique synthetic cases repeated five times; 80 scored executions and 40
+blocked/transport exclusions per snapshot. Baseline: 35 false positives and 15
+uncaught transport exceptions. After: zero fixture FP/FN and no exceptions.
+These are selected fixture results, not real-world accuracy or full capability
+coverage. Technology 404 cases are scored for absence of false detection while
+their scan coverage remains explicitly incomplete.
+
+| Tool | Mock-processing p95 before → after (ms) | Normal requests before → after |
+|---|---|---|
+| django_scan | 5.176 → 7.017 | 15 → 16 |
+| express_scan | 6.835 → 8.771 | 21 → 22 |
+| spring_scan | 5.785 → 5.511 | 15 → 14 |
+| tech_detect | 4.187 → 1.207 | 1 → 1 |
+
+Django/Express trade an extra control request and processing for discrimination.
+Spring savings partly reflect removing two heapdump requests and adding a control.
+Blocked and transport fixtures now stop after one attempt. p95 is local synthetic
+processing only, affected by interpreter warmup and host scheduling; RSS/network
+latency remain unmeasured. Benchmark snapshots preceded only the boolean-meta
+guard fix, which does not alter any benchmark fixture path.
+
+Full 209-tool operational validation remains incomplete; the inventory is static
+test-reference accounting, not proof that every tool or signature was executed.
 
 ## Remaining work
 

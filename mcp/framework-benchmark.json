@@ -1,0 +1,234 @@
+{
+  "before": {
+    "revision": "1ddff85",
+    "runs": 5,
+    "groups": {
+      "django_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 10,
+          "fn": 0
+        },
+        "exceptions": 5,
+        "mock_processing_p95_ms": 5.176,
+        "requests_by_case": {
+          "positive": 15,
+          "negative": 15,
+          "prose": 15,
+          "catchall": 15,
+          "blocked": 15,
+          "transport": null
+        },
+        "complete_by_case": {
+          "positive": null,
+          "negative": null,
+          "prose": null,
+          "catchall": null,
+          "blocked": null,
+          "transport": null
+        }
+      },
+      "express_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 10,
+          "fn": 0
+        },
+        "exceptions": 5,
+        "mock_processing_p95_ms": 6.835,
+        "requests_by_case": {
+          "positive": 21,
+          "negative": 21,
+          "prose": 19,
+          "catchall": 21,
+          "blocked": 21,
+          "transport": null
+        },
+        "complete_by_case": {
+          "positive": null,
+          "negative": null,
+          "prose": null,
+          "catchall": null,
+          "blocked": null,
+          "transport": null
+        }
+      },
+      "spring_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 10,
+          "fn": 0
+        },
+        "exceptions": 5,
+        "mock_processing_p95_ms": 5.785,
+        "requests_by_case": {
+          "positive": 15,
+          "negative": 15,
+          "prose": 15,
+          "catchall": 15,
+          "blocked": 15,
+          "transport": null
+        },
+        "complete_by_case": {
+          "positive": null,
+          "negative": null,
+          "prose": null,
+          "catchall": null,
+          "blocked": null,
+          "transport": null
+        }
+      },
+      "tech_detect": {
+        "counts": {
+          "tp": 5,
+          "tn": 10,
+          "fp": 5,
+          "fn": 0
+        },
+        "exceptions": 0,
+        "mock_processing_p95_ms": 4.187,
+        "requests_by_case": {
+          "positive": 1,
+          "negative": 1,
+          "prose": 1,
+          "catchall": 1,
+          "blocked": 1,
+          "transport": 1
+        },
+        "complete_by_case": {
+          "positive": null,
+          "negative": null,
+          "prose": null,
+          "catchall": null,
+          "blocked": null,
+          "transport": null
+        }
+      }
+    },
+    "limitations": [
+      "24 unique synthetic cases; repetitions are not independent targets.",
+      "Blocked and transport cases excluded from classification scores.",
+      "Local MockTransport processing only, not network p95 or RSS.",
+      "Signature coverage is limited; no real-world accuracy claim."
+    ]
+  },
+  "after": {
+    "revision": "working_tree",
+    "runs": 5,
+    "groups": {
+      "django_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 15,
+          "fp": 0,
+          "fn": 0
+        },
+        "exceptions": 0,
+        "mock_processing_p95_ms": 7.017,
+        "requests_by_case": {
+          "positive": 16,
+          "negative": 16,
+          "prose": 16,
+          "catchall": 16,
+          "blocked": 1,
+          "transport": 1
+        },
+        "complete_by_case": {
+          "positive": true,
+          "negative": true,
+          "prose": true,
+          "catchall": true,
+          "blocked": false,
+          "transport": false
+        }
+      },
+      "express_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 15,
+          "fp": 0,
+          "fn": 0
+        },
+        "exceptions": 0,
+        "mock_processing_p95_ms": 8.771,
+        "requests_by_case": {
+          "positive": 22,
+          "negative": 22,
+          "prose": 22,
+          "catchall": 22,
+          "blocked": 1,
+          "transport": 1
+        },
+        "complete_by_case": {
+          "positive": true,
+          "negative": true,
+          "prose": true,
+          "catchall": true,
+          "blocked": false,
+          "transport": false
+        }
+      },
+      "spring_scan": {
+        "counts": {
+          "tp": 5,
+          "tn": 15,
+          "fp": 0,
+          "fn": 0
+        },
+        "exceptions": 0,
+        "mock_processing_p95_ms": 5.511,
+        "requests_by_case": {
+          "positive": 14,
+          "negative": 14,
+          "prose": 14,
+          "catchall": 14,
+          "blocked": 1,
+          "transport": 1
+        },
+        "complete_by_case": {
+          "positive": true,
+          "negative": true,
+          "prose": true,
+          "catchall": true,
+          "blocked": false,
+          "transport": false
+        }
+      },
+      "tech_detect": {
+        "counts": {
+          "tp": 5,
+          "tn": 15,
+          "fp": 0,
+          "fn": 0
+        },
+        "exceptions": 0,
+        "mock_processing_p95_ms": 1.207,
+        "requests_by_case": {
+          "positive": 1,
+          "negative": 1,
+          "prose": 1,
+          "catchall": 1,
+          "blocked": 1,
+          "transport": 1
+        },
+        "complete_by_case": {
+          "positive": true,
+          "negative": false,
+          "prose": true,
+          "catchall": true,
+          "blocked": false,
+          "transport": false
+        }
+      }
+    },
+    "limitations": [
+      "24 unique synthetic cases; repetitions are not independent targets.",
+      "Blocked and transport cases excluded from classification scores.",
+      "Local MockTransport processing only, not network p95 or RSS.",
+      "Signature coverage is limited; no real-world accuracy claim."
+    ]
+  }
+}

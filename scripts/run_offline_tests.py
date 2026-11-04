@@ -29,6 +29,7 @@ MODULES = (
     "test_discovery_accuracy",
     "test_rails_accuracy",
     "test_metrics_accuracy",
+    "test_framework_accuracy",
 )
 
 

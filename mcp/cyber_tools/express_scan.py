@@ -1,123 +1,40 @@
-"""Scan Express.js app — header disclosure, error handling, directory listing, exposed paths."""
-
+"""Content-backed Express surface observations, without status-only findings."""
+import re
 import httpx
+from .framework_surface import inspect_paths
 
-EXPRESS_PATHS = [
-    "/debug",
-    "/_debug",
-    "/console",
-    "/dev",
-    "/.env",
-    "/routes",
-    "/api/routes",
-    "/api-docs",
-    "/swagger.json",
-    "/sitemap.xml",
-    "/robots.txt",
-    "/package.json",
-    "/.git/HEAD",
-]
+EXPRESS_PATHS = ['/debug', '/_debug', '/console', '/dev', '/.env', '/routes',
+                 '/api/routes', '/api-docs', '/swagger.json', '/sitemap.xml',
+                 '/robots.txt', '/package.json', '/.git/HEAD']
+PATHS = ['/%s', '/..%2f', '/admin%00', '/node_modules/', '/static/', '/public/', '/assets/'] + EXPRESS_PATHS
 
-EXPRESS_HEADERS_RISKY = {
-    "x-powered-by": "Express framework disclosure",
-    "x-aspnet-version": "ASP.NET version disclosure (unlikely in Express)",
-}
+
+def _classify(path, response):
+    text = response.text
+    html = bool(re.search(r'<(?:html|body|!doctype\s+html)\b', text, re.I))
+    if not html and path == '/.env' and re.search(r'(?m)^(?:NODE_ENV|DATABASE_URL|DB_PASSWORD)=\S+', text) and len(re.findall(r'(?m)^[A-Z_][A-Z0-9_]*=\S+', text)) >= 2:
+        return 'environment_configuration', 'medium', False
+    if path == '/.git/HEAD' and re.fullmatch(r'ref: refs/heads/[\w./-]+\s*', text):
+        return 'git_head_exposure', 'medium', False
+    if path == '/package.json':
+        try:
+            data = response.json()
+        except ValueError:
+            data = None
+        if isinstance(data, dict) and isinstance(data.get('name'), str) and isinstance(data.get('dependencies'), dict):
+            return 'package_manifest', 'info', 'express' in data['dependencies']
+    if path in ('/%s', '/..%2f', '/admin%00') and re.search(r'(?m)^(?:TypeError|ReferenceError|Error):[^\n]+', text) and re.search(r'(?m)^\s+at [^\n]*[/:][^\n]*:\d+:\d+\)?\s*$', text):
+        return 'javascript_stack_disclosure', 'medium', False
+    if path in ('/node_modules/', '/static/', '/public/', '/assets/') and re.search(r'<(?:title|h1)>\s*Index of /[^<]*</(?:title|h1)>', text, re.I) and re.search(r'<a\s[^>]*href=[\"\']\.\./[\"\']', text, re.I):
+        return 'directory_listing', 'medium', False
+    return None
 
 
 async def express_scan(target: str) -> dict:
-    """Scan an Express.js application for common security misconfigurations."""
-    if not target.startswith(("http://", "https://")):
-        target = f"https://{target}"
-
-    findings = []
-    base = target.rstrip("/")
-
-    async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
-        resp = await client.get(base)
-        headers = dict(resp.headers)
-
-        # Check Express-specific headers
-        for hdr, desc in EXPRESS_HEADERS_RISKY.items():
-            if hdr in headers:
-                findings.append({
-                    "type": "header_disclosure",
-                    "header": hdr,
-                    "value": headers[hdr],
-                    "description": desc,
-                    "risk": "MEDIUM",
-                })
-
-        # Check for Express session cookie
-        for cookie_name, cookie_value in resp.cookies.items():
-            if "connect.sid" in cookie_name.lower():
-                findings.append({
-                    "type": "express_session",
-                    "cookie": cookie_name,
-                    "note": "Express session cookie (connect.sid) detected",
-                    "risk": "INFO",
-                })
-
-        # Check error handling
-        error_paths = ["/%s", "/..%2f", "/admin%00"]
-        for ep in error_paths:
-            try:
-                err_resp = await client.get(base + ep)
-                err_text = err_resp.text.lower()
-                if any(
-                    ptn in err_text
-                    for ptn in [
-                        "express",
-                        "stack trace",
-                        "at ",
-                        "error:",
-                        "referenceerror",
-                        "typeerror",
-                    ]
-                ):
-                    findings.append({
-                        "type": "error_disclosure",
-                        "path": ep,
-                        "risk": "HIGH",
-                        "note": "Error page may disclose framework internals",
-                    })
-                    break
-            except Exception:
-                continue
-
-        # Check for express.static misconfig (directory listing)
-        for sp in ["/node_modules/", "/static/", "/public/", "/assets/"]:
-            try:
-                sr = await client.get(base + sp)
-                body_lower = sr.text.lower()
-                if sr.status_code == 200 and any(
-                    p in body_lower
-                    for p in ["index of", "directory listing", "parent directory"]
-                ):
-                    findings.append({
-                        "type": "directory_listing",
-                        "path": sp,
-                        "risk": "HIGH",
-                    })
-            except Exception:
-                continue
-
-        # Check common paths
-        for p in EXPRESS_PATHS:
-            try:
-                pr = await client.get(base + p)
-                if pr.status_code == 200 and pr.text.strip():
-                    findings.append({
-                        "type": "exposed_path",
-                        "path": p,
-                        "status": pr.status_code,
-                        "risk": "MEDIUM",
-                    })
-            except Exception:
-                continue
-
-    return {
-        "target": target,
-        "findings": findings,
-        "vulnerable": len(findings) > 0,
-        "framework": "Express.js",
-    }
+    if not target.startswith(('http://', 'https://')):
+        target = 'https://' + target
+    coverage = '20 GET paths plus root/control; env/git/package/stack/listing signatures; no console execution or API authorization; 5xx responses remain incomplete'
+    async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
+        result = await inspect_paths(client, target.rstrip('/'), PATHS, _classify,
+            lambda r: r.headers.get('x-powered-by','').strip().lower() == 'express', coverage)
+    return {'target':target, 'framework':'Express.js', **result}
