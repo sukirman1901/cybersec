@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 112,
+  "with_static_test_references": 122,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -180,9 +180,14 @@
         "mcp/cyber_tools/api_auth.py"
       ],
       "import_roots": [
-        "httpx"
+        "asyncio",
+        "httpx",
+        "time",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_auth_surface_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -455,12 +460,12 @@
         "mcp/cyber_tools/bypass_403.py"
       ],
       "import_roots": [
-        "asyncio",
         "httpx",
-        "ssl",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_auth_surface_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -528,9 +533,12 @@
       ],
       "import_roots": [
         "datetime",
-        "json"
+        "json",
+        "shlex"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_local_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -680,7 +688,9 @@
       "import_roots": [
         "json"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_local_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -734,7 +744,9 @@
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_local_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -749,10 +761,10 @@
         "__future__",
         "asyncio",
         "httpx",
-        "time",
-        "urllib"
+        "time"
       ],
       "static_test_references": [
+        "mcp/tests/test_cors_accuracy.py",
         "mcp/tests/test_pipeline_quality.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -768,12 +780,13 @@
       "import_roots": [
         "asyncio",
         "httpx",
-        "random",
-        "re",
-        "string",
+        "secrets",
+        "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_crlf_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -860,9 +873,12 @@
       "import_roots": [
         "itertools",
         "json",
-        "os"
+        "os",
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_local_utility_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -894,9 +910,13 @@
       ],
       "import_roots": [
         "os",
-        "re"
+        "re",
+        "stat",
+        "time"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_desktop_config_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1572,6 +1592,7 @@
         "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_offline_crypto_accuracy.py",
         "mcp/tests/test_routing_eval.py",
         "mcp/tests/test_skill_contract.py"
       ],
@@ -1898,9 +1919,14 @@
       ],
       "import_roots": [
         "base64",
-        "json"
+        "binascii",
+        "json",
+        "math",
+        "re",
+        "time"
       ],
       "static_test_references": [
+        "mcp/tests/test_offline_crypto_accuracy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2209,9 +2235,14 @@
         "mcp/cyber_tools/misplaced_files.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "json",
+        "re",
+        "uuid"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_http_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3570,11 +3601,11 @@
         "mcp/cyber_tools/waf_detect.py"
       ],
       "import_roots": [
-        "re",
-        "ssl",
-        "urllib"
+        "httpx",
+        "re"
       ],
       "static_test_references": [
+        "mcp/tests/test_remaining_http_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -3621,9 +3652,12 @@
       "import_roots": [
         "httpx",
         "re",
-        "typing"
+        "typing",
+        "uuid"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_remaining_http_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

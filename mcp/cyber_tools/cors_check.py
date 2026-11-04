@@ -1,245 +1,188 @@
-"""Test for CORS misconfiguration — origin reflection, credentials, bypass analysis.
-
-Defaults to observe-first (bounded origins + deadline). staging-deep expands
-bypass probes. Always returns confidence + coverage notes.
-"""
-
+"""Bounded CORS policy observations, not proof of sensitive-data exposure."""
 from __future__ import annotations
 
 import asyncio
 import time
-from urllib.parse import urlparse
 
 import httpx
 from .http_guard import GuardedAsyncClient
 
 
+OBSERVE_SECONDS = 12.0
+OBSERVE_REQUESTS = 24
+DEEP_SECONDS = 25.0
+DEEP_REQUESTS = 64
 CORE_ORIGINS = (
-    "https://evil.com",
-    "http://evil.com",
-    "null",
-    "https://evil{host}",
-    "https://{host}.evil.com",
-    "https://evil.com/{host}",
-    "{scheme}://{host}",
-    "https://sub.{host}.evil.com",
+    'https://evil.com', 'http://evil.com', 'null',
+    'https://evil{host}', 'https://{host}.evil.com',
+    '{scheme}://{host}', 'https://sub.{host}.evil.com',
+)
+DEEP_ORIGINS = CORE_ORIGINS + (
+    'https://evil.{host}', 'https://{host}-evil.com',
+    'https://{host}evil.com', '{scheme}://evil{host}',
 )
 
-DEEP_ORIGINS = CORE_ORIGINS + (
-    "https://evil.com%2f@{host}",
-    "https://{host}%0d%0aevil.com",
-    "https://{host}\\evil.com",
-    "https://{host}%5cevil.com",
-    "https://evil.{host}",
-    "https://{host}-evil.com",
-    "https://{host}evil.com",
-    "https://evil.com#{host}",
-    "https://{host};evil.com",
-    "https://{host}@evil.com",
-    "https://evil.com/?{host}",
-    "{scheme}://evil{host}",
-    "https://{host}.evil.com/",
-    "https://evil.com:{80}@{host}",
-    "https://evil.com:{443}@{host}",
-    "https://{host}%20evil.com",
-)
+
+def _serialized_origin(url: httpx.URL) -> str:
+    host = url.raw_host.decode('ascii')
+    if ':' in host:
+        host = '[' + host + ']'
+    port = ':' + str(url.port) if url.port is not None else ''
+    return url.scheme + '://' + host + port
 
 
 def _format_origins(templates: tuple[str, ...], host: str, scheme: str) -> list[str]:
-    out = []
+    """Only emit browser-serializable origins, excluding path/userinfo tricks."""
+    origins = []
     for template in templates:
         try:
-            out.append(template.format(host=host, scheme=scheme))
-        except (KeyError, ValueError):
-            out.append(template)
-    # Preserve order, drop empties/dupes
-    seen = set()
-    unique = []
-    for origin in out:
-        if origin and origin not in seen:
-            seen.add(origin)
-            unique.append(origin)
-    return unique
+            origin = template.format(host=host, scheme=scheme)
+            if origin != 'null':
+                url = httpx.URL(origin)
+                if (url.scheme not in ('http', 'https') or not url.host or url.userinfo
+                        or url.path != '/' or url.query or url.fragment
+                        or _serialized_origin(url) != origin):
+                    continue
+            if origin not in origins:
+                origins.append(origin)
+        except (httpx.InvalidURL, ValueError, KeyError, IndexError):
+            continue
+    return origins
 
 
-def max_risk(current: str, proposed: str) -> str:
-    hierarchy = {"critical": 4, "high": 3, "medium": 2, "low": 1, "info": 0}
-    return proposed if hierarchy.get(proposed, 0) > hierarchy.get(current, 0) else current
+async def cors_check(target: str, preset: str = 'observe-first') -> dict:
+    """Observe credentialed GET CORS policy; staging-deep adds safe preflights.
 
-
-async def cors_check(target: str, preset: str = "observe-first") -> dict:
-    """CORS misconfiguration check.
-
-    preset: observe-first (default, bounded) | staging-deep (more origins/methods).
-    Schema-compatible: same core keys; adds coverage/confidence/preset.
+    `vulnerable` retains compatibility and means a policy candidate only.
+    Authentication, cookie delivery and sensitive response content are untested.
     """
-    if not target.startswith(("http://", "https://")):
-        target = f"https://{target}"
+    if not target.startswith(('http://', 'https://')):
+        target = 'https://' + target
+    results, errors = [], []
+    requests = 0
+    stopped = False
+    origins = []
+    report_target = '[invalid target]'
+    own_origin = ''
+    deep = preset == 'staging-deep'
+    max_requests = DEEP_REQUESTS if deep else OBSERVE_REQUESTS
+    seconds = DEEP_SECONDS if deep else OBSERVE_SECONDS
+    deadline = time.monotonic() + seconds
+    try:
+        url = httpx.URL(target)
+        if (url.scheme not in ('http', 'https') or not url.host or url.userinfo
+                or preset not in ('observe-first', 'staging-deep')):
+            raise ValueError('invalid input')
+        own_origin = _serialized_origin(url)
+        report_target = own_origin + '/'
+        target = str(url.copy_with(fragment=None))
+        host = url.raw_host.decode('ascii')
+        if ':' in host:
+            host = '[' + host + ']'
+        origins = _format_origins(DEEP_ORIGINS if deep else CORE_ORIGINS, host, url.scheme)
+        if own_origin not in origins:
+            origins.append(own_origin)
+    except (ValueError, httpx.InvalidURL):
+        errors.append('invalid_target_or_preset')
 
-    parsed = urlparse(target)
-    host = parsed.hostname or ""
-    scheme = parsed.scheme or "https"
-    if not host:
-        return {
-            "target": target, "vulnerable": False, "risk": "info",
-            "confidence": "LOW", "coverage": "invalid_target",
-            "preset": preset, "total_tests": 0, "vulnerable_count": 0,
-            "evidence": [], "findings": [], "all_results": [],
-            "error": "hostname required",
-        }
+    async with GuardedAsyncClient(timeout=4.0 if deep else 3.0,
+                                  follow_redirects=False) as client:
+        async def observe(method, origin, requested_method='GET'):
+            nonlocal requests, stopped
+            remaining = deadline - time.monotonic()
+            if stopped:
+                return
+            if remaining <= 0 or requests >= max_requests:
+                errors.append('budget_exhausted')
+                stopped = True
+                return
+            requests += 1
+            headers = {'Origin': origin}
+            if method == 'OPTIONS':
+                headers.update({'Access-Control-Request-Method': requested_method,
+                                'Access-Control-Request-Headers': 'authorization,content-type'})
 
-    deep = preset == "staging-deep"
-    origins = _format_origins(DEEP_ORIGINS if deep else CORE_ORIGINS, host, scheme)
-    deadline = time.monotonic() + (25.0 if deep else 12.0)
-    per_request_timeout = 4.0 if deep else 3.0
+            async def receive():
+                # No body is needed for policy inspection. Avoid eager reads,
+                # decompression, infinite streams and redirect credential egress.
+                async with client.stream(method, target, headers=headers,
+                                         follow_redirects=False) as response:
+                    return response.status_code, response.headers.copy()
+            try:
+                status, response_headers = await asyncio.wait_for(
+                    receive(), timeout=min(remaining, 4.0 if deep else 3.0))
+            except (httpx.HTTPError, asyncio.TimeoutError, ValueError) as exc:
+                errors.append(type(exc).__name__)
+                results.append({'test_type': 'actual_request' if method == 'GET' else 'preflight',
+                                'origin': origin, 'error': type(exc).__name__, 'vulnerable': False})
+                stopped = True
+                return
 
-    results = []
-    risk = "info"
-    evidence_items = []
-    timed_out = False
+            success = 200 <= status < 300
+            if not success:
+                errors.append(method + '_status:' + str(status))
+                # OPTIONS may be unsupported while simple GET is supported.
+                if method == 'GET' or status != 405:
+                    stopped = True
+            acao = response_headers.get_list('access-control-allow-origin')
+            acac = response_headers.get_list('access-control-allow-credentials')
+            reflected = acao == [origin]
+            wildcard = acao == ['*']
+            # Fetch's credential check is case sensitive and requires a single
+            # exact ACAO field. Wildcard cannot authorize credentials mode include.
+            credentials = reflected and acac == ['true']
+            candidate = method == 'GET' and success and origin != own_origin and credentials
+            observation = {
+                'test_type': 'actual_request' if method == 'GET' else 'preflight',
+                'method': method, 'origin': origin, 'status_code': status,
+                'is_reflected': reflected and origin != 'null',
+                'is_wildcard': wildcard, 'is_null': reflected and origin == 'null',
+                'credentials_allowed': credentials, 'vulnerable': candidate,
+                'severity': 'HIGH' if candidate else '',
+                # Do not serialize arbitrary reflected header data or cookies.
+                'acao': origin if reflected else '*' if wildcard else '[absent_or_other]',
+                'acac': 'true' if acac == ['true'] else '[absent_or_invalid]',
+            }
+            if method == 'OPTIONS':
+                observation['requested_method'] = requested_method
+            if candidate:
+                observation.update({
+                    'classification': 'cors_policy_candidate', 'confidence': 'HIGH',
+                    'sensitive_data_leak_verified': False,
+                    'coverage': 'Successful unauthenticated GET response headers only; '
+                                'authentication, cookie delivery, sensitive content and browser exploitation untested.',
+                })
+            results.append(observation)
 
-    async with GuardedAsyncClient(timeout=per_request_timeout, verify=False, follow_redirects=True) as client:
         for origin in origins:
-            if time.monotonic() > deadline:
-                timed_out = True
+            if stopped:
                 break
-            try:
-                resp = await client.options(
-                    target,
-                    headers={
-                        "Origin": origin,
-                        "Access-Control-Request-Method": "GET",
-                        "Access-Control-Request-Headers": "Authorization,Content-Type",
-                    },
-                )
-                acao = resp.headers.get("access-control-allow-origin", "")
-                acac = resp.headers.get("access-control-allow-credentials", "")
-                acam = resp.headers.get("access-control-allow-methods", "")
-                acah = resp.headers.get("access-control-allow-headers", "")
+            await observe('GET', origin)
+            await observe('OPTIONS', origin)
+        if deep and not stopped and origins:
+            for origin in ('https://evil.com', 'null'):
+                for requested_method in ('POST', 'PUT', 'DELETE'):
+                    # These are OPTIONS requests only, never actual mutations.
+                    await observe('OPTIONS', origin, requested_method)
 
-                is_reflected = acao == origin and origin != "null"
-                is_wildcard = acao == "*"
-                is_null = acao == "null" and origin == "null"
-                creds_ok = acac.lower() == "true"
-
-                vulnerable = False
-                severity = ""
-                if is_wildcard and creds_ok:
-                    vulnerable, severity, risk = True, "CRITICAL", "critical"
-                elif is_reflected and creds_ok:
-                    vulnerable, severity, risk = True, "HIGH", max_risk(risk, "high")
-                elif is_reflected:
-                    vulnerable, severity, risk = True, "MEDIUM", max_risk(risk, "medium")
-                elif is_null and creds_ok:
-                    vulnerable, severity, risk = True, "HIGH", max_risk(risk, "high")
-
-                results.append({
-                    "origin": origin,
-                    "preflight_acao": acao,
-                    "preflight_acac": acac,
-                    "preflight_acam": acam,
-                    "preflight_acah": acah,
-                    "is_reflected": is_reflected,
-                    "is_wildcard": is_wildcard,
-                    "is_null": is_null,
-                    "credentials_allowed": creds_ok,
-                    "vulnerable": vulnerable,
-                    "severity": severity,
-                })
-                if vulnerable:
-                    evidence_items.append(f"Origin '{origin}' → ACAO='{acao}' ACAC='{acac}'")
-            except (httpx.HTTPError, asyncio.TimeoutError) as e:
-                results.append({"origin": origin, "error": type(e).__name__, "vulnerable": False})
-
-        # Actual GET checks (bounded)
-        for origin in [f"https://evil.com", "null", f"{scheme}://{host}"]:
-            if time.monotonic() > deadline:
-                timed_out = True
-                break
-            try:
-                resp = await client.get(target, headers={"Origin": origin})
-                acao = resp.headers.get("access-control-allow-origin", "")
-                acac = resp.headers.get("access-control-allow-credentials", "")
-                is_reflected = acao == origin and origin != "null"
-                creds_ok = acac.lower() == "true"
-                vulnerable = False
-                severity = ""
-                if is_reflected and creds_ok:
-                    vulnerable, severity, risk = True, "HIGH", max_risk(risk, "high")
-                elif is_reflected:
-                    vulnerable, severity, risk = True, "MEDIUM", max_risk(risk, "medium")
-                results.append({
-                    "test_type": "actual_request",
-                    "origin": origin,
-                    "acao": acao,
-                    "acac": acac,
-                    "status_code": resp.status_code,
-                    "credentials_allowed": creds_ok,
-                    "vulnerable": vulnerable,
-                    "severity": severity,
-                })
-                if vulnerable:
-                    evidence_items.append(f"Actual request origin '{origin}' → ACAO='{acao}' ACAC='{acac}'")
-            except (httpx.HTTPError, asyncio.TimeoutError) as e:
-                results.append({"test_type": "actual_request", "origin": origin,
-                                "error": type(e).__name__, "vulnerable": False})
-
-        if deep and not timed_out:
-            for origin in ("https://evil.com", "null"):
-                for method in ("GET", "POST", "PUT", "DELETE"):
-                    if time.monotonic() > deadline:
-                        timed_out = True
-                        break
-                    try:
-                        resp = await client.request(
-                            method, target,
-                            headers={"Origin": origin, "Content-Type": "application/json"},
-                            content=b'{"test":true}' if method in ("POST", "PUT", "DELETE") else None,
-                        )
-                        acao = resp.headers.get("access-control-allow-origin", "")
-                        acac = resp.headers.get("access-control-allow-credentials", "")
-                        if acao == origin and origin != "null" and acac.lower() == "true":
-                            results.append({
-                                "test_type": "method_bypass", "origin": origin, "method": method,
-                                "acao": acao, "acac": acac, "vulnerable": True, "severity": "HIGH",
-                            })
-                            risk = max_risk(risk, "high")
-                            evidence_items.append(f"Method {method} with origin '{origin}' accepted with creds")
-                    except (httpx.HTTPError, asyncio.TimeoutError):
-                        continue
-                if timed_out:
-                    break
-
-    unique_vulns = [r for r in results if r.get("vulnerable")]
-    total_tests = len([r for r in results if "error" not in r])
-    if unique_vulns:
-        confidence = "HIGH" if any(v.get("severity") in ("CRITICAL", "HIGH") for v in unique_vulns) else "MEDIUM"
-    elif timed_out:
-        confidence = "LOW"
-    else:
-        confidence = "MEDIUM"
-
-    coverage_parts = [
-        f"preset={preset}",
-        f"origins_tested={len(origins)}",
-        f"tests_completed={total_tests}",
-    ]
-    if timed_out:
-        coverage_parts.append("deadline_reached — remaining probes skipped")
-    if not deep:
-        coverage_parts.append("method/header deep bypass not run (use preset=staging-deep)")
-
+    findings = [item for item in results if item.get('vulnerable')]
+    total_tests = sum('status_code' in item for item in results)
+    coverage = (
+        f'preset={preset}; requests_attempted={requests}; tests_completed={total_tests}; '
+        f'request_limit={max_requests}; deadline_seconds={seconds}; response_body_bytes_read=0; '
+        'first-hop headers only; redirects not followed; actual mutating methods untested; '
+        'sensitive content, authentication and browser credential delivery untested; '
+        'non-browser origin strings excluded; negative results do not establish safety'
+    )
     return {
-        "target": target,
-        "preset": preset,
-        "total_tests": total_tests,
-        "vulnerable_count": len(unique_vulns),
-        "vulnerable": len(unique_vulns) > 0,
-        "risk": risk,
-        "confidence": confidence,
-        "coverage": "; ".join(coverage_parts),
-        "technique": "CORS misconfiguration — origin reflection, credential leakage, method/header bypass",
-        "evidence": evidence_items[:20],
-        "findings": unique_vulns[:30],
-        "all_results": results[:100],
+        'target': report_target, 'preset': preset, 'total_tests': total_tests,
+        'vulnerable_count': len(findings), 'vulnerable': bool(findings),
+        'risk': 'high' if findings else 'info',
+        'confidence': 'HIGH' if findings else 'LOW' if errors else 'MEDIUM',
+        'coverage': coverage, 'coverage_complete': False,
+        'execution_status': 'partial' if errors else 'completed',
+        'errors': errors, 'requests_attempted': requests,
+        'technique': 'Credentialed CORS policy candidates; sensitive-data leakage unverified',
+        'evidence': [f"GET permits credentialed CORS for {f['origin']} (policy only)" for f in findings],
+        'findings': findings, 'all_results': results,
     }

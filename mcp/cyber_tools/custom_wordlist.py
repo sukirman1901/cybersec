@@ -1,6 +1,21 @@
 """Custom wordlist manager — create, store, manage, merge wordlists."""
 import json
 import os
+import re
+
+MAX_BYTES = 1024 * 1024
+
+
+def _safe_path(name):
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}", name):
+        raise ValueError("Invalid wordlist name")
+    path = os.path.join(WORDLIST_DIR, f"{name}.txt")
+    if os.path.islink(path):
+        raise ValueError("Symlink wordlists are not supported")
+    if os.path.exists(path):
+        if not os.path.isfile(path) or os.path.getsize(path) > MAX_BYTES:
+            raise ValueError("Wordlist must be a regular file of at most 1 MiB")
+    return path
 
 WORDLIST_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "wordlists")
 BUILTIN = {
@@ -16,6 +31,38 @@ BUILTIN = {
 
 
 def custom_wordlist(action: str, name: str = "", words: str = "", wordlist: str = "", source: str = "", ext: str = "") -> str:
+    try:
+        if action in ("create", "show", "delete", "merge", "generate", "import", "append"):
+            _safe_path(name)
+        if any(not isinstance(v, str) or len(v.encode('utf-8')) > MAX_BYTES for v in (words, wordlist, source, ext)):
+            raise ValueError("Inputs must be strings of at most 1 MiB")
+        if action == "merge":
+            names = [n.strip() for n in wordlist.split(',')]
+            total = 0
+            for n in names:
+                path = _safe_path(n)
+                if n not in BUILTIN and not os.path.isfile(path):
+                    raise ValueError("Merge source not found")
+                total += os.path.getsize(path) if os.path.isfile(path) else 0
+                total += sum(len(w.encode('utf-8')) + 1 for w in BUILTIN.get(n, []))
+            if total > MAX_BYTES:
+                raise ValueError("Merged wordlist exceeds 1 MiB budget")
+        if action == "import" and (not os.path.isfile(source) or os.path.getsize(source) > MAX_BYTES):
+            raise ValueError("Import source must be a regular file of at most 1 MiB")
+        if action == "append":
+            path = _safe_path(name)
+            if (os.path.getsize(path) if os.path.exists(path) else 0) + len(words.encode('utf-8')) > MAX_BYTES:
+                raise ValueError("Appended wordlist exceeds 1 MiB budget")
+        if action == "generate":
+            # Conservative upper bound before materializing the cross product.
+            bases = source.split(',')
+            extensions = ext.split(',') if ext else ['.tar.gz'] * 9
+            bound = sum((len(w.encode('utf-8')) + 10) * (18 + len(extensions)) for w in bases)
+            bound += len(bases) * sum(len(e.encode('utf-8')) for e in extensions)
+            if bound > MAX_BYTES:
+                raise ValueError("Generated wordlist exceeds 1 MiB budget")
+    except (ValueError, OSError) as exc:
+        return json.dumps({"error": str(exc)})
     os.makedirs(WORDLIST_DIR, exist_ok=True)
 
     if action == "create":
@@ -52,7 +99,10 @@ def _list_all():
     wordlists = []
     for f in os.listdir(WORDLIST_DIR):
         if f.endswith(".txt"):
-            path = os.path.join(WORDLIST_DIR, f)
+            try:
+                path = _safe_path(f[:-4])
+            except ValueError:
+                continue
             size = os.path.getsize(path)
             with open(path) as fh:
                 count = sum(1 for _ in fh)
@@ -123,8 +173,14 @@ def _generate(name, source, ext):
 def _import(name, source):
     if not os.path.exists(source):
         return json.dumps({"error": f"Source file not found: {source}"}, indent=2)
-    with open(source) as f:
-        words = [line.strip() for line in f if line.strip()]
+    try:
+        with open(source, encoding="utf-8") as f:
+            text = f.read(MAX_BYTES + 1)
+        if len(text.encode("utf-8")) > MAX_BYTES:
+            return json.dumps({"error": "Import exceeds 1 MiB budget"})
+        words = [line.strip() for line in text.splitlines() if line.strip()]
+    except (OSError, UnicodeError):
+        return json.dumps({"error": "Import source must be readable UTF-8 text"})
     out_path = os.path.join(WORDLIST_DIR, f"{name}.txt")
     with open(out_path, "w") as f:
         f.write("\n".join(words))

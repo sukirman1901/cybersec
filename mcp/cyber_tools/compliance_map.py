@@ -120,10 +120,17 @@ FRAMEWORK_DESCRIPTIONS = {
 def compliance_map(findings_json: str, framework: str = "auto") -> str:
     try:
         findings = json.loads(findings_json) if isinstance(findings_json, str) else findings_json
-    except Exception:
-        findings = []
+    except (ValueError, TypeError):
+        return json.dumps({"error": "Invalid findings JSON"})
     if isinstance(findings, dict):
         findings = findings.get("findings", findings.get("results", [findings]))
+    if not isinstance(findings, list) or any(
+        not isinstance(f, dict) or not isinstance(f.get("type", f.get("vuln_type", f.get("title", ""))), str)
+        for f in findings
+    ):
+        return json.dumps({"error": "Expected a list of finding objects with string types"})
+    if framework != "auto" and framework not in FRAMEWORK_DESCRIPTIONS:
+        return json.dumps({"error": "Unknown framework"})
 
     frameworks = list(COMPLIANCE_MAP.get("sqli", {}).keys()) if framework == "auto" else [framework]
     mapped_findings = []
@@ -147,14 +154,14 @@ def compliance_map(findings_json: str, framework: str = "auto") -> str:
                 finding_map["compliance"][fw] = {
                     "controls": controls,
                     "framework": FRAMEWORK_DESCRIPTIONS.get(fw, fw),
-                    "status": "non_compliant",
+                    "status": "requires_review",
                 }
                 framework_summary[fw]["total"] += 1
                 framework_summary[fw]["controls"].update(controls)
             else:
                 finding_map["compliance"][fw] = {
                     "controls": [],
-                    "status": "not_applicable",
+                    "status": "unmapped",
                 }
 
         mapped_findings.append(finding_map)
@@ -176,8 +183,9 @@ def compliance_map(findings_json: str, framework: str = "auto") -> str:
     }
 
     non_compliant = sum(1 for fw in frameworks if framework_summary[fw]["total"] > 0)
-    result["compliance_status"] = "non_compliant" if non_compliant > 0 else "compliant"
-    result["summary"] = f"{non_compliant}/{len(frameworks)} frameworks have violations from {len(findings)} findings"
+    result["compliance_status"] = "requires_review" if non_compliant > 0 else "not_assessed"
+    result["summary"] = f"{non_compliant}/{len(frameworks)} frameworks have candidate mappings from {len(findings)} findings"
+    result["limitations"] = "Heuristic mappings, not a compliance determination. Legacy violated_controls fields contain candidate controls; framework editions require independent verification."
     return json.dumps(result, indent=2)
 
 

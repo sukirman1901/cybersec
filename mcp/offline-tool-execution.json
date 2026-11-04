@@ -1,0 +1,3087 @@
+{
+  "catalog_count": 209,
+  "entry_execution_observed": 72,
+  "tests_run": 518,
+  "tests_successful": true,
+  "failures": 0,
+  "errors": 0,
+  "tools": [
+    {
+      "tool": "ad_asrep_roast",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_asrep_roast.py",
+          "symbol": "ad_asrep_roast"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_certipy",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_certipy.py",
+          "symbol": "ad_certipy"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_dcsync",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_dcsync.py",
+          "symbol": "ad_dcsync"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_enum.py",
+          "symbol": "ad_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_kerberoast",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_kerberoast.py",
+          "symbol": "ad_kerberoast"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_ntlm_relay",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_ntlm_relay.py",
+          "symbol": "ad_ntlm_relay"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_passthehash",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_passthehash.py",
+          "symbol": "ad_passthehash"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ad_spray",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ad_spray.py",
+          "symbol": "ad_spray"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "amass_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "amass_enum"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_cli_failures_are_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "api_auth",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/api_auth.py",
+          "symbol": "api_auth"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_cookies_cannot_contaminate_controls",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_denied_surface_has_bounded_requests_and_no_raw_protocol",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_extracted_rows_retain_coverage",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_generic_candidate_does_not_hide_later_matched_positive",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_malformed_target_is_structured_without_requests",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_matched_resource_differential_preserves_positive_without_secrets",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_oversized_body_stops_and_marks_incomplete",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_positive_must_stay_denied_without_probe_header",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_public_api_is_not_auth_bypass",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_rate_limit_and_server_failure_stop",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_root_denial_does_not_make_public_docs_critical",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_service_port_identity_survives_redaction",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_transport_failure_is_incomplete_not_fabricated_denial",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_unmatched_success_is_only_candidate",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_unstable_negative_baseline_does_not_confirm"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "api_fuzz",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/api_fuzz.py",
+          "symbol": "api_fuzz"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_accuracy.DiscoveryAccuracy.test_html_json_catchalls_and_prose_not_findings",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_rate_limit_stops_immediately",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_realistic_positive_and_redacted_evidence",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_transport_error_is_structured_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "apk_analyze",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/apk_analyze.py",
+          "symbol": "apk_analyze"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "approval_artifact",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/approval_artifact.py",
+          "symbol": "approval_artifact"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestAutoExploitGates.test_approved_but_validate_gate_can_block_exploit_claim",
+        "test_tool_policy.TestEvidenceScoring.test_approved_auto_flow_with_controlled_proof_can_reach_existing_phase"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "asn_lookup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/asn_lookup.py",
+          "symbol": "asn_lookup"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "attack_surface_map",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/attack_surface.py",
+          "symbol": "attack_surface_map"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "auth_macro_runner",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/auth_macro_runner.py",
+          "symbol": "auth_macro_runner"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "authenticated_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/authenticated_scan.py",
+          "symbol": "authenticated_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditSync.test_cookie_sent_without_false_auth_or_idor"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "auto_exploit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/auto_exploit.py",
+          "symbol": "auto_exploit"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestAutoExploitGates.test_approved_but_validate_gate_can_block_exploit_claim",
+        "test_detector_accuracy.TestAutoExploitGates.test_blocked_without_approval",
+        "test_tool_policy.TestEvidenceScoring.test_approved_auto_flow_with_controlled_proof_can_reach_existing_phase"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "bandit_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/bandit_scan.py",
+          "symbol": "bandit_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_bandit_severity_and_metrics"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "binary_checksec",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/binary_checksec.py",
+          "symbol": "binary_checksec"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "bloodhound_collect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/bloodhound_collect.py",
+          "symbol": "bloodhound_collect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "branded_report",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/branded_report.py",
+          "symbol": "branded_report"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "browser_agent_hijack",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/browser_agent_hijack.py",
+          "symbol": "browser_agent_hijack"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "bulk_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/bulk_scan.py",
+          "symbol": "bulk_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_redirect_contract.RedirectContract.test_bulk_workers_retain_session_scope_for_allowed_redirects",
+        "test_remediation_20261104.AuditSync.test_bulk_nested_error"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "bypass_403",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/bypass_403.py",
+          "symbol": "bypass_403"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_cookies_cannot_contaminate_controls",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_denied_surface_has_bounded_requests_and_no_raw_protocol",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_extracted_rows_retain_coverage",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_malformed_target_is_structured_without_requests",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_matched_resource_differential_preserves_positive_without_secrets",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_non_403_baseline_status_is_reported",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_oversized_body_stops_and_marks_incomplete",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_path_mutations_preserve_query_and_have_single_leading_slash",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_positive_must_stay_denied_without_probe_header",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_rate_limit_and_server_failure_stop",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_redirect_and_empty_method_success_are_not_bypasses",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_service_port_identity_survives_redaction",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_transport_failure_is_incomplete_not_fabricated_denial",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_unmatched_success_is_only_candidate",
+        "test_auth_surface_accuracy.AuthSurfaceAccuracy.test_unstable_negative_baseline_does_not_confirm"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "cache_poison_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cache_poison_check.py",
+          "symbol": "cache_poison_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "captcha_test",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/captcha_test.py",
+          "symbol": "captcha_test"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ci_cd_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ci_cd_scan.py",
+          "symbol": "ci_cd_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cleanup_tracking",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cleanup_tracking.py",
+          "symbol": "cleanup_tracking"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_local_utility_accuracy.CleanupTests.test_comment_newline_cannot_become_command",
+        "test_local_utility_accuracy.CleanupTests.test_generated_id_can_be_completed_and_alias_cleared",
+        "test_local_utility_accuracy.CleanupTests.test_generated_path_is_one_literal_argument",
+        "test_local_utility_accuracy.CleanupTests.test_invalid_status_does_not_mutate",
+        "test_local_utility_accuracy.CleanupTests.test_update_filters_and_counts_pending"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "cloud_audit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cloud_audit.py",
+          "symbol": "cloud_audit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cloud_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cloud_enum.py",
+          "symbol": "cloud_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cloud_iam_audit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cloud_iam_audit.py",
+          "symbol": "cloud_iam_audit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cloud_infra",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cloud_infra.py",
+          "symbol": "cloud_infra"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cmd_injection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cmd_injection.py",
+          "symbol": "cmd_injection"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cmd_oast_helper",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cmd_oast_helper.py",
+          "symbol": "cmd_oast_helper"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cmseek_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "cmseek_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "compliance_map",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/compliance_map.py",
+          "symbol": "compliance_map"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_local_utility_accuracy.ComplianceTests.test_invalid_input_is_not_compliant",
+        "test_local_utility_accuracy.ComplianceTests.test_mapping_is_advisory",
+        "test_local_utility_accuracy.ComplianceTests.test_unknown_framework_rejected",
+        "test_local_utility_accuracy.ComplianceTests.test_unmapped_and_empty_are_not_certified"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "continuous_monitor",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/continuous_monitor.py",
+          "symbol": "continuous_monitor"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "cookie_audit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cookie_audit.py",
+          "symbol": "cookie_audit"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_accuracy_tuning.HeaderAccuracy.test_cookie_attribute_names_not_values_determine_flags",
+        "test_accuracy_tuning.HeaderAccuracy.test_cookie_blocked_response_is_incomplete",
+        "test_accuracy_tuning.HeaderAccuracy.test_cookie_deletion_is_not_infinite_session",
+        "test_accuracy_tuning.HeaderAccuracy.test_cookie_expires_comma_and_no_secret_output"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "cookie_editor",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cookie_editor.py",
+          "symbol": "cookie_editor"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_local_utility_accuracy.CookieTests.test_analysis_redacts_plain_base64_and_json_secrets",
+        "test_local_utility_accuracy.CookieTests.test_analyze_never_constructs_network_client",
+        "test_local_utility_accuracy.CookieTests.test_fetched_analysis_redacts_and_bounds_values",
+        "test_local_utility_accuracy.CookieTests.test_invalid_action_and_cookie_rejected_before_network",
+        "test_local_utility_accuracy.CookieTests.test_invalid_base64_not_reported_as_decoded",
+        "test_local_utility_accuracy.CookieTests.test_oversize_cookie_rejected_before_decode_or_network"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "cors_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cors_check.py",
+          "symbol": "cors_check"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cors_accuracy.CorsAccuracy.test_blocking_status_redirect_and_errors_are_incomplete",
+        "test_cors_accuracy.CorsAccuracy.test_bodies_not_consumed",
+        "test_cors_accuracy.CorsAccuracy.test_deep_never_sends_writes_or_non_browser_origins",
+        "test_cors_accuracy.CorsAccuracy.test_expired_deadline_and_request_cap",
+        "test_cors_accuracy.CorsAccuracy.test_external_credentials_are_policy_candidate_not_leak",
+        "test_cors_accuracy.CorsAccuracy.test_invalid_inputs_do_not_send_requests",
+        "test_cors_accuracy.CorsAccuracy.test_invalid_or_public_policy_not_credentialed_vulnerability",
+        "test_cors_accuracy.CorsAccuracy.test_null_get_policy_is_candidate",
+        "test_cors_accuracy.CorsAccuracy.test_own_origin_port_is_exact_and_other_port_cross_origin",
+        "test_cors_accuracy.CorsAccuracy.test_same_origin_default_port_and_ipv6_normalization",
+        "test_cors_accuracy.CorsAccuracy.test_simple_get_does_not_require_preflight_support",
+        "test_cors_accuracy.CorsAccuracy.test_stalled_headers_cancel_at_deadline",
+        "test_pipeline_quality.TestBoundedFlakyModules.test_cors_observe_first_finishes_quickly"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "crlf_inject",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/crlf_inject.py",
+          "symbol": "crlf_inject"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_crlf_accuracy.CrlfAccuracy.test_body_is_never_read",
+        "test_crlf_accuracy.CrlfAccuracy.test_budget_cannot_leave_unconfirmed_finding",
+        "test_crlf_accuracy.CrlfAccuracy.test_deadline_interrupts_stalled_headers",
+        "test_crlf_accuracy.CrlfAccuracy.test_extracted_findings_have_independent_coverage_snapshots",
+        "test_crlf_accuracy.CrlfAccuracy.test_failures_visible_and_redacted",
+        "test_crlf_accuracy.CrlfAccuracy.test_incidental_and_reflected_content_is_not_confirmation",
+        "test_crlf_accuracy.CrlfAccuracy.test_invalid_and_credential_urls_are_not_sent",
+        "test_crlf_accuracy.CrlfAccuracy.test_query_preserved_and_secrets_not_reported",
+        "test_crlf_accuracy.CrlfAccuracy.test_real_injected_header_confirmed_including_redirect",
+        "test_crlf_accuracy.CrlfAccuracy.test_requests_bounded",
+        "test_crlf_accuracy.CrlfAccuracy.test_zero_deadline_sends_no_requests"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "crt_search",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/crt_search.py",
+          "symbol": "crt_search"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "csp_analyze",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/csp_analyze.py",
+          "symbol": "csp_analyze"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_accuracy_tuning.HeaderAccuracy.test_csp_blocked_response_is_incomplete",
+        "test_accuracy_tuning.HeaderAccuracy.test_csp_first_duplicate_directive_wins",
+        "test_accuracy_tuning.HeaderAccuracy.test_csp_host_sources_are_not_scheme_wildcards",
+        "test_accuracy_tuning.HeaderAccuracy.test_csp_multiple_policies_are_not_reported_as_confirmed_weakness",
+        "test_accuracy_tuning.HeaderAccuracy.test_csp_scheme_and_wildcard_sources_identify_directive",
+        "test_accuracy_tuning.HeaderAccuracy.test_nonce_suppresses_inline_script_warning_but_not_style"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "csrf_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/csrf_detect.py",
+          "symbol": "csrf_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_csrf_accuracy.CsrfAccuracy.test_cookie_attributes_are_individual_not_value_substrings",
+        "test_csrf_accuracy.CsrfAccuracy.test_cookie_expiry_comma_and_missing_value_do_not_merge",
+        "test_csrf_accuracy.CsrfAccuracy.test_default_get_comments_and_html_entities",
+        "test_csrf_accuracy.CsrfAccuracy.test_failures_are_incomplete_not_clean",
+        "test_csrf_accuracy.CsrfAccuracy.test_form_budget_and_body_limit_report_partial",
+        "test_csrf_accuracy.CsrfAccuracy.test_post_form_metadata_and_missing_token_candidate",
+        "test_csrf_accuracy.CsrfAccuracy.test_public_get_and_missing_cookies_not_csrf",
+        "test_csrf_accuracy.CsrfAccuracy.test_token_attribute_order_encoding_and_double_submit_not_weakness",
+        "test_csrf_accuracy.CsrfAccuracy.test_token_value_not_taken_from_adjacent_input_or_meta"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "csrf_extract",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/csrf_extract.py",
+          "symbol": "csrf_extract"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "custom_wordlist",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/custom_wordlist.py",
+          "symbol": "custom_wordlist"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_local_utility_accuracy.WordlistTests.test_import_budget_preserves_destination",
+        "test_local_utility_accuracy.WordlistTests.test_invalid_utf8_import_preserves_destination",
+        "test_local_utility_accuracy.WordlistTests.test_merge_source_traversal_cannot_disclose",
+        "test_local_utility_accuracy.WordlistTests.test_missing_merge_source_does_not_overwrite",
+        "test_local_utility_accuracy.WordlistTests.test_normal_roundtrip",
+        "test_local_utility_accuracy.WordlistTests.test_symlink_cannot_read_or_overwrite_outside",
+        "test_local_utility_accuracy.WordlistTests.test_traversal_rejected",
+        "test_local_utility_accuracy.WordlistTests.test_valid_import_and_builtin_inventory"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "cve_search",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vuln_db.py",
+          "symbol": "cve_lookup"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_php2shell.TestPhp2ShellLookup.test_lookup_uses_same_numeric_boundaries",
+        "test_php2shell.TestPhp2ShellLookup.test_no_php2shell_match_for_other_service_or_constraint",
+        "test_php2shell.TestPhp2ShellLookup.test_nvd_keyword_hits_cannot_override_version_assessment",
+        "test_php2shell.TestPhp2ShellLookup.test_oversized_numeric_lookup_is_unknown_not_an_exception"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "desktop_config",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/desktop_config.py",
+          "symbol": "desktop_config"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_external_symlink_not_read",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_filename_alone_is_not_high_risk",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_json_env_candidates_without_secret_values",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_large_file_bounded_and_incomplete",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_nonrecursive_and_actual_files_scanned_count",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_private_key_structure_not_public_certificate",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_read_failure_not_silently_clean",
+        "test_desktop_config_accuracy.DesktopConfigAccuracy.test_symlink_swap_between_stat_and_open_not_followed"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "desktop_electron",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/desktop_electron.py",
+          "symbol": "desktop_electron"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "desktop_entitlements",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/desktop_entitlements.py",
+          "symbol": "desktop_entitlements"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "desktop_packages",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/desktop_packages.py",
+          "symbol": "desktop_packages"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "desktop_strings",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/desktop_strings.py",
+          "symbol": "desktop_strings"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "dir_bruteforce",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/web_fuzz.py",
+          "symbol": "dir_bust"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "django_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/django_scan.py",
+          "symbol": "django_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_framework_accuracy.FrameworkAccuracy.test_admin_and_health_are_observations_not_vulnerabilities",
+        "test_framework_accuracy.FrameworkAccuracy.test_blocked_and_transport_stop_incomplete",
+        "test_framework_accuracy.FrameworkAccuracy.test_distinctive_positive_source_and_actuator_data",
+        "test_framework_accuracy.FrameworkAccuracy.test_dynamic_prose_and_generic_headers_are_not_detection",
+        "test_framework_accuracy.FrameworkAccuracy.test_other_positive_signature_formats"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "dns_lookup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/dns_enum.py",
+          "symbol": "dns_enum"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_workflow_contract.WorkflowContractTests.test_condition_selectors_match_real_mocked_result_shapes"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "docker_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/docker_scan.py",
+          "symbol": "docker_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "dork_and_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/dork_pipeline.py",
+          "symbol": "dork_and_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_tool_policy.TestDiscoveryBoundaries.test_pipeline_filters_discovered_hosts_before_scanning"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "dork_gen",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/dork_gen.py",
+          "symbol": "dork_gen"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "dork_hunt",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/dork_hunt.py",
+          "symbol": "dork_hunt"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_tool_policy.TestDiscoveryBoundaries.test_hunt_does_not_probe_out_of_scope_search_results"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "dork_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/dork_scan.py",
+          "symbol": "dork_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "dork_search",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/google_dork.py",
+          "symbol": "google_dork"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "drupal_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/drupal_scan.py",
+          "symbol": "drupal_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestCmsContentConfirm.test_drupal_403_settings_not_disclosure",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_cms_soft404_is_not_a_configuration_disclosure",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_known_positive_cases_are_preserved",
+        "test_detector_benchmark.TestMockBenchmark.test_baseline_rows_include_every_fixture_not_just_passes",
+        "test_detector_benchmark.TestMockBenchmark.test_rows_are_labelled_and_transport_errors_are_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "email_osint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/email_osint.py",
+          "symbol": "email_osint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "engagement_gate",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/engagement_gate.py",
+          "symbol": "engagement_gate"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_audit_regressions.TestScopeRegressions.test_cidr_uses_network_membership",
+        "test_audit_regressions.TestScopeRegressions.test_domain_substrings_and_url_paths_are_not_in_scope",
+        "test_audit_regressions.TestScopeRegressions.test_invalid_scope_does_not_keep_authorization",
+        "test_audit_regressions.TestScopeRegressions.test_new_engagement_drops_old_scope_and_authorization",
+        "test_audit_regressions.TestScopeRegressions.test_per_call_scope_cannot_widen_authorized_scope",
+        "test_audit_regressions.TestScopeRegressions.test_real_domain_and_subdomain_are_in_scope",
+        "test_redirect_contract.RedirectContract.test_307_308_preserve_same_origin_body_headers_and_history",
+        "test_redirect_contract.RedirectContract.test_auto_exploit_all_retained_phases_use_redirect_guard",
+        "test_redirect_contract.RedirectContract.test_bulk_workers_retain_session_scope_for_allowed_redirects",
+        "test_redirect_contract.RedirectContract.test_disabled_redirect_is_observable_but_next_request_is_guarded",
+        "test_redirect_contract.RedirectContract.test_external_redirect_never_sends_credentials_or_body",
+        "test_redirect_contract.RedirectContract.test_fixture_e2e_observes_redirect_without_following_it",
+        "test_redirect_contract.RedirectContract.test_httpx_cross_origin_auth_stripping_and_user_hooks_retained",
+        "test_redirect_contract.RedirectContract.test_inventory_no_unclassified_redirect_capable_python_clients",
+        "test_redirect_contract.RedirectContract.test_manual_open_redirect_chain_does_not_contact_external_location",
+        "test_redirect_contract.RedirectContract.test_multihop_checks_every_destination_with_per_request_override",
+        "test_redirect_contract.RedirectContract.test_revoked_authorization_blocks_same_host_redirect",
+        "test_redirect_contract.RedirectContract.test_stored_xss_manual_redirect_does_not_contact_external_location",
+        "test_redirect_contract.RedirectContract.test_urllib_307_308_outside_scope_post_never_replays_body",
+        "test_redirect_contract.RedirectContract.test_urllib_multihop_rejects_external_without_sending_auth",
+        "test_remediation_20261104.AuditRegression.test_workflow_execution_gated_and_preserves_findings",
+        "test_tool_policy.TestDiscoveryBoundaries.test_hunt_does_not_probe_out_of_scope_search_results",
+        "test_tool_policy.TestDiscoveryBoundaries.test_pipeline_filters_discovered_hosts_before_scanning",
+        "test_tool_policy.TestEgressContainment.test_active_probe_tools_use_the_guarded_transport",
+        "test_tool_policy.TestEgressContainment.test_guard_preserves_insecure_ssl_context_support",
+        "test_tool_policy.TestEgressContainment.test_in_scope_redirect_is_followed",
+        "test_tool_policy.TestEgressContainment.test_out_of_scope_redirect_is_refused",
+        "test_tool_policy.TestScopeExtension.test_extend_merges_scope_and_keeps_authorization",
+        "test_tool_policy.TestScopeExtension.test_extend_rejects_invalid_identifiers_and_keeps_scope",
+        "test_tool_policy.TestScopeExtension.test_extend_requires_an_active_authorized_engagement",
+        "test_tool_policy.TestScopeExtension.test_extend_requires_explicit_confirmation",
+        "test_tool_policy.TestScopeExtension.test_extended_engagement_is_reusable_after_all",
+        "test_tool_policy.TestToolKinds.test_discovery_is_not_blanket_rejected",
+        "test_tool_policy.TestToolKinds.test_injection_shaped_resource_names_are_denied",
+        "test_tool_policy.TestToolKinds.test_other_resources_are_denied",
+        "test_tool_policy.TestToolKinds.test_resource_tools_use_their_actual_resource_identity",
+        "test_tool_policy.TestToolKinds.test_typed_scope_can_be_authorized_without_a_domain"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "epss_lookup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/epss_lookup.py",
+          "symbol": "epss_lookup"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_epss_freshness.TestEpssFreshness.test_cache_expires_at_one_hour_and_stale_is_not_current",
+        "test_epss_freshness.TestEpssFreshness.test_disabled_kev_and_invalid_scores_remain_unknown",
+        "test_epss_freshness.TestEpssFreshness.test_first_outage_still_checks_kev",
+        "test_epss_freshness.TestEpssFreshness.test_fresh_negative_and_boundary_scores",
+        "test_epss_freshness.TestEpssFreshness.test_invalid_percentile_is_null",
+        "test_epss_freshness.TestEpssFreshness.test_missing_epss_does_not_hide_kev_membership",
+        "test_epss_freshness.TestEpssFreshness.test_source_dates_are_retained",
+        "test_epss_freshness.TestEpssFreshness.test_unavailable_kev_is_unknown_not_false",
+        "test_epss_lookup.TestEpssLookup.test_caps_25_ids",
+        "test_epss_lookup.TestEpssLookup.test_rejects_empty",
+        "test_epss_lookup.TestEpssLookup.test_scores_and_kev_flag"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "evidence_manifest",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/evidence_manifest.py",
+          "symbol": "evidence_manifest"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "executive_summary",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/executive_summary.py",
+          "symbol": "executive_summary"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "exploit_db_detail",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/exploit_db.py",
+          "symbol": "exploit_db_detail"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "exploit_db_download",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/exploit_db.py",
+          "symbol": "exploit_db_download"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "exploit_db_search",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/exploit_db.py",
+          "symbol": "exploit_db_search"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "exposed_backup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/exposed_backup.py",
+          "symbol": "exposed_backup"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_accuracy.DiscoveryAccuracy.test_backup_budget_deterministic_and_deferred_explicit",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_html_json_catchalls_and_prose_not_findings",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_priority_backup_variants_and_signature_formats",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_rate_limit_stops_immediately",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_realistic_positive_and_redacted_evidence",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_transport_error_is_structured_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "exposed_git",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/exposed_git.py",
+          "symbol": "exposed_git"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_blocked_stops_and_is_incomplete",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_catchall_not_sensitive_exposure",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_incidental_strings_do_not_detect",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_malformed_does_not_crash_or_confirm",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_positive_signatures_retained",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_transport_error_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "express_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/express_scan.py",
+          "symbol": "express_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_framework_accuracy.FrameworkAccuracy.test_admin_and_health_are_observations_not_vulnerabilities",
+        "test_framework_accuracy.FrameworkAccuracy.test_blocked_and_transport_stop_incomplete",
+        "test_framework_accuracy.FrameworkAccuracy.test_distinctive_positive_source_and_actuator_data",
+        "test_framework_accuracy.FrameworkAccuracy.test_dynamic_prose_and_generic_headers_are_not_detection",
+        "test_framework_accuracy.FrameworkAccuracy.test_other_positive_signature_formats"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "ffuf_fuzz",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "ffuf_fuzz"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_cli_json_output_channels"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "findings_manager",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/findings_manager.py",
+          "symbol": "findings_manager"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_novelty_engine.TestFindingsManagerNovelty.test_add_novel_then_duplicate_then_regression",
+        "test_novelty_engine.TestFindingsManagerNovelty.test_add_rejects_missing_quality",
+        "test_novelty_engine.TestFindingsManagerNovelty.test_novelty_action_classifies_without_persist"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "generate_report",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/report.py",
+          "symbol": "gen_report"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_accuracy_tuning.ProbeAndReportAccuracy.test_report_preserves_unknown_scope_and_observation",
+        "test_remediation_20261104.AuditSync.test_report_generator_accepts_array_and_quality"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "gf_patterns",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/gf_patterns.py",
+          "symbol": "gf_patterns"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ghdb_search",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ghdb_search.py",
+          "symbol": "ghdb_search"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "github_issue",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/github_issue.py",
+          "symbol": "github_issue"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "gitleaks_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "gitleaks_check"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_cli_json_output_channels"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "gobuster_dir",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "gobuster_dir"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "graphql_depth_bypass",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/graphql_depth_bypass.py",
+          "symbol": "graphql_depth_bypass"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "graphql_injection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/graphql_injection.py",
+          "symbol": "graphql_injection"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "graphql_introspect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/graphql_introspect.py",
+          "symbol": "graphql_introspect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_blocked_stops_and_is_incomplete",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_catchall_not_sensitive_exposure",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_incidental_strings_do_not_detect",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_malformed_does_not_crash_or_confirm",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_positive_signatures_retained",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_transport_error_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "hash_analyze",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/hash_analyze.py",
+          "symbol": "hash_analyze"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_crypt_formats_accept_variable_salts_and_rounds",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_hash_and_key_evidence_is_redacted",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_hex_is_ambiguous_and_case_insensitive",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_invalid_input_types",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_malformed_hashes_have_no_cracking_default",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_oversize_hash_stops_before_strip_or_regex",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_size_limits_are_inclusive"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "hash_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/hash_detect.py",
+          "symbol": "hash_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "host_header_injection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/host_header.py",
+          "symbol": "host_header"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "http_ingest",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/http_ingest.py",
+          "symbol": "http_ingest"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "http_logger",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/http_logger.py",
+          "symbol": "http_logger"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "http_probe_target",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/http_probe.py",
+          "symbol": "http_probe"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_workflow_contract.WorkflowContractTests.test_condition_selectors_match_real_mocked_result_shapes"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "http_request_splitting",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/http_request_splitting.py",
+          "symbol": "http_request_splitting"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "hydra_brute",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/hydra_brute.py",
+          "symbol": "hydra_brute"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "idor_access_validation",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/idor_access_validation.py",
+          "symbol": "idor_access_validation"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_audit_regressions.TestIdorRegressions.test_public_shared_response_is_not_confirmed_bola",
+        "test_pipeline_quality.TestIdorDualRole.test_dual_role_hash_match_without_private_ownership_is_unverified",
+        "test_pipeline_quality.TestIdorDualRole.test_single_role_is_low_confidence"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "idor_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/idor_detect.py",
+          "symbol": "idor_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "injection_validator",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/injection_validator.py",
+          "symbol": "injection_validator"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ios_data_storage",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ios_data_storage.py",
+          "symbol": "ios_data_storage"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ios_frida",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ios_frida.py",
+          "symbol": "ios_frida"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ios_objection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ios_objection.py",
+          "symbol": "ios_objection"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ios_signing",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ios_signing.py",
+          "symbol": "ios_signing"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ipa_analyze",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ipa_analyze.py",
+          "symbol": "ipa_analyze"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "java_deserialize",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/java_deserialize.py",
+          "symbol": "java_deserialize"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "jira_create",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/jira_create.py",
+          "symbol": "jira_create"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "joomla_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/joomla_scan.py",
+          "symbol": "joomla_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestCmsContentConfirm.test_joomla_403_config_is_not_high",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_cms_soft404_is_not_a_configuration_disclosure",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_known_positive_cases_are_preserved",
+        "test_detector_benchmark.TestMockBenchmark.test_baseline_rows_include_every_fixture_not_just_passes",
+        "test_detector_benchmark.TestMockBenchmark.test_rows_are_labelled_and_transport_errors_are_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "jwt_analyze",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/jwt_analyze.py",
+          "symbol": "jwt_analyze"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_algorithm_structure",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_decoding_is_not_verification",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_duplicate_claims_are_rejected",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_each_jwt_issue_is_scoped_observation",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_errors_do_not_echo_token",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_future_iat_and_valid_fractional_dates",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_invalid_encoding_is_rejected",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_invalid_input_types",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_invalid_numeric_dates",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_non_object_json_is_rejected",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_nonstandard_json_constants_are_rejected",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_numeric_dates_and_boundary",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_oversize_jwt_stops_before_split_or_decode",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_redacts_claims_and_signature",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_size_limits_are_inclusive",
+        "test_offline_crypto_accuracy.OfflineCryptoAccuracy.test_zero_exp_is_present_and_expired"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "jwt_forgery",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/jwt_forgery.py",
+          "symbol": "jwt_forgery"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "k8s_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/k8s_scan.py",
+          "symbol": "k8s_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "laravel_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/laravel_scan.py",
+          "symbol": "laravel_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_pipeline_quality.TestBoundedFlakyModules.test_laravel_scan_has_coverage_and_budget"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "ldap_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ldap_enum.py",
+          "symbol": "ldap_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ldap_inject",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ldap_inject.py",
+          "symbol": "ldap_inject"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "lfi_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/lfi_detect.py",
+          "symbol": "lfi_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "llm_agent_hijack",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/llm_agent_hijack.py",
+          "symbol": "llm_agent_hijack"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "llm_data_exposure",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/llm_data_exposure.py",
+          "symbol": "llm_data_exposure"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "llm_guardrails",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/llm_guardrails.py",
+          "symbol": "llm_guardrails"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "llm_model_dos",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/llm_model_dos.py",
+          "symbol": "llm_model_dos"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "log4j_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/log4j_scan.py",
+          "symbol": "log4j_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "log_exposure",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/log_exposure.py",
+          "symbol": "log_exposure"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_accuracy.DiscoveryAccuracy.test_html_json_catchalls_and_prose_not_findings",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_json_log_secret_is_candidate_without_value",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_rate_limit_stops_immediately",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_realistic_positive_and_redacted_evidence",
+        "test_discovery_accuracy.DiscoveryAccuracy.test_transport_error_is_structured_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "magento_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/magento_scan.py",
+          "symbol": "magento_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestCmsContentConfirm.test_magento_env_php_requires_markers_for_high",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_cms_soft404_is_not_a_configuration_disclosure",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_known_positive_cases_are_preserved",
+        "test_detector_benchmark.TestMockBenchmark.test_baseline_rows_include_every_fixture_not_just_passes",
+        "test_detector_benchmark.TestMockBenchmark.test_rows_are_labelled_and_transport_errors_are_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "mass_assignment",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/mass_assignment.py",
+          "symbol": "mass_assignment"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "masscan_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "masscan_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "mcp_abuse_test",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/mcp_abuse_test.py",
+          "symbol": "mcp_abuse_test"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "metrics_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/metrics_check.py",
+          "symbol": "metrics_check"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_metrics_accuracy.MetricsAccuracy.test_failures_inconclusive_and_bounded",
+        "test_metrics_accuracy.MetricsAccuracy.test_identical_catchall_not_metrics_endpoint",
+        "test_metrics_accuracy.MetricsAccuracy.test_incidental_prose_and_dynamic_html_are_not_metrics",
+        "test_metrics_accuracy.MetricsAccuracy.test_real_samples_detected_without_labels_or_values",
+        "test_metrics_accuracy.MetricsAccuracy.test_transport_failure_not_pass"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "misplaced_files",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/misplaced_files.py",
+          "symbol": "misplaced_files"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_blocked_redirect_and_server_errors_stop_at_one",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_deadline_cancels_stalled_mock_response",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_misplaced_public_documents_and_malformed_formats_not_secrets",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_misplaced_structural_positives_without_secret_snippets",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_oversized_body_is_bounded_and_incomplete",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_signature_catchalls_rejected",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_successful_html_and_shell_prose_are_not_findings",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_transport_failure_is_incomplete_without_exception_text"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "nextjs_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/nextjs_scan.py",
+          "symbol": "nextjs_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_blocked_stops_and_is_incomplete",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_catchall_not_sensitive_exposure",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_incidental_strings_do_not_detect",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_malformed_does_not_crash_or_confirm",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_nextjs_reuses_root_response",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_positive_signatures_retained",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_source_map_without_secret_proof_not_high_or_critical",
+        "test_web_surface_accuracy.WebSurfaceAccuracy.test_transport_error_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "nikto_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "nikto_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestCliMissing.test_nikto_missing_is_cli_missing_not_clean",
+        "test_remediation_20261104.AuditRegression.test_cli_failures_are_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "nmap_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/nmap_scan.py",
+          "symbol": "nmap_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "nosql_inject",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/nosql_inject.py",
+          "symbol": "nosql_inject"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "notify_webhook",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/notify_webhook.py",
+          "symbol": "notify_webhook"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "nuclei_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/nuclei_scan.py",
+          "symbol": "nuclei_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_nuclei_failure_is_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "oast_callback_server",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/oast_callback_server.py",
+          "symbol": "oast_callback_server"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditSync.test_oast_unconfigured_never_fabricates_domain"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "oauth_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/oauth_scan.py",
+          "symbol": "oauth_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "oob_test",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/oob_test.py",
+          "symbol": "oob_test"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "open_redirect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/open_redirect.py",
+          "symbol": "open_redirect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_redirect_contract.RedirectContract.test_manual_open_redirect_chain_does_not_contact_external_location"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "origin_ip_discovery",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/origin_ip_discovery.py",
+          "symbol": "origin_ip_discovery"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "param_discovery",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/param_discovery.py",
+          "symbol": "discover_params"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_query_discovery_preserves_existing_query"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "password_audit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/password_audit.py",
+          "symbol": "password_audit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "pentest_workflow",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/pentest_workflow.py",
+          "symbol": "pentest_workflow"
+        },
+        {
+          "path": "mcp/cyber_tools/workflow_runner.py",
+          "symbol": "execute_plan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_pipeline_quality.TestWorkflowPresets.test_observe_first_is_default_and_gated",
+        "test_pipeline_quality.TestWorkflowPresets.test_staging_deep_keeps_approval_and_retest",
+        "test_remediation_20261104.AuditRegression.test_workflow_execution_gated_and_preserves_findings",
+        "test_remediation_20261104.AuditSync.test_staging_deep_forwards_sqli_preset",
+        "test_workflow_contract.WorkflowContractTests.test_all_tools_and_template_steps_have_valid_argument_contracts",
+        "test_workflow_contract.WorkflowContractTests.test_approval_requests_require_explicit_tool_selection",
+        "test_workflow_contract.WorkflowContractTests.test_candidate_findings_preserve_uncertainty",
+        "test_workflow_contract.WorkflowContractTests.test_condition_selectors_match_real_mocked_result_shapes",
+        "test_workflow_contract.WorkflowContractTests.test_conditions_are_preserved_without_claiming_they_passed",
+        "test_workflow_contract.WorkflowContractTests.test_custom_workflow_preserves_shape_and_declares_placeholders",
+        "test_workflow_contract.WorkflowContractTests.test_every_unresolved_input_is_declared_and_blocks_step",
+        "test_workflow_contract.WorkflowContractTests.test_evidence_and_retest_inputs_are_not_fake_results",
+        "test_workflow_contract.WorkflowContractTests.test_invalid_template_and_invalid_json_remain_errors",
+        "test_workflow_contract.WorkflowContractTests.test_no_embedded_authorization_or_scope_reset",
+        "test_workflow_contract.WorkflowContractTests.test_non_object_custom_json_is_a_structured_error",
+        "test_workflow_contract.WorkflowContractTests.test_plans_explicitly_do_not_execute_or_resolve_authorization",
+        "test_workflow_contract.WorkflowContractTests.test_recon_query_is_hostname_scoped",
+        "test_workflow_contract.WorkflowContractTests.test_rendering_does_not_mutate_templates_or_engagement",
+        "test_workflow_contract.WorkflowContractTests.test_target_is_substituted_as_data_not_json_source",
+        "test_workflow_contract.WorkflowContractTests.test_tokens_and_cloud_resources_are_not_invented_from_target"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "people_osint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/people_osint.py",
+          "symbol": "people_osint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "phone_osint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/phone_osint.py",
+          "symbol": "phone_osint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "php2shell_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/php2shell_remote.py",
+          "symbol": "scan_php2shell"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_php2shell_remote.TestPhp2ShellRemote.test_access_blocked_reported_after_bounded_checks",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_arbitrary_version_text_and_composer_are_not_runtime_evidence",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_conflicting_phpinfo_and_header_remain_unknown",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_deep_version_reaches_expanded_phpinfo_path",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_disabled_upload_progress_does_not_mean_fixed",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_eol_version_is_unclassified_not_hidden",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_error_page_disclosure_is_high_confidence",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_explicit_zero_port_redirect_is_not_same_origin",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_external_redirect_never_followed",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_head_and_options_can_fill_banner_gap",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_invalid_target_and_limits_send_nothing",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_large_response_is_truncated_and_never_exported",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_limitations_flag_runtime_serialize_switch_context",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_local_flag_default_off_and_optional_host_probe",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_local_sandbox_block_is_skipped_with_todo",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_multiple_banner_formats",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_network_error_is_unknown",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_php_presence_is_not_exact_version_or_safe",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_phpinfo_after_hidden_banner_with_allowlisted_config",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_proxy_lowers_header_confidence",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_rate_limit_preserves_unknown_not_safe",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_rate_limit_stops_immediately",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_redirect_loop_is_bounded",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_report_urls_do_not_export_redirect_credentials_or_tokens",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_request_budget_and_missing_evidence",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_same_origin_redirect_consumes_budget",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_same_origin_redirect_queries_used_but_not_published",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_serialize_handler_collected_for_session_runtime_switch_cve",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_timeout_bounds_complete_slow_stream_not_just_network_waits",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_unexpected_compression_is_not_decompressed",
+        "test_php2shell_remote.TestPhp2ShellRemote.test_whole_scan_deadline"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "php_deserialize",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/php_deserialize.py",
+          "symbol": "php_deserialize"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "pickle_deserialize",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/pickle_deserialize.py",
+          "symbol": "pickle_deserialize"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "port_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/port_scanner.py",
+          "symbol": "detect_service"
+        },
+        {
+          "path": "mcp/cyber_tools/port_scanner.py",
+          "symbol": "scan_ports"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "prompt_injection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/prompt_injection.py",
+          "symbol": "prompt_injection"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "prototype_pollution",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/prototype_pollution.py",
+          "symbol": "prototype_pollution"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "race_condition",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/race_condition.py",
+          "symbol": "race_condition"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "rails_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/rails_scan.py",
+          "symbol": "rails_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_rails_accuracy.RailsAccuracy.test_default_scan_never_writes",
+        "test_rails_accuracy.RailsAccuracy.test_denial_stops_and_remains_incomplete",
+        "test_rails_accuracy.RailsAccuracy.test_dynamic_catchall_is_not_exposure",
+        "test_rails_accuracy.RailsAccuracy.test_fingerprint_is_not_vulnerability",
+        "test_rails_accuracy.RailsAccuracy.test_positive_source_signatures_are_retained_and_redacted",
+        "test_rails_accuracy.RailsAccuracy.test_transport_failure_is_structured"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "raw_replay",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/raw_replay.py",
+          "symbol": "raw_replay"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "redis_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/redis_enum.py",
+          "symbol": "redis_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "report_export",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/report_export.py",
+          "symbol": "report_export"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "report_schema_v2",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/report_schema_v2.py",
+          "symbol": "report_schema_v2"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_pipeline_quality.TestReportQualityGates.test_schema_requires_confidence_and_coverage",
+        "test_sqli_evidence.TestSqliEvidence.test_findings_work_with_existing_report_converter"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "retest_vuln",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/retest_vuln.py",
+          "symbol": "retest_vuln"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_audit_regressions.TestRetestRegressions.test_all_network_errors_are_inconclusive_not_fixed",
+        "test_audit_regressions.TestRetestRegressions.test_blocked_payload_echo_is_not_exploit_confirmation",
+        "test_audit_regressions.TestRetestRegressions.test_blocked_responses_are_inconclusive",
+        "test_audit_regressions.TestRetestRegressions.test_existing_query_is_preserved_and_payload_encoded",
+        "test_audit_regressions.TestRetestRegressions.test_login_redirect_is_inconclusive",
+        "test_audit_regressions.TestRetestRegressions.test_negative_retest_only_says_not_reproduced",
+        "test_remediation_20261104.AuditSync.test_retest_controlled_redirect",
+        "test_remediation_20261104.AuditSync.test_retest_static_script_not_exploitable"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "reverse_ip",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/reverse_ip.py",
+          "symbol": "reverse_ip"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "risk_score",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/risk_score.py",
+          "symbol": "risk_score"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "s3_scanner",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/s3_scanner.py",
+          "symbol": "s3_scanner"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "sast_review",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/sast_review.py",
+          "symbol": "sast_review"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "scan_template",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/scan_template.py",
+          "symbol": "scan_template"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_pipeline_quality.TestWorkflowPresets.test_scan_template_observe_first",
+        "test_remediation_20261104.AuditSync.test_staging_deep_forwards_sqli_preset",
+        "test_workflow_contract.WorkflowContractTests.test_all_tools_and_template_steps_have_valid_argument_contracts",
+        "test_workflow_contract.WorkflowContractTests.test_approval_requests_require_explicit_tool_selection",
+        "test_workflow_contract.WorkflowContractTests.test_every_unresolved_input_is_declared_and_blocks_step",
+        "test_workflow_contract.WorkflowContractTests.test_evidence_and_retest_inputs_are_not_fake_results",
+        "test_workflow_contract.WorkflowContractTests.test_invalid_template_and_invalid_json_remain_errors",
+        "test_workflow_contract.WorkflowContractTests.test_no_embedded_authorization_or_scope_reset",
+        "test_workflow_contract.WorkflowContractTests.test_plans_explicitly_do_not_execute_or_resolve_authorization",
+        "test_workflow_contract.WorkflowContractTests.test_rendering_does_not_mutate_templates_or_engagement",
+        "test_workflow_contract.WorkflowContractTests.test_source_audit_contains_only_local_path_tools",
+        "test_workflow_contract.WorkflowContractTests.test_target_is_substituted_as_data_not_json_source",
+        "test_workflow_contract.WorkflowContractTests.test_tokens_and_cloud_resources_are_not_invented_from_target"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "searchsploit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/searchsploit.py",
+          "symbol": "searchsploit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "secret_scanner",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/secret_scanner.py",
+          "symbol": "secret_scanner"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "semgrep_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/semgrep_scan.py",
+          "symbol": "semgrep_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_semgrep_errors_not_empty_success"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "service_fingerprint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/service_fingerprint.py",
+          "symbol": "service_fingerprint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "session_verification",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/session_verification.py",
+          "symbol": "session_verification"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditSync.test_offline_session_format_is_not_authentication"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "sharepoint_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/sharepoint_scan.py",
+          "symbol": "sharepoint_scan"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "shodan_lookup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/shodan_lookup.py",
+          "symbol": "shodan_lookup"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "smb_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/smb_enum.py",
+          "symbol": "smb_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "smtp_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/smtp_enum.py",
+          "symbol": "smtp_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "smuggling_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/smuggling_check.py",
+          "symbol": "smuggling_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "snmp_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/snmp_enum.py",
+          "symbol": "snmp_enum"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "social_osint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/social_osint.py",
+          "symbol": "social_osint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "spring_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/spring_scan.py",
+          "symbol": "spring_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_framework_accuracy.FrameworkAccuracy.test_admin_and_health_are_observations_not_vulnerabilities",
+        "test_framework_accuracy.FrameworkAccuracy.test_blocked_and_transport_stop_incomplete",
+        "test_framework_accuracy.FrameworkAccuracy.test_distinctive_positive_source_and_actuator_data",
+        "test_framework_accuracy.FrameworkAccuracy.test_dynamic_prose_and_generic_headers_are_not_detection",
+        "test_framework_accuracy.FrameworkAccuracy.test_failed_response_after_positive_retains_evidence",
+        "test_framework_accuracy.FrameworkAccuracy.test_other_positive_signature_formats",
+        "test_framework_accuracy.FrameworkAccuracy.test_spring_does_not_download_heap_dumps"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "sqli_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/sqli_detect.py",
+          "symbol": "sqli_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_accuracy.TestSqliObserveFirst.test_sqli_observe_first_has_contract_and_bounds",
+        "test_remediation_20261104.AuditRegression.test_sqli_authenticated_json_preserves_context_and_detects",
+        "test_sqli_evidence.TestSqliEvidence.test_blind_confirmation_rejects_syntax_sensitive_filter",
+        "test_sqli_evidence.TestSqliEvidence.test_block_page_with_200_is_not_boolean_proof",
+        "test_sqli_evidence.TestSqliEvidence.test_boolean_control_errors_do_not_allow_high_confidence",
+        "test_sqli_evidence.TestSqliEvidence.test_boolean_proof_has_two_predicates_and_reversed_round",
+        "test_sqli_evidence.TestSqliEvidence.test_confirmed_findings_survive_later_request_budget_exhaustion",
+        "test_sqli_evidence.TestSqliEvidence.test_deadline_cancels_inflight_io",
+        "test_sqli_evidence.TestSqliEvidence.test_does_not_depend_on_python311_timeout_api",
+        "test_sqli_evidence.TestSqliEvidence.test_finding_is_replayable_without_outer_scan_envelope",
+        "test_sqli_evidence.TestSqliEvidence.test_findings_work_with_existing_report_converter",
+        "test_sqli_evidence.TestSqliEvidence.test_input_rejection_status_is_not_boolean_sqli",
+        "test_sqli_evidence.TestSqliEvidence.test_invalid_preset_makes_no_requests",
+        "test_sqli_evidence.TestSqliEvidence.test_one_transient_error_does_not_confirm",
+        "test_sqli_evidence.TestSqliEvidence.test_operational_timings_do_not_change_finding_identity",
+        "test_sqli_evidence.TestSqliEvidence.test_oversized_response_is_inconclusive",
+        "test_sqli_evidence.TestSqliEvidence.test_preserves_original_values_duplicates_blanks_and_encoding",
+        "test_sqli_evidence.TestSqliEvidence.test_redirect_is_not_followed_or_reported_clean",
+        "test_sqli_evidence.TestSqliEvidence.test_reflected_payload_is_not_boolean_or_union_proof",
+        "test_sqli_evidence.TestSqliEvidence.test_repeated_warning_text_does_not_block_deadline",
+        "test_sqli_evidence.TestSqliEvidence.test_replay_redacts_secrets_and_declares_missing_context",
+        "test_sqli_evidence.TestSqliEvidence.test_reproducible_new_error_has_control_evidence",
+        "test_sqli_evidence.TestSqliEvidence.test_request_budget_and_deferred_techniques_are_explicit",
+        "test_sqli_evidence.TestSqliEvidence.test_static_sql_error_documentation_is_not_sqli",
+        "test_sqli_evidence.TestSqliEvidence.test_transport_failure_is_inconclusive_not_clean",
+        "test_sqli_evidence.TestSqliEvidence.test_unstable_baselines_are_inconclusive",
+        "test_sqli_evidence.TestSqliEvidence.test_unsupported_scheme_is_rejected_before_network",
+        "test_sqli_or_evidence.TestOrEvidence.test_budget_exhaustion_mid_confirmation_does_not_publish",
+        "test_sqli_or_evidence.TestOrEvidence.test_changed_baseline_after_or_does_not_confirm",
+        "test_sqli_or_evidence.TestOrEvidence.test_keyword_only_filter_does_not_confirm",
+        "test_sqli_or_evidence.TestOrEvidence.test_one_predicate_string_filter_is_not_confirmed",
+        "test_sqli_or_evidence.TestOrEvidence.test_or_evidence_has_controls_two_rounds_and_recovery",
+        "test_sqli_or_evidence.TestOrEvidence.test_or_finding_identity_is_stable",
+        "test_sqli_or_evidence.TestOrEvidence.test_or_reflection_is_not_proof",
+        "test_sqli_or_evidence.TestOrEvidence.test_or_replay_redacts_required_secret",
+        "test_sqli_or_evidence.TestOrEvidence.test_or_waf_response_is_not_proof",
+        "test_sqli_or_evidence.TestOrEvidence.test_successful_and_does_not_run_or_fallback",
+        "test_sqli_or_evidence.TestOrEvidence.test_two_different_true_responses_do_not_confirm"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "sqli_exploit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/sqli_exploit.py",
+          "symbol": "sqli_exploit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "sqlmap_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "sqlmap_check"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_cli_failures_are_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "ssh_audit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ssh_audit.py",
+          "symbol": "ssh_audit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ssl_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ssl_analyzer.py",
+          "symbol": "ssl_analyze"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ssl_pinning_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ssl_pinning_check.py",
+          "symbol": "ssl_pinning_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "sslyze_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "sslyze_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "ssrf_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ssrf_detect.py",
+          "symbol": "ssrf_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_known_positive_cases_are_preserved",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_ssrf_generic_and_reflected_content_are_not_positive",
+        "test_detector_benchmark.TestMockBenchmark.test_baseline_rows_include_every_fixture_not_just_passes",
+        "test_detector_benchmark.TestMockBenchmark.test_blocked_response_remains_incomplete_without_false_positive",
+        "test_detector_benchmark.TestMockBenchmark.test_rows_are_labelled_and_transport_errors_are_not_clean"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "ssti_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/ssti_detect.py",
+          "symbol": "ssti_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "stego_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/stego_detect.py",
+          "symbol": "stego_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "sub_takeover",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/sub_takeover.py",
+          "symbol": "sub_takeover"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "subdomain_enum",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/subdomain_enum.py",
+          "symbol": "enumerate_subdomains"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "supply_chain",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/supply_chain.py",
+          "symbol": "supply_chain"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "tech_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/tech_detect.py",
+          "symbol": "detect_technologies"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_framework_accuracy.FrameworkAccuracy.test_blocked_and_transport_stop_incomplete",
+        "test_framework_accuracy.FrameworkAccuracy.test_dynamic_prose_and_generic_headers_are_not_detection",
+        "test_framework_accuracy.FrameworkAccuracy.test_malformed_boolean_meta_attributes_do_not_crash",
+        "test_framework_accuracy.FrameworkAccuracy.test_tech_assets_and_headers_without_secret_values",
+        "test_framework_accuracy.FrameworkAccuracy.test_tech_cookie_values_links_comments_and_queries_not_hints"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "telegram_osint",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/telegram_osint.py",
+          "symbol": "telegram_osint"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "testssl_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "testssl_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "tool_health",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/runtime_info.py",
+          "symbol": "inspect_runtime"
+        },
+        {
+          "path": "mcp/cyber_tools/tool_health.py",
+          "symbol": "check_tool_health"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditSync.test_health_lists_sast_capabilities",
+        "test_runtime_info.TestRuntimeInfo.test_comparison_cli_match_different_unknown_and_invalid_input",
+        "test_runtime_info.TestRuntimeInfo.test_external_symlink_is_not_hashed_as_package_content",
+        "test_runtime_info.TestRuntimeInfo.test_incompatible_manifest_is_unknown_not_different",
+        "test_runtime_info.TestRuntimeInfo.test_old_payload_and_missing_reference_never_match",
+        "test_runtime_info.TestRuntimeInfo.test_plugin_and_skills_are_disk_evidence_only",
+        "test_runtime_info.TestRuntimeInfo.test_same_source_matches_and_non_source_files_are_ignored",
+        "test_runtime_info.TestRuntimeInfo.test_startup_identity_is_preserved_when_disk_changes",
+        "test_runtime_info.TestRuntimeInfo.test_symlink_loop_is_unknown_not_a_health_failure"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "upload_bypass",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/upload_bypass.py",
+          "symbol": "upload_bypass"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "upload_exploit_chain",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/upload_exploit_chain.py",
+          "symbol": "upload_exploit_chain"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "vhost_discovery",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vhost_discovery.py",
+          "symbol": "vhost_discovery"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "vuln_database",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vuln_database.py",
+          "symbol": "vuln_database"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "vuln_diff",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vuln_diff.py",
+          "symbol": "vuln_diff"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_novelty_engine.TestVulnDiffNovelty.test_fingerprint_novelty_and_regression",
+        "test_novelty_engine.TestVulnDiffNovelty.test_port_diff_no_nameerror",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_enrichment_added_removed_and_old_snapshots",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_expired_feed_is_quality_degradation_not_risk_reduction",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_feed_status_loss_without_score_change_is_visible",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_intel_and_severity_change_can_coexist",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_kev_membership_change_is_not_new_vulnerability",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_legacy_list_shape_and_malformed_intel_are_tolerated",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_new_or_resolved_findings_do_not_create_intel_events",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_priority_change_is_separate_and_keeps_identity",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_recovered_feed_is_quality_recovery",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_regression_and_intel_events_can_coexist",
+        "test_vuln_diff_intel.TestVulnDiffIntel.test_timestamps_and_cache_hit_alone_are_ignored"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "vuln_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vuln_scanner.py",
+          "symbol": "scan_vulnerabilities"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "vuln_validate",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vuln_validate.py",
+          "symbol": "vuln_validate"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_audit_regressions.TestValidatorRegressions.test_correlated_callback_is_scored",
+        "test_audit_regressions.TestValidatorRegressions.test_missing_evidence_is_unverified_not_false_positive",
+        "test_audit_regressions.TestValidatorRegressions.test_nonstring_evidence_does_not_crash",
+        "test_audit_regressions.TestValidatorRegressions.test_uncorrelated_callback_boolean_is_not_proof",
+        "test_audit_regressions.TestValidatorRegressions.test_unrelated_error_text_does_not_discard_other_vuln_types",
+        "test_tool_policy.TestEvidenceScoring.test_approved_auto_flow_with_controlled_proof_can_reach_existing_phase",
+        "test_tool_policy.TestEvidenceScoring.test_html_reflection_is_not_browser_execution_proof",
+        "test_tool_policy.TestEvidenceScoring.test_invalid_or_uncontrolled_proof_stays_below_threshold",
+        "test_tool_policy.TestEvidenceScoring.test_raw_response_markers_do_not_get_promoted_to_verified_proof",
+        "test_tool_policy.TestEvidenceScoring.test_repeated_controlled_verification_can_reach_threshold"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "vulnerable_fixture",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/vulnerable_fixture.py",
+          "symbol": "vulnerable_fixture"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "waf_detection",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/waf_detect.py",
+          "symbol": "waf_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_http_accuracy.WafAccuracy.test_blocking_and_transport_are_incomplete_and_redacted",
+        "test_remaining_http_accuracy.WafAccuracy.test_body_stream_is_not_consumed_and_is_closed",
+        "test_remaining_http_accuracy.WafAccuracy.test_cloudflare_edge_not_waf_attestation",
+        "test_remaining_http_accuracy.WafAccuracy.test_original_http_scheme_path_and_query_redaction",
+        "test_remaining_http_accuracy.WafAccuracy.test_oversized_headers_are_incomplete",
+        "test_remaining_http_accuracy.WafAccuracy.test_prose_cookies_and_incidental_headers_not_waf",
+        "test_remaining_http_accuracy.WafAccuracy.test_specific_product_header_recognized_as_hint"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "wayback_urls",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/wayback_urls.py",
+          "symbol": "wayback_urls"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "webshell_connect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/webshell_connect.py",
+          "symbol": "webshell_connect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "webshell_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/webshell_detect.py",
+          "symbol": "webshell_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_blocked_redirect_and_server_errors_stop_at_one",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_deadline_cancels_stalled_mock_response",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_oversized_body_is_bounded_and_incomplete",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_signature_catchalls_rejected",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_successful_html_and_shell_prose_are_not_findings",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_transport_failure_is_incomplete_without_exception_text",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_webshell_budget_and_uncrawled_links_explicit",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_webshell_normal_source_and_filenames_not_candidates",
+        "test_remaining_http_accuracy.RemainingHttpAccuracy.test_webshell_source_is_candidate_not_confirmed_execution"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "webshell_gen",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/webshell_gen.py",
+          "symbol": "webshell_gen"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "webshell_upload",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/webshell_upload.py",
+          "symbol": "webshell_upload"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "websocket_test",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/websocket_test.py",
+          "symbol": "websocket_test"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "whois_lookup",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/whois_lookup.py",
+          "symbol": "whois_lookup"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "wordpress_scan",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/wordpress_scan.py",
+          "symbol": "wordpress_scan"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_novelty_engine.TestWordpressContract.test_non_wp_has_coverage"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "wpscan_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "wpscan_check"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_remediation_20261104.AuditRegression.test_wpscan_keeps_nested_findings"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "xss_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/xss_detect.py",
+          "symbol": "xss_detect"
+        }
+      ],
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_known_positive_cases_are_preserved",
+        "test_detector_benchmark.TestMeasuredDetectorRegressions.test_xss_non_html_and_static_script_are_not_positive",
+        "test_detector_benchmark.TestMockBenchmark.test_baseline_rows_include_every_fixture_not_just_passes",
+        "test_detector_benchmark.TestMockBenchmark.test_rows_are_labelled_and_transport_errors_are_not_clean",
+        "test_pipeline_quality.TestBoundedFlakyModules.test_xss_detect_observe_first_skips_stored_and_bounds",
+        "test_redirect_contract.RedirectContract.test_stored_xss_manual_redirect_does_not_contact_external_location",
+        "test_remediation_20261104.AuditRegression.test_xss_json_and_session_preserved",
+        "test_remediation_20261104.AuditRegression.test_xss_transport_failure_is_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
+    },
+    {
+      "tool": "xss_exploit",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/xss_exploit.py",
+          "symbol": "xss_exploit"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "xsstrike_check",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/cli_tools.py",
+          "symbol": "xsstrike_check"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    },
+    {
+      "tool": "xxe_detect",
+      "mapped_entries": [
+        {
+          "path": "mcp/cyber_tools/xxe_detect.py",
+          "symbol": "xxe_detect"
+        }
+      ],
+      "entry_execution_observed": false,
+      "test_ids": [],
+      "verdict": "not_observed_in_this_run"
+    }
+  ],
+  "limitations": [
+    "Main-thread Python calls only; subprocess/CLI/browser execution is not traced.",
+    "Test IDs identify cases that called mapped implementation entries, not every action or branch.",
+    "Mocks may satisfy dependencies; an entry call is not an operational pass or proof of accuracy.",
+    "No live target tested; no sensitive argument/return values recorded."
+  ]
+}

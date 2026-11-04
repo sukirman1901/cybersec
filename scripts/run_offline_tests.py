@@ -31,6 +31,13 @@ MODULES = (
     "test_metrics_accuracy",
     "test_framework_accuracy",
     "test_csrf_accuracy",
+    "test_crlf_accuracy",
+    "test_auth_surface_accuracy",
+    "test_desktop_config_accuracy",
+    "test_offline_crypto_accuracy",
+    "test_local_utility_accuracy",
+    "test_cors_accuracy",
+    "test_remaining_http_accuracy",
 )
 
 

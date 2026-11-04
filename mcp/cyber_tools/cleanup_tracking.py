@@ -1,5 +1,6 @@
 """Cleanup tracking — track what was modified, created, uploaded during testing."""
 import json
+import shlex
 from datetime import datetime
 
 def cleanup_tracking(action: str, action_type: str = "", target: str = "", tool: str = "", description: str = "", artifact: str = "", cleanup_cmd: str = "", cleanup_status: str = "pending") -> str:
@@ -58,13 +59,21 @@ def _list_entries(action_type, cleanup_status):
 
 
 def _update_status(tool, target, cleanup_status):
+    if cleanup_status in ("done", "cleaned"):
+        cleanup_status = "completed"
+    if cleanup_status not in ("pending", "completed"):
+        return json.dumps({"error": "Status must be pending, completed, done, or cleaned"})
+    if not tool and not target:
+        return json.dumps({"error": "Specify a tool, entry ID, or target"})
     updated = []
     for entry in LOG:
-        if entry["tool"] == tool or entry["target"] == target:
+        if (not tool or tool in (entry["tool"], entry["id"])) and (not target or entry["target"] == target):
             entry["status"] = cleanup_status
             if cleanup_status in ("completed", "done", "cleaned"):
                 entry["cleaned_at"] = datetime.utcnow().isoformat() + "Z"
-                updated.append(entry["id"])
+            else:
+                entry["cleaned_at"] = ""
+            updated.append(entry["id"])
     return json.dumps({
         "updated": len(updated),
         "ids": updated,
@@ -88,26 +97,26 @@ def _generate_cleanup_script():
         elif entry["action"] == "upload":
             commands.append({
                 "id": entry["id"],
-                "command": f"rm -f {entry['artifact']}",
+                "command": f"rm -f -- {shlex.quote(entry['artifact'])}",
                 "description": f"Remove uploaded file: {entry['artifact']}",
             })
         elif entry["action"] == "create":
             commands.append({
                 "id": entry["id"],
-                "command": f"rm -rf {entry['artifact']}",
+                "command": f"rm -rf -- {shlex.quote(entry['artifact'])}",
                 "description": f"Remove created resource: {entry['artifact']}",
             })
         elif entry["action"] == "modify":
             commands.append({
                 "id": entry["id"],
-                "command": f"# Manual: revert changes to {entry['target']}",
+                "command": "# Manual: revert changes to " + entry['target'].replace("\r", " ").replace("\n", " "),
                 "description": f"Manual reversion needed for {entry['target']}",
             })
 
     script_lines = ["#!/bin/bash", "# Cleanup Script — generated " + datetime.utcnow().isoformat() + "Z", f"# Total items: {len(pending)}"]
     for cmd in commands:
         script_lines.append("")
-        script_lines.append(f"# {cmd['description']}")
+        script_lines.append("# " + cmd['description'].replace("\r", " ").replace("\n", " "))
         script_lines.append(cmd["command"])
         if not cmd.get("command", "").startswith("#"):
             script_lines.append(f"# cleanup_tracking(action='update', tool='{cmd['id']}', cleanup_status='completed')")

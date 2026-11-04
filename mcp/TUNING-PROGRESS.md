@@ -258,6 +258,60 @@ Coverage completion refers only to the described snapshot analysis. JavaScript
 forms, external form associations and submit-button overrides are not modeled.
 The CRLF scanner was inspected but remains pending its own evidence-focused batch.
 
+## Autonomous cycle 1 — 14 further tools and live smoke (2026-11-04)
+
+User requested continuous execution without per-batch prompts. Independent modules
+were delegated in parallel, reviewed, and integrated. No agent ran live probes.
+Parent performed the bounded una browser smoke documented in
+`NUSAIBA-AUTONOMOUS-SMOKE-2026-11-04.md`: root 200, missing route 404, selected
+security-header presence, Next asset hints; no exploit or all-tool validation claim.
+
+| Tools | Verified change / selected evidence | Remaining boundary |
+|---|---|---|
+| crlf_inject | Two fresh exact response-header nonces, absent in baseline and non-newline controls; raw query preservation, 49 requests/15s, no body reads | Four query names/three encodings; other input surfaces, splitting/log forgery not tested |
+| api_auth, bypass_403 | Stable denied controls, repeats and matching structured resource envelopes; independent cookie state, redaction, malformed URL rejection | Medium-confidence resource-access observation; authenticated privilege not confirmed; raw protocol/mutation probes removed |
+| cors_check | Browser-valid origin/ACAC semantics; wildcard+credentials and same-origin are not findings; actual GET policy required; GET/OPTIONS only | Policy candidates, not verified sensitive-data leaks or browser credential delivery |
+| jwt_analyze, hash_analyze | Malformed/duplicate JSON, dates, ambiguity, uppercase hex and crypt formats; redacted output; 64 KiB/4 KiB ASCII input bounds | No signature, algorithm identity or credential verification |
+| desktop_config | JSON/env/key-envelope candidates; no raw values; bounded regular-file reads, symlink/race rejection, accurate scan count | Selected filenames, heuristic assignments, cooperative local deadline, no secret validity test |
+| compliance_map | Invalid input rejected; heuristic mappings no longer certify compliance | Control editions need independent review |
+| cleanup_tracking | Correct updates/combined filters/ID selection and status aliases; quote generated removal args, sanitize comments | Generated cleanup scripts not executed |
+| custom_wordlist | Name/path/symlink controls, bounded imports/merges, missing-source protection and UTF-8 failures | Synthetic temporary round-trips; concurrent filesystem races untested |
+| cookie_editor | Supplied analysis stays offline, no implicit escalation, bounded decoding and value-free structural output | Escalation action not operationally validated |
+| misplaced_files | Structural file signatures, missing-path control, no raw snippets, 17 supported paths | Public documents and unsupported formats explicitly excluded |
+| webshell_detect | Direct source-pattern candidates, not filename/brand/prose matches; 25/33-request limits | No confirmed-shell execution or obfuscated/rendered-interface validation |
+| waf_detection | One header-only request, product hints separate from CDN/load-balancer observations | No WAF enforcement/bypass proof; per-I/O timeout rather than hard wall-clock bound |
+
+Red-phase reproductions: CRLF 9 failures/2 errors; auth 5 failures/6 errors;
+desktop initial six failures plus private-key and file-swap regressions; CORS 10
+failures/6 errors; remaining HTTP 42 failures/subtest failures. Offline crypto and
+local utility regressions were also run red/green before their fixes.
+
+An initial integration run overlapped another agent's red-phase work and failed
+those unfinished HTTP cases; the source-fingerprint test correctly noticed files
+changing. No passing claim or commit used that run. After every agent finished,
+the stable full suite passed: **551 tests + 1511 subtests**, 59 deprecation warnings.
+Network-disabled traced runner passed **518 tests**.
+
+`crlf-benchmark.json` compares unchanged historical code at eeaa568 against the
+same offline fixtures. A real synthetic query/header sink was missed before and
+recognized after. Static scripts produced 493 bogus findings before versus zero
+after; reflected bodies 58 versus zero. Blocked/transport runs went from 1684
+attempts each to one. This is deliberately reduced, evidence-backed query coverage,
+not equivalent broad exploitation becoming faster. Local timings are not network p95.
+
+New evidence accounting:
+- `TOOL-VALIDATION-DISPOSITION.md`: all **209** registrations mapped to evidence,
+  validation groups and operational dependencies, not marked uniformly passing.
+- `scripts/trace_offline_tool_execution.py`: profiles mapped implementation entries
+  only during named network-disabled tests, with no arguments/locals/return values.
+- `offline-tool-execution.json`: **72/209** entries observed in this run. The other
+  137 were not observed by this main-thread offline trace; subprocesses and excluded
+  local integrations are not measured. A traced call can use mocked dependencies
+  and is not an all-actions operational pass. Static-reference counts remain separate.
+
+Continue feasible offline work automatically. AD/cloud/device operational coverage
+still needs appropriate labs; `nusaiba.dev` cannot establish those capabilities.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

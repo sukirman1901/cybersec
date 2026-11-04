@@ -4,9 +4,11 @@ Web Shell Detector — detect web shells on a target via signature scanning.
 
 import re
 from typing import Any
+import uuid
 
 import httpx
 from .http_guard import GuardedAsyncClient
+from .surface_probe import SurfaceProbe
 
 # Common web shell signatures (patterns to look for in file content)
 _SIGNATURES = {
@@ -101,15 +103,11 @@ async def webshell_detect(
     deep_scan: bool = False,
     timeout: int = 10,
 ) -> dict:
-    """Detect web shells on a target via signature and filename scanning.
+    """Recognize source-code candidates; never execute or confirm a webshell.
 
-    Args:
-        target_url:  Target URL (e.g. ``"https://example.com"`` or directory URL).
-        deep_scan:   Also fetch and scan file content (slower but more accurate).
-        timeout:     Request timeout per file (default 10s).
-
-    Returns:
-        A dict with found_shells, signatures_matched, scanned_urls, count, error.
+    Both modes GET bounded content. deep_scan increases the candidate path budget
+    from 24 to 32, not exploit depth. No links or redirects are followed.
+    found_shells/count remain confirmed-only; inspect candidates/candidate_count.
     """
     result: dict[str, Any] = {
         "found_shells": [],
@@ -117,91 +115,76 @@ async def webshell_detect(
         "scanned_urls": 0,
         "count": 0,
         "error": None,
+        "candidates": [],
+        "candidate_count": 0,
+        "assessment": "not_execution_tested",
+        "unsupported_detection": ['rendered shell interfaces', 'obfuscated/indirect dataflow', 'heredoc and language parsing',
+                                  'command execution', 'linked-path crawling', 'unselected paths'],
     }
-
-    base = target_url.rstrip("/")
-
-    async with GuardedAsyncClient(timeout=float(timeout), verify=False, follow_redirects=True) as client:
-        # Phase 1: Try common shell filenames
-        scan_urls = [f"{base}/{fn}" for fn in _SHELL_FILENAMES]
-
-        # If target looks like a directory, also try common upload paths
-        upload_dirs = ["/uploads/", "/files/", "/media/", "/images/", "/tmp/", "/cache/", "/static/", "/assets/"]
-        for d in upload_dirs:
-            for fn in ["shell.php", "cmd.php", "test.php", "c99.php", "1.php"]:
-                scan_urls.append(f"{base}{d}{fn}")
-
-        for url in scan_urls:
-            result["scanned_urls"] += 1
-            try:
-                if deep_scan:
-                    resp = await client.get(url)
-                    if resp.status_code == 200 and len(resp.text) > 0:
-                        matched = _scan_content(resp.text)
-                        if matched:
-                            result["found_shells"].append({
-                                "url": url,
-                                "signatures": matched,
-                                "size": len(resp.text),
-                                "status": resp.status_code,
-                            })
-                            result["signatures_matched"].extend(matched)
-                else:
-                    # Quick scan: HEAD request to check if file exists
-                    resp = await client.head(url)
-                    if resp.status_code == 200:
-                        # Suspicious filename match
-                        fn = url.split("/")[-1]
-                        suspicious = any(fn.lower() == s.lower() for s in _SHELL_FILENAMES)
-                        if suspicious:
-                            # Quick GET to check content
-                            resp = await client.get(url)
-                            matched = _scan_content(resp.text)
-                            result["found_shells"].append({
-                                "url": url,
-                                "signatures": matched or ["suspicious_filename"],
-                                "size": len(resp.text),
-                                "status": resp.status_code,
-                            })
-                            result["signatures_matched"].extend(matched or ["suspicious_filename"])
-
-            except Exception:
-                continue
-
-        # Phase 2: If deep_scan, also crawl the main page for links to .php/.jsp/.asp files
-        if deep_scan:
-            try:
-                resp = await client.get(base)
-                links = re.findall(r'(?:href|src|action)=["\']([^"\']+\.(?:php|jsp|asp|aspx))["\']', resp.text, re.I)
-                for link in links:
-                    full_url = link if link.startswith("http") else f"{base.rstrip('/')}/{link.lstrip('/')}"
-                    if full_url in [s["url"] for s in result["found_shells"]]:
-                        continue
-                    try:
-                        resp2 = await client.get(full_url)
-                        result["scanned_urls"] += 1
-                        if resp2.status_code == 200:
-                            matched = _scan_content(resp2.text)
-                            if matched:
-                                result["found_shells"].append({
-                                    "url": full_url,
-                                    "signatures": matched,
-                                    "size": len(resp2.text),
-                                    "status": resp2.status_code,
-                                })
-                                result["signatures_matched"].extend(matched)
-                    except Exception:
-                        continue
-            except Exception:
-                pass
-
+    try:
+        url = httpx.URL(target_url)
+        if url.scheme not in ('http', 'https') or not url.host or url.userinfo:
+            raise ValueError('Invalid target')
+        base = str(url.copy_with(query=None, fragment=None)).rstrip('/')
+        seconds = min(15.0, max(0.1, float(timeout)))
+    except (httpx.InvalidURL, ValueError, TypeError):
+        return {**result, 'error': 'Invalid HTTP target or timeout', 'requests_attempted': 0,
+                'coverage_complete': False}
+    paths = ['/' + fn for fn in _SHELL_FILENAMES]
+    paths += [f'/{directory}/{fn}' for directory in ('uploads', 'files', 'media', 'images', 'tmp', 'cache', 'static', 'assets')
+              for fn in ('shell.php', 'cmd.php', 'test.php', 'c99.php', '1.php')]
+    selected = paths[:32 if deep_scan else 24]
+    coverage = 'Direct source-code signatures in first source block/16 KiB prefix on selected paths, not family attribution or executable-shell proof; identical catch-all bodies rejected'
+    async with GuardedAsyncClient(timeout=min(5.0, seconds), verify=False, trust_env=False, follow_redirects=False) as client:
+        probe = SurfaceProbe(client, seconds=seconds, max_requests=len(selected) + 1)
+        control = await probe.request('GET', base + '/.missing-' + uuid.uuid4().hex)
+        if control is not None:
+            for path in selected:
+                response = await probe.request('GET', base + path)
+                if response is None:
+                    break
+                result['scanned_urls'] += 1
+                if response.status_code != 200 or response.content == control.content:
+                    continue
+                matched = _scan_content(response.text)
+                if matched:
+                    result['candidates'].append({'path': path, 'signatures': matched,
+                        'status': 200, 'size': len(response.content), 'confidence': 'MEDIUM',
+                        'assessment': 'source_code_candidate', 'coverage': coverage})
+                    result['signatures_matched'].extend(matched)
+    result.update(probe.summary())
+    result['selected_paths_complete'] = result['coverage_complete']
+    result['coverage_complete'] = False
+    result['coverage'] = coverage
+    result['candidates_deferred'] = len(paths) - result['scanned_urls']
+    result['candidate_count'] = len(result['candidates'])
     result["signatures_matched"] = list(dict.fromkeys(result["signatures_matched"]))
-    result["count"] = len(result["found_shells"])
     return result
 
 
 def _scan_content(content: str) -> list[str]:
-    """Scan file content for web shell signatures."""
+    """Apply legacy signatures only to plausible direct-input source candidates.
+
+    A server returning source does not prove it can execute that source. Plain
+    brands, normal socket calls and rendered documentation are insufficient.
+    """
+    content = content.strip()
+    if not content.startswith(('<?php', '<%')):
+        return []
+    # Inspect a bounded prefix; regexes below are heuristics, not a language parser.
+    content = content[:16384]
+    # Strip common comments and literals before matching code patterns. Preserve
+    # quotes as placeholders so direct $_GET["..."] sinks still match. Heredocs
+    # need a language parser and are deliberately outside this shallow detector.
+    if '<<<' in content:
+        return []
+    content = re.sub(r'''"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|/\*[\s\S]*?\*/|//[^\r\n]*|\#[^\r\n]*''',
+                     lambda m: '""' if m.group(0)[0] in ('"', "'") else ' ', content)
+    content = content.split('?>' if content.startswith('<?php') else '%>', 1)[0]
+    strong = re.search(r'\b(?:system|exec|passthru|shell_exec|popen|proc_open|eval|assert)\s*\(\s*(?:(?:base64_decode|gzinflate)\s*\(\s*)?\$_(?:GET|POST|REQUEST|COOKIE)\s*\[', content, re.I)
+    java = re.search(r'Runtime\.getRuntime\(\)\.exec\s*\(\s*request\.getParameter\s*\(', content)
+    if not (strong or java):
+        return []
     matched = []
     for shell_type, patterns in _SIGNATURES.items():
         for pattern in patterns:
