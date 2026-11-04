@@ -11,6 +11,12 @@ from datetime import datetime
 from .http_guard import NoRedirectHandler
 
 def vulnerable_fixture(action: str, target: str = "127.0.0.1", port: int = 9999, vuln_types: str = "sqli,xss,lfi,cmd,ssrf,open_redirect", ssl: bool = False, reset: bool = False) -> str:
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        return json.dumps({"error": "Invalid port"})
+    if ssl and action in ("start", "e2e"):
+        return json.dumps({"error": "TLS fixtures are not supported"})
+    if target not in ("127.0.0.1", "localhost"):
+        return json.dumps({"error": "Fixture actions require a loopback target"})
     if action == "start":
         return _start_fixture(target, port, vuln_types, ssl, reset)
     elif action == "stop":
@@ -176,7 +182,7 @@ class VulnHandler(BaseHTTPRequestHandler):
             self._send(200, json.dumps({"method": "POST", "path": path}))
 
 def run(port):
-    server = HTTPServer(("0.0.0.0", port), VulnHandler)
+    server = HTTPServer(("127.0.0.1", port), VulnHandler)
     print(f"Fixture running on port {port}", flush=True)
     try:
         server.serve_forever()
@@ -245,6 +251,8 @@ def _start_fixture(target, port, vuln_types, ssl, reset):
 
 
 def _stop_fixture(target, port):
+    if not FIXTURE_PROCESS["pid"] or FIXTURE_PROCESS["port"] != port:
+        return json.dumps({"status": "not_managed", "error": "No matching managed fixture"})
     if FIXTURE_PROCESS["pid"]:
         try:
             os.kill(FIXTURE_PROCESS["pid"], signal.SIGTERM)
@@ -254,11 +262,6 @@ def _stop_fixture(target, port):
             return json.dumps({"status": "stopped", "message": "Fixture stopped"}, indent=2)
         except ProcessLookupError:
             pass
-    # Also try pkill by port
-    try:
-        subprocess.run(["pkill", "-f", f"fixture.py {port}"], capture_output=True, timeout=5)
-    except Exception:
-        pass
     FIXTURE_PROCESS["pid"] = None
     FIXTURE_PROCESS["port"] = None
     return json.dumps({"status": "stopped", "message": "Fixture process cleaned up"}, indent=2)
@@ -394,10 +397,10 @@ def _run_e2e(target, port, vuln_types, ssl):
         except Exception as e:
             results["sqli_post"] = {"error": str(e)}
 
-    all_passed = all(
-        r.get("detected") or r.get("readable") or r.get("executed") or r.get("reflected") or r.get("status", 200) == 200
-        for k, r in results.items() if isinstance(r, dict) and k != "health"
-    )
+    checks = [r for k, r in results.items() if isinstance(r, dict) and k != "health"]
+    all_passed = bool(checks) and results["health"]["ok"] and all(
+        not r.get("error") and any(r.get(key) is True for key in ("detected", "readable", "executed", "reflected", "ssrf_possible"))
+        for r in checks)
 
     return json.dumps({
         "fixture_url": base,

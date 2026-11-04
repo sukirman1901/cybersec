@@ -296,7 +296,7 @@ async def smuggling_check(target: str) -> dict:
 
             resp = b""
             try:
-                while True:
+                for _ in range(64):
                     chunk = await asyncio.wait_for(r.read(4096), timeout=5)
                     if not chunk:
                         break
@@ -344,7 +344,7 @@ async def smuggling_check(target: str) -> dict:
 
             resp = b""
             try:
-                while True:
+                for _ in range(64):
                     chunk = await asyncio.wait_for(r.read(4096), timeout=5)
                     if not chunk:
                         break
@@ -392,7 +392,7 @@ async def smuggling_check(target: str) -> dict:
 
             resp = b""
             try:
-                while True:
+                for _ in range(64):
                     chunk = await asyncio.wait_for(r.read(4096), timeout=5)
                     if not chunk:
                         break
@@ -464,7 +464,7 @@ async def smuggling_check(target: str) -> dict:
 
         resp = b""
         try:
-            while True:
+            for _ in range(64):
                 chunk = await asyncio.wait_for(r.read(4096), timeout=5)
                 if not chunk:
                     break
@@ -492,10 +492,20 @@ async def smuggling_check(target: str) -> dict:
             "error": str(e),
         })
 
-    vulnerable_results = [r for r in results if r.get("vulnerable")]
+    for result in results:
+        result["potential_indicator"] = bool(result.get("vulnerable"))
+        result["vulnerable"] = False
+        result["confidence"] = "unverified"
+        if result.get("error"):
+            result["error"] = "Transport test failed"
+        result.pop("response_preview", None)
+    vulnerable_results = []
 
     return {
         "target": host,
+        "remote_effects_verified": False,
+        "coverage_complete": False,
+        "coverage": "Bounded response heuristics only; desynchronization and remote effects unverified",
         "port": port,
         "is_https": is_https,
         "http2_supported": h2_support.get("supported", False),

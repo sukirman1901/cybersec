@@ -569,6 +569,8 @@ async def http_request_splitting(target: str) -> dict:
         parsed = urllib.parse.urlparse(target)
 
     all_findings = []
+    if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
+        return {"error": "Invalid HTTP target", "coverage_complete": False, "findings": []}
 
     async with httpx.AsyncClient(
         verify=False,
@@ -600,11 +602,17 @@ async def http_request_splitting(target: str) -> dict:
         if risk_weights.get(r, 0) > risk_weights.get(max_risk, 0):
             max_risk = r
 
-    confirmed_count = sum(1 for f in all_findings if f.get("confidence") == "confirmed")
+    for finding in all_findings:
+        if finding.get("confidence") == "confirmed":
+            finding["confidence"] = "unverified"
+    confirmed_count = 0
     techniques_tested = list(set(f.get("technique", "") for f in all_findings))
 
     return {
         "target": target,
+        "remote_effects_verified": False,
+        "coverage_complete": False,
+        "coverage": "Heuristic response observations; caught transport failures are not exhaustively accounted for",
         "risk": max_risk,
         "total_findings": len(all_findings),
         "confirmed_findings": confirmed_count,

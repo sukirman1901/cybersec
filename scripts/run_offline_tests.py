@@ -65,6 +65,9 @@ MODULES = (
     "test_ad_failure_boundaries",
     "test_ai_failure_boundaries",
     "test_runtime_failure_boundaries",
+    "test_generated_artifact_boundaries",
+    "test_transport_workflow_boundaries",
+    "test_detector_failure_boundaries",
 )
 
 

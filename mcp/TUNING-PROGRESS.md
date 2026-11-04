@@ -637,6 +637,70 @@ Stable integration:
   Error-path execution is not successful operational coverage. AD native-call
   bounds, external labs and authenticated runtime validation remain explicit gaps.
 
+## Autonomous cycle 8 — verified offline entry coverage
+
+Three groups address remaining detector, transport/workflow and generated-artifact
+failure boundaries with mocks only. No exploits, uploads, raw replay, external
+models, scanners or downloaded artifacts are executed. Payload efficacy and
+operational exploitation are outside these defensive changes.
+
+Parent verified initial generated-artifact regressions: **11 tests + 38 subtests
+passed**. Generated/observed results no longer imply verified remote execution;
+selected input and secret-error handling improved. Review found download response
+buffering remained unbounded and one bounded read silently truncated; focused
+follow-up requested before integration. Comprehensive URL validation, arbitrary
+secret redaction and legacy heuristic accuracy remain unverified.
+
+Generated-artifact follow-up completed: download streaming caps at 256 KiB with
+a 15-second wall deadline and redirects disabled; overflow is incomplete, not
+download success. Execution-response observation uses limit+1 to detect truncation
+and generic exceptions. Parent combined regression with existing search metadata:
+**52 tests + 56 subtests passed**. No downloads/uploads/artifacts executed.
+
+Transport/workflow initial parent verification: **20 tests + 4 subtests passed**.
+Fixture safeguards restrict loopback binding/managed-process stops; empty or failed
+checks cannot produce successful E2E results. Raw replay review found response
+headers/body/base64 could still disclose secrets and receive loops lacked aggregate
+time bounds; a focused follow-up is pending. Eager buffering in other legacy
+HTTPX paths and synchronous dork helpers remain outside current fixes.
+
+Raw replay follow-up independently verified: **24 tests + 4 subtests passed** for
+the transport/workflow suite. Response bodies/base64, header values and preview
+content are withheld with metadata; returned URL credentials/query/fragments are
+sanitized. Types and aggregate size are checked before encoding. Receive waits
+share a cooperative deadline, not a hard process-wide interruption. Transmitted
+request bytes are unchanged; all socket interactions were mocked.
+
+Detector group completed with fixed request/time/body budgets (32 requests,
+15 seconds, 256 KiB) and fail-stop behavior. Legacy payloads/decision bodies were
+preserved; returned heuristic signals are explicitly unverified, with `vulnerable`
+null where confirmation is unsupported. Bounded runs may skip later techniques.
+The old LFI fixture assertion expected confirmed exploitation from a heuristic.
+Its regression now requires the traversal signal, unsupported verification status,
+zero confirmed findings and the request bound. This is an intentional result-
+semantics change, not improved exploit verification.
+
+Two public-entry regressions additionally verify injection/scanner failure/privacy
+contracts. Tracer review found `scan_vulnerabilities = vuln_scanner` was missed by
+qualname matching. Static top-level alias resolution now attributes actual calls
+to the imported public symbol; historical unobserved counts therefore understated
+this particular tool's execution. No function call is inferred solely from an alias.
+
+Final stable evidence:
+- Full pytest: **1144 tests + 2391 subtests passed**, 97 warnings, **104.17 seconds**.
+- Network-disabled trace after alias correction: **1111 tests passed**, **51.312
+  seconds**, zero failures/errors; **209/209 mapped entries observed**.
+- This completes entry-call accounting, NOT all-action coverage, connected MCP
+  dispatch verification, real-world precision/recall, or operational lab validation.
+- Final lightweight Nusaiba smoke at **2026-11-04T18:51:17.088Z**: one authorized
+  credential-free GET `/`, status **200**, four headers present, body cancelled
+  unread. No exploitation/load testing or broader scan was performed.
+
+Outstanding high-value work remains explicit: AD native/PTH execution bounds,
+some eager legacy HTTP buffering, comprehensive redaction/URL validation, provider
+interoperability, authenticated/device/cloud/AD labs and loaded-MCP source parity.
+No further agent work is running after cycle 8 integration.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

@@ -55,7 +55,7 @@ async def _scan_serpapi(query: str, max_results: int, client: httpx.AsyncClient)
     """Search via SerpAPI (set SERPAPI_API_KEY)."""
     api_key = os.environ.get("SERPAPI_API_KEY", "")
     if not api_key:
-        return []
+        return [{"url": "", "engine": "serpapi", "error": "API key unavailable", "coverage_complete": False}]
     results = []
     try:
         resp = await client.get(
@@ -64,7 +64,7 @@ async def _scan_serpapi(query: str, max_results: int, client: httpx.AsyncClient)
             timeout=30,
         )
         if resp.status_code != 200:
-            return results
+            return [{"url": "", "engine": "serpapi", "error": "Search request failed", "status": resp.status_code, "coverage_complete": False}]
         data = resp.json()
         for item in data.get("organic_results", [])[:max_results]:
             url = item.get("link")
@@ -75,8 +75,8 @@ async def _scan_serpapi(query: str, max_results: int, client: httpx.AsyncClient)
                     "engine": "serpapi",
                     "dork": query,
                 })
-    except Exception:
-        pass
+    except Exception as exc:
+        results.append({"url": "", "engine": "serpapi", "error": type(exc).__name__, "coverage_complete": False})
     return results
 
 
@@ -91,7 +91,7 @@ async def _scan_ddg(query: str, max_results: int, client: httpx.AsyncClient) -> 
             timeout=20,
         )
         if resp.status_code != 200:
-            return results
+            return [{"url": "", "engine": "ddg", "error": "Search request failed", "status": resp.status_code, "coverage_complete": False}]
 
         links = re.findall(
             r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>',
@@ -116,8 +116,8 @@ async def _scan_ddg(query: str, max_results: int, client: httpx.AsyncClient) -> 
                     "engine": "duckduckgo",
                     "dork": query,
                 })
-    except Exception:
-        pass
+    except Exception as exc:
+        results.append({"url": "", "engine": "ddg", "error": type(exc).__name__, "coverage_complete": False})
     return results
 
 
@@ -128,7 +128,7 @@ async def _scan_bing(query: str, max_results: int, client: httpx.AsyncClient) ->
         url = f"https://www.bing.com/search?q={quote(query)}&count={max_results}"
         resp = await client.get(url, headers=_HEADERS, timeout=20)
         if resp.status_code != 200:
-            return results
+            return [{"url": "", "engine": "bing", "error": "Search request failed", "status": resp.status_code, "coverage_complete": False}]
 
         # Bing results: <li class="b_algo"><h2><a href="...">
         links = re.findall(r'<li[^>]*class="[^"]*b_algo[^"]*"[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>(.*?)</a>', resp.text, re.DOTALL)
@@ -143,8 +143,8 @@ async def _scan_bing(query: str, max_results: int, client: httpx.AsyncClient) ->
                         "engine": "bing",
                         "dork": query,
                     })
-    except Exception:
-        pass
+    except Exception as exc:
+        results.append({"url": "", "engine": "bing", "error": type(exc).__name__, "coverage_complete": False})
     return results
 
 
@@ -255,10 +255,17 @@ async def dork_scan(dorks: str = "", engines: str = "ddg,bing", max_results: int
     Returns:
         List of result dicts with url, title, engine, dork fields
     """
-    engine_list = [e.strip() for e in engines.split(",") if e.strip()]
+    import math
+    if (isinstance(max_results, bool) or not isinstance(max_results, int) or not 1 <= max_results <= 100
+            or not isinstance(delay, (int, float)) or not math.isfinite(delay) or not 0 <= delay <= 10
+            or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 0 < timeout <= 60):
+        return [{"error": "Invalid result, delay or timeout budget", "coverage_complete": False}]
+    engine_list = list(dict.fromkeys(e.strip() for e in engines.split(",") if e.strip()))
     dork_list = [d.strip() for d in dorks.split("\n") if d.strip()]
     if not dork_list:
         dork_list = [dorks] if dorks else []
+    if len(dork_list) > 20 or any(e not in _ENGINE_MAP for e in engine_list):
+        return [{"error": "Query budget exceeded or unsupported engine", "coverage_complete": False}]
     
     async def _scan_engine(client, query, engine):
         if engine in _ENGINE_MAP:

@@ -28,12 +28,15 @@ async def oob_test(target: str, payload: str = "") -> dict:
                         "technique": tech["name"], "parameter": param, "test_url": test_url,
                         "status": "timeout", "note": "Timeout — possible OOB callback",
                     })
-                except httpx.HTTPError:
-                    continue
+                except httpx.HTTPError as exc:
+                    results.append({"technique": tech["name"], "parameter": param,
+                                    "error": type(exc).__name__})
 
     return {
         "target": target,
+        "remote_effects_verified": False,
+        "coverage_complete": not any(r.get("error") or r.get("status") == "timeout" for r in results),
         "tests": results,
         "recommendation": "Check oast.fun / Burp Collaborator for outbound callbacks. "
-        "A callback confirms blind SSRF, blind RCE, or OOB-based injection.",
+        "Timing alone does not verify a callback or vulnerability; independently correlate any callback to the request.",
     }

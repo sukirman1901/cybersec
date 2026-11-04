@@ -76,3 +76,12 @@ HSTS, X-Content-Type-Options and X-Frame-Options present. A five-second abort bo
 was used and the body stream was cancelled unread. No navigation, credential
 attempt, upload or cloud probe occurred. Header presence is not policy validation.
 The browser/daemon remain running.
+
+## Cycle 8 repeat — 18:51:17 UTC
+
+Engagement validation reconfirmed the exact origin as authorized. One explicit
+credential-free GET `/` through the existing una browser returned **200**; CSP,
+HSTS, X-Content-Type-Options and X-Frame-Options remained present. Redirects were
+manual, the abort timeout five seconds, and the body stream cancelled unread.
+No exploitation, uploads, authentication attempts or load testing. This validates
+availability/header presence only. Browser and daemon were left running.

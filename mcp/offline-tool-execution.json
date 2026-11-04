@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 173,
-  "tests_run": 1057,
+  "entry_execution_observed": 209,
+  "tests_run": 1111,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -460,9 +460,11 @@
           "symbol": "cache_poison_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_cache_body_difference_not_poisoning_proof"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "captcha_test",
@@ -603,9 +605,20 @@
           "symbol": "cmd_injection"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cmd_oast_helper",
@@ -615,9 +628,11 @@
           "symbol": "cmd_oast_helper"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_cmd_delay_does_not_confirm_execution"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cmseek_check",
@@ -1018,9 +1033,11 @@
           "symbol": "dir_bust"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_directory_budget_and_transport_errors_are_explicit"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "django_scan",
@@ -1127,9 +1144,11 @@
           "symbol": "dork_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_dork_budget_rejected_before_client"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "dork_search",
@@ -1324,9 +1343,14 @@
           "symbol": "exploit_db_download"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_download_byte_limit_and_redirect",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_download_invalid_id_does_not_construct_client",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_download_mocked_failure_and_truncation_metadata",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_download_wall_deadline_cancels_stalled_stream"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "exploit_db_search",
@@ -1563,9 +1587,21 @@
           "symbol": "graphql_depth_bypass"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_graphql_malformed_success_is_incomplete",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "graphql_injection",
@@ -1575,9 +1611,21 @@
           "symbol": "graphql_injection"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_graphql_malformed_success_is_incomplete",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "graphql_introspect",
@@ -1724,9 +1772,11 @@
           "symbol": "http_request_splitting"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_splitting_invalid_scheme_never_creates_client"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "hydra_brute",
@@ -1775,9 +1825,21 @@
           "symbol": "idor_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unbounded_arguments_are_rejected",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "injection_validator",
@@ -1787,9 +1849,11 @@
           "symbol": "injection_validator"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_injection_public_entry_generic_and_blocked_responses_unverified"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ios_data_storage",
@@ -1903,9 +1967,11 @@
           "symbol": "java_deserialize"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "jira_create",
@@ -1983,9 +2049,12 @@
           "symbol": "jwt_forgery"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_jwt_generated_candidate_is_not_verified_vulnerability",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_jwt_rejects_nonobject_and_invalid_claim_types"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "k8s_scan",
@@ -2052,9 +2121,20 @@
           "symbol": "ldap_inject"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "lfi_detect",
@@ -2064,9 +2144,20 @@
           "symbol": "lfi_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "llm_agent_hijack",
@@ -2165,9 +2256,20 @@
           "symbol": "log4j_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_log4j_body_boundary_is_observation_not_callback_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "log_exposure",
@@ -2213,9 +2315,20 @@
           "symbol": "mass_assignment"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "masscan_scan",
@@ -2364,9 +2477,20 @@
           "symbol": "nosql_inject"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "notify_webhook",
@@ -2443,9 +2567,11 @@
           "symbol": "oob_test"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_oob_errors_are_not_empty_success"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "open_redirect",
@@ -2649,9 +2775,11 @@
           "symbol": "php_deserialize"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "pickle_deserialize",
@@ -2661,9 +2789,11 @@
           "symbol": "pickle_deserialize"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "port_scan",
@@ -2713,9 +2843,20 @@
           "symbol": "prototype_pollution"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_partial_run_retains_unverified_heuristic_observations",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "race_condition",
@@ -2725,9 +2866,11 @@
           "symbol": "race_condition"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_race_parallel_budget_rejected_before_client"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "rails_scan",
@@ -2756,9 +2899,14 @@
           "symbol": "raw_replay"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_raw_invalid_timeout_never_opens_socket",
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_raw_invalid_types_and_sizes_do_not_encode_or_send",
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_raw_invalid_url_and_headers_never_send",
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_raw_previews_templates_and_errors_do_not_echo_secrets"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "redis_enum",
@@ -3139,9 +3287,11 @@
           "symbol": "smuggling_check"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_smuggling_connection_failures_stay_unverified"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "snmp_enum",
@@ -3262,9 +3412,12 @@
           "symbol": "sqli_exploit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_response_heuristics_are_not_verified_exploits_and_close_response"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "sqlmap_check",
@@ -3384,9 +3537,21 @@
           "symbol": "ssti_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unbounded_arguments_are_rejected",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "stego_detect",
@@ -3560,9 +3725,11 @@
           "symbol": "upload_bypass"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "upload_exploit_chain",
@@ -3572,9 +3739,11 @@
           "symbol": "upload_exploit_chain"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "vhost_discovery",
@@ -3659,9 +3828,25 @@
           "symbol": "scan_vulnerabilities"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_php2shell.TestPhp2ShellScanner.test_all_supported_branch_boundaries",
+        "test_php2shell.TestPhp2ShellScanner.test_conflicting_versions_are_unknown",
+        "test_php2shell.TestPhp2ShellScanner.test_detection_adds_no_requests",
+        "test_php2shell.TestPhp2ShellScanner.test_network_failure_has_unknown_assessment",
+        "test_php2shell.TestPhp2ShellScanner.test_oversized_numeric_banner_does_not_abort_scan",
+        "test_php2shell.TestPhp2ShellScanner.test_server_header_and_backport_warning",
+        "test_php2shell.TestPhp2ShellScanner.test_summary_contract_preserves_probable_not_verified",
+        "test_php2shell.TestPhp2ShellScanner.test_unknown_is_not_safe",
+        "test_remediation_20261104.AuditRegression.test_laravel_catchall_is_not_verified",
+        "test_remediation_20261104.AuditRegression.test_total_transport_failure_preserved",
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_scanner_public_entry_failed_or_blocked_transport_is_incomplete",
+        "test_vuln_scan_epss_intel.TestVulnScanEpssIntel.test_default_is_off_and_makes_no_intel_calls",
+        "test_vuln_scan_epss_intel.TestVulnScanEpssIntel.test_intel_failure_never_fails_the_scan",
+        "test_vuln_scan_epss_intel.TestVulnScanEpssIntel.test_optin_intel_enriches_cve_findings",
+        "test_vuln_scan_epss_intel.TestVulnScanEpssIntel.test_source_uncertainty_and_dates_survive_enrichment"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "vuln_validate",
@@ -3694,9 +3879,11 @@
           "symbol": "vulnerable_fixture"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_transport_workflow_boundaries.TransportWorkflowBoundaries.test_fixture_ssl_rejected_before_start"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "waf_detection",
@@ -3746,9 +3933,13 @@
           "symbol": "webshell_connect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_connector_failure_does_not_echo_credentials",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_connector_http_success_is_not_execution_proof",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "webshell_detect",
@@ -3780,9 +3971,12 @@
           "symbol": "webshell_gen"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_generator_synthetic_template_metadata",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_generator_template_failure_is_structured"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "webshell_upload",
@@ -3792,9 +3986,11 @@
           "symbol": "webshell_upload"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "websocket_test",
@@ -3901,9 +4097,12 @@
           "symbol": "xss_exploit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_invalid_targets_do_not_reach_transport",
+        "test_generated_artifact_boundaries.ArtifactBoundaries.test_response_heuristics_are_not_verified_exploits_and_close_response"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "xsstrike_check",
@@ -3935,9 +4134,21 @@
           "symbol": "xxe_detect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_blocking_status_stops_without_following_redirect",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_deadline_exhaustion_makes_no_request",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_external_cancellation_propagates",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_malformed_target_is_rejected_without_io",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_midstream_error_closes_response_and_discards_partial_evidence",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_reflection_is_observed_but_not_confirmation",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_static_indicator_is_retained_without_claiming_execution",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_transport_failure_is_not_clean_negative",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_truncation_discards_incomplete_body",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unbounded_arguments_are_rejected",
+        "test_detector_failure_boundaries.DetectorFailureBoundaries.test_unremarkable_responses_do_not_prove_absence"
+      ],
+      "verdict": "fixture_execution_observed"
     }
   ],
   "limitations": [

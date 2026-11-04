@@ -10,6 +10,8 @@ ctx.verify_mode = ssl.CERT_NONE
 
 def dir_bust(target: str, wordlist: list[str], extensions: list[str] = ["", ".php", ".html", ".bak", ".txt"]) -> list[dict]:
     """Brute force directories and files."""
+    if len(wordlist) * len(extensions) > 500:
+        return [{"error": "Request budget exceeds 500", "coverage_complete": False}]
     target = target.rstrip("/")
     if not target.startswith("http"):
         target = f"https://{target}"
@@ -28,6 +30,7 @@ def dir_bust(target: str, wordlist: list[str], extensions: list[str] = ["", ".ph
             except urllib.error.HTTPError as e:
                 if e.code in [401, 403]:
                     results.append({"url": url, "status": e.code, "size": 0})
-            except Exception:
-                pass
+                e.close()
+            except Exception as exc:
+                results.append({"url": url, "error": type(exc).__name__, "coverage_complete": False})
     return results

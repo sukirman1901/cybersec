@@ -38,8 +38,21 @@ def mappings():
 
 def main():
     tools = mappings()
-    expected = {(str(ROOT/path), symbol): (path, symbol) for entries in tools.values() for path, symbol in entries}
-    calls = {entry:set() for entry in expected.values()}
+    expected = {}
+    for entries in tools.values():
+        for path, symbol in entries:
+            # Public imports can alias a function whose code retains its original
+            # qualname (e.g. scan_vulnerabilities = vuln_scanner).
+            tree = ast.parse((ROOT/path).read_text())
+            aliases = {target.id: node.value.id for node in tree.body
+                       if isinstance(node, ast.Assign) and isinstance(node.value, ast.Name)
+                       for target in node.targets if isinstance(target, ast.Name)}
+            actual, seen = symbol, set()
+            while actual in aliases and actual not in seen:
+                seen.add(actual)
+                actual = aliases[actual]
+            expected.setdefault((str(ROOT/path), actual), set()).add((path, symbol))
+    calls = {entry:set() for entries in tools.values() for entry in entries}
     current = [None]
 
     class Result(unittest.TextTestResult):
@@ -55,7 +68,8 @@ def main():
         if event == 'call' and current[0] is not None:
             key = (frame.f_code.co_filename, frame.f_code.co_qualname)
             if key in expected:
-                calls[expected[key]].add(current[0])
+                for entry in expected[key]:
+                    calls[entry].add(current[0])
 
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(name) for name in offline.MODULES)
     with patch.object(socket.socket, 'connect', offline.deny_network), patch.object(socket.socket, 'connect_ex', offline.deny_network):

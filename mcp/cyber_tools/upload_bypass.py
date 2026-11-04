@@ -162,6 +162,8 @@ def _make_shell_with_magic(magic_bytes: bytes, shell_code: str) -> bytes:
 
 async def upload_bypass(target: str) -> dict:
     """Deep file upload bypass detection with content-type, magic bytes, polyglot, null byte."""
+    if not isinstance(target, str) or not target.strip() or len(target) > 8192 or any(ord(c) < 32 for c in target):
+        return {"error": "Invalid target", "verified": False}
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 

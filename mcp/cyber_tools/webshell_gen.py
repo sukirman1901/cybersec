@@ -82,6 +82,9 @@ async def webshell_gen(
     """
     result: dict[str, Any] = {
         "shell_code": "",
+        "generated": False,
+        "executed": False,
+        "verified": False,
         "language": language,
         "shell_type": shell_type,
         "filename_hint": _FILENAME_HINTS.get(language, "shell.txt"),
@@ -104,11 +107,15 @@ async def webshell_gen(
 
     template = templates[shell_type]
 
-    if shell_type == "reverse":
-        shell_code = template.format(host=reverse_host, port=reverse_port, param=param_name)
-    else:
-        key = "".join(random.choices(string.ascii_letters + string.digits, k=16)) if password else ""
-        shell_code = template.format(param=param_name, key=key)
+    try:
+        if shell_type == "reverse":
+            shell_code = template.format(host=reverse_host, port=reverse_port, param=param_name)
+        else:
+            key = "".join(random.choices(string.ascii_letters + string.digits, k=16)) if password else ""
+            shell_code = template.format(param=param_name, key=key)
+    except (ValueError, KeyError, IndexError):
+        result["error"] = "Template rendering failed; no artifact generated."
+        return result
 
     if password and language == "php":
         pw_hash = __import__("hashlib").md5(password.encode()).hexdigest()
@@ -123,4 +130,5 @@ async def webshell_gen(
             shell_code = _obfuscate_general(shell_code)
 
     result["shell_code"] = shell_code
+    result["generated"] = True
     return result

@@ -52,6 +52,8 @@ def _analyze_race_responses(responses: list[dict]) -> dict:
     }
 
     for resp in responses:
+        if "error" in resp:
+            analysis["error_count"] += 1
         status = resp.get("status", 0)
         body = resp.get("body", "").lower()
 
@@ -88,6 +90,11 @@ def _analyze_race_responses(responses: list[dict]) -> dict:
         analysis["race_detected"] = True
         analysis["evidence"].append(f"Status code inconsistency: {analysis['unique_statuses']}")
 
+    analysis["race_possible"] = analysis["race_detected"]
+    analysis["race_detected"] = False
+    analysis["remote_effects_verified"] = False
+    analysis["success_bodies"] = []
+    analysis["failure_bodies"] = []
     analysis["unique_bodies"] = len(analysis["unique_bodies"])
     analysis["unique_statuses"] = list(analysis["unique_statuses"])
 
@@ -96,6 +103,8 @@ def _analyze_race_responses(responses: list[dict]) -> dict:
 
 async def race_condition(target: str, parallel: int = 10, endpoint: str = "", cookies: str = "") -> dict:
     """Deep race condition detection with parallel requests, response diff, timing analysis."""
+    if isinstance(parallel, bool) or not isinstance(parallel, int) or not 1 <= parallel <= 20:
+        return {"error": "parallel must be an integer from 1 to 20", "coverage_complete": False}
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 
@@ -158,7 +167,8 @@ async def race_condition(target: str, parallel: int = 10, endpoint: str = "", co
                     "body": baseline_resp.text,
                     "time": 0,
                 }
-            except Exception:
+            except Exception as exc:
+                results.append({"endpoint": path, "error": type(exc).__name__, "confidence": "unknown"})
                 continue
 
             # --- Parallel Requests ---
@@ -190,7 +200,7 @@ async def race_condition(target: str, parallel: int = 10, endpoint: str = "", co
 
             # --- Analysis ---
             valid_responses = [r for r in responses if "status" in r]
-            analysis = _analyze_race_responses(valid_responses)
+            analysis = _analyze_race_responses(responses)
 
             # --- Timing Analysis ---
             times = [r["time"] for r in valid_responses if "time" in r]
@@ -212,9 +222,9 @@ async def race_condition(target: str, parallel: int = 10, endpoint: str = "", co
             # --- Determine Risk ---
             risk = "NONE"
             confidence = "none"
-            if analysis["race_detected"]:
-                risk = "CRITICAL"
-                confidence = "confirmed"
+            if analysis["race_possible"]:
+                risk = "MEDIUM"
+                confidence = "possible"
             elif analysis["success_count"] > 1:
                 risk = "HIGH"
                 confidence = "probable"
@@ -229,7 +239,7 @@ async def race_condition(target: str, parallel: int = 10, endpoint: str = "", co
                 "analysis": analysis,
                 "timing": timing_analysis,
                 "response_diff": response_diff,
-                "race_possible": analysis["race_detected"],
+                "race_possible": analysis["race_possible"],
                 "risk": risk,
                 "confidence": confidence,
                 "baseline_status": baseline["status"],
@@ -237,6 +247,8 @@ async def race_condition(target: str, parallel: int = 10, endpoint: str = "", co
 
     return {
         "target": target,
+        "remote_effects_verified": False,
+        "coverage_complete": bool(results) and not any(r.get("error") or r.get("analysis", {}).get("error_count") for r in results),
         "tests": results,
         "race_condition_possible": any(r.get("race_possible") for r in results),
         "total_endpoints_tested": len(results),

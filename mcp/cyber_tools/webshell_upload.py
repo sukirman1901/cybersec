@@ -65,6 +65,10 @@ async def webshell_upload(
         "error": None,
     }
 
+    if not isinstance(target_url, str) or not target_url.strip() or len(target_url) > 8192 or any(ord(c) < 32 for c in target_url):
+        result["error"] = "Invalid target"
+        return result
+
     if not shell_code and not auto_gen:
         result["error"] = "Either shell_code or auto_gen=True must be provided."
         return result

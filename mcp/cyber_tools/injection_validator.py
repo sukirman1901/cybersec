@@ -40,10 +40,12 @@ INJECTION_PAYLOADS = {
 }
 
 def injection_validator(target: str, types: str = "sqli,xss,nosql,cmd,ldap,ssti,xxe", param: str = "q", method: str = "get", technique: str = "basic") -> str:
+    if method not in ("get", "post") or any(t.strip() not in INJECTION_PAYLOADS for t in types.split(",")):
+        return json.dumps({"error": "Unsupported method or injection type", "vulnerable": []})
     if not target.startswith("http"):
         target = "http://" + target
 
-    type_list = [t.strip() for t in types.split(",")]
+    type_list = list(dict.fromkeys(t.strip() for t in types.split(",")))
     result = {"target": target, "param": param, "injection_types_tested": type_list, "results": {}, "vulnerable": []}
 
     for inj_type in type_list:
@@ -86,7 +88,10 @@ def _test_payload(target, param, payload, method, inj_type, tech_name):
         req = urllib.request.Request(url, data=data, headers={"User-Agent": "CybersecInjectionValidator/1.0"})
         resp = guarded_urlopen(req, timeout=15)
         elapsed = time.time() - t0
-        body = resp.read().decode("utf-8", errors="ignore")
+        try:
+            body = resp.read(1048576).decode("utf-8", errors="ignore")
+        finally:
+            resp.close()
         body_lower = body.lower()
 
         if inj_type == "sqli":
@@ -128,13 +133,21 @@ def _test_payload(target, param, payload, method, inj_type, tech_name):
                 finding["verified"] = True; finding["evidence"] = "XXE file read success"
 
     except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="ignore").lower()
+        try:
+            body = e.read(1048576).decode("utf-8", errors="ignore").lower()
+        finally:
+            e.close()
         if inj_type == "sqli" and any(w in body for w in ["sql syntax", "mysql", "sqlite", "odbc"]):
             finding["verified"] = True; finding["evidence"] = f"SQL error in HTTP {e.code}"
         finding["http_status"] = e.code
     except Exception as e:
-        finding["error"] = str(e)[:100]
+        finding["error"] = type(e).__name__
 
+    if finding["verified"]:
+        finding["potential_indicator"] = True
+        finding["evidence"] = "Unverified response indicator: " + finding["evidence"]
+        finding["verified"] = False
+    finding["remote_effects_verified"] = False
     return finding
 
 

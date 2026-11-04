@@ -74,10 +74,19 @@ def _build_forged_token(header: dict, payload: dict, signature: str = "") -> str
 
 async def jwt_forgery(token: str) -> dict:
     try:
+        if not isinstance(token, str) or len(token) > 65536:
+            raise ValueError("Invalid token")
         header, payload, signature = _parse_jwt(token)
+        if not isinstance(header, dict) or not isinstance(payload, dict):
+            raise ValueError("JWT objects required")
+        if not isinstance(header.get("kid", ""), str):
+            raise ValueError("Invalid kid")
+        for claim in ("exp", "nbf", "iat"):
+            if claim in payload and (type(payload[claim]) not in (int, float) or not __import__("math").isfinite(payload[claim])):
+                raise ValueError("Invalid numeric claim")
     except Exception as e:
         return {
-            "error": f"Invalid JWT: {str(e)}",
+            "error": "Invalid JWT structure or claim types",
             "vulnerable": False,
             "risk": "info",
             "confidence": "high",
@@ -401,9 +410,23 @@ async def jwt_forgery(token: str) -> dict:
                 risk = max_risk(risk, "high")
                 evidence.append(f"URL in header '{header_key}': {url_val}")
 
+    # Offline generation and header observations cannot establish server acceptance.
+    for finding in findings:
+        confirmed = finding.get("test") == "weak_secret" and finding.get("vulnerable") is True
+        finding["vulnerable"] = confirmed
+        finding["verified"] = confirmed
+        finding["generated"] = "forged_token" in finding
+        if not confirmed:
+            finding["severity"] = "info"
+            finding["note"] = "Offline candidate or token observation; server behavior is unverified."
     unique_vulns = [f for f in findings if f.get("vulnerable")]
+    risk = "critical" if unique_vulns else "info"
+    evidence = ["Offline weak signing-secret match"] if unique_vulns else ["Token inspected offline; server acceptance was not tested."]
 
     return {
+        "verified": bool(unique_vulns),
+        "executed": False,
+        "coverage": "offline_token_analysis",
         "token_header": header,
         "token_payload": payload,
         "total_tests": len(findings),

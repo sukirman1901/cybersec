@@ -119,6 +119,76 @@ def _compare_responses(baseline: dict, candidate: dict) -> dict:
 
 
 async def idor_detect(target: str, ids: str = "1,2,3", param: str = "") -> dict:
+    """Bounded observations; cross-principal authorization verification is unsupported."""
+    return await _bounded_detector(target, ids, param)
+
+
+async def _bounded_detector(target, *options):
+    from functools import partial
+    from urllib.parse import urlsplit
+    from .surface_probe import SurfaceProbe
+
+    result = {"results": [], "idor_candidates": [], "idor_count": 0,
+              "observations": [], "heuristic_signals": [],
+              "vulnerable": None, "verification": "unsupported",
+              "total_findings": 0, "confirmed_findings": 0,
+              "coverage_complete": False, "execution_status": "invalid_input"}
+    try:
+        if not isinstance(target, str) or not target or len(target) > 4096:
+            raise ValueError
+        if any(c.isspace() or ord(c) < 32 for c in target):
+            raise ValueError
+        target = target if "://" in target else "https://" + target
+        parsed = urlsplit(target)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username is not None or parsed.fragment:
+            raise ValueError
+        _ = parsed.port
+        if any(not isinstance(v, str) or len(v) > 512 or any(ord(c) < 32 for c in v) for v in options):
+            raise ValueError
+        if len(options[0].split(",")) > 16:
+            raise ValueError
+    except (ValueError, TypeError):
+        return {**result, "error": "Invalid target or detector arguments"}
+
+    class StopProbe(BaseException):
+        """Unwind legacy catch-and-continue handlers without a fake response."""
+
+    class Client(SurfaceProbe):
+        async def __aenter__(self):
+            self.get = partial(self.request, "GET")
+            self.post = partial(self.request, "POST")
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def request(self, method, url, **kwargs):
+            response = await super().request(method, url, **kwargs)
+            if response is None:
+                raise StopProbe
+            result["observations"].append({"method": method, "status": response.status_code,
+                                           "response_bytes": len(response.content)})
+            return response
+
+    async with httpx.AsyncClient(timeout=10, verify=False, follow_redirects=False) as raw:
+        probe = Client(raw, seconds=15, max_requests=32)
+        probe.signals = []
+        try:
+            await _legacy_detector(probe, target, *options)
+        except StopProbe:
+            pass
+        except (ValueError, TypeError, KeyError, AttributeError, IndexError):
+            probe.errors.append("malformed_response")
+        result.update(probe.summary())
+        for item in probe.signals:
+            technique = item.get("technique")
+            if isinstance(technique, str) and technique.isascii() and technique.replace("_", "").isalnum():
+                result["heuristic_signals"].append({"technique": technique[:80], "verification": "unsupported"})
+    result["note"] = "HTTP observations and legacy heuristics do not establish exploitation or absence of vulnerability. Raw response data is omitted."
+    return result
+
+
+async def _legacy_detector(_client, target: str, ids: str = "1,2,3", param: str = "") -> dict:
     """Deep IDOR detection with cross-user testing, response comparison, method variation."""
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
@@ -129,10 +199,10 @@ async def idor_detect(target: str, ids: str = "1,2,3", param: str = "") -> dict:
     if not test_ids:
         test_ids = ["1", "2", "3", "4", "5"]
 
-    results = []
+    results = _client.signals
     idor_findings = []
 
-    async with httpx.AsyncClient(timeout=15.0, verify=False, follow_redirects=False) as client:
+    async with _client as client:
         # Get baseline with first ID
         baseline_body = ""
         baseline_status = 200

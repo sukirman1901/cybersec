@@ -20,6 +20,9 @@ class _ObservedClient:
         self.errors = []
 
     async def get(self, url, **kwargs):
+        if self.attempted >= 500:
+            self.errors.append({"kind": "request_budget_exceeded"})
+            raise httpx.RequestError("Request budget exceeded")
         self.attempted += 1
         try:
             response = await self.client.get(url, **kwargs)
@@ -27,7 +30,7 @@ class _ObservedClient:
             if response.status_code in (401, 403, 429) or response.status_code >= 500:
                 self.errors.append({"status": response.status_code, "kind": "blocked_or_server_error"})
             return response
-        except httpx.HTTPError as exc:
+        except Exception as exc:
             self.errors.append({"kind": type(exc).__name__})
             raise
 

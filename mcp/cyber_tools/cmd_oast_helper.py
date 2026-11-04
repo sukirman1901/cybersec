@@ -9,6 +9,8 @@ import time
 import socket
 
 def cmd_oast_helper(target: str, param: str = "cmd", method: str = "get", test_type: str = "oob", oob_domain: str = "", callback_server: str = "") -> str:
+    if method not in ("get", "post") or test_type not in ("oob", "time", "both"):
+        return json.dumps({"error": "Unsupported method or test_type", "verified": False})
     if not target.startswith("http"):
         target = "http://" + target
 
@@ -57,8 +59,7 @@ def cmd_oast_helper(target: str, param: str = "cmd", method: str = "get", test_t
             finding["elapsed"] = round(elapsed, 2)
             finding["delayed"] = elapsed > 4
             if finding["delayed"]:
-                finding["evidence"] = f"Response delayed {elapsed:.1f}s — blind CMD confirmed"
-                result["verified"] = True
+                finding["evidence"] = f"Response delayed {elapsed:.1f}s; execution unverified"
             result["payloads_tested"].append(finding)
 
     result["check_oob"] = f"Check callback {cb_id}.{oob} for DNS/HTTP interactions"
@@ -83,20 +84,24 @@ def _send_payload(target, param, payload, method, timeout=10):
 
         req = urllib.request.Request(url, data=data, headers={"User-Agent": "CybersecCMDOAST/1.0"})
         resp = guarded_urlopen(req, timeout=timeout)
-        body = resp.read().decode("utf-8", errors="ignore").lower()
+        try:
+            body = resp.read(1048576).decode("utf-8", errors="ignore").lower()
+        finally:
+            resp.close()
 
         if "uid=" in body or "gid=" in body or "www-data" in body or "root:" in body[:200]:
-            finding["verified"] = True
-            finding["evidence"] = "Command output in response"
+            finding["evidence"] = "Command-like text in response; execution unverified"
         finding["status"] = resp.status
         finding["body_size"] = len(body)
     except urllib.error.HTTPError as e:
         finding["status"] = e.code
-        body = e.read().decode("utf-8", errors="ignore").lower()[:200]
+        try:
+            body = e.read(200).decode("utf-8", errors="ignore").lower()
+        finally:
+            e.close()
         if "uid=" in body or "gid=" in body or "root" in body:
-            finding["verified"] = True
-            finding["evidence"] = f"Command output in error {e.code}"
+            finding["evidence"] = f"Command-like text in HTTP {e.code}; execution unverified"
     except Exception as e:
-        finding["error"] = str(e)[:100]
+        finding["error"] = type(e).__name__
 
     return finding

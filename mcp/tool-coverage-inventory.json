@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 189,
+  "with_static_test_references": 209,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -531,7 +531,8 @@
         "urllib"
       ],
       "static_test_references": [
-        "mcp/tests/test_tool_policy.py"
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_transport_workflow_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -688,13 +689,15 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "re",
         "time",
         "urllib"
       ],
       "static_test_references": [
-        "mcp/tests/test_core_tools.py"
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_detector_failure_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -714,7 +717,9 @@
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1082,7 +1087,9 @@
         "ssl",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1207,6 +1214,7 @@
       "import_roots": [
         "asyncio",
         "httpx",
+        "math",
         "os",
         "re",
         "typing",
@@ -1215,7 +1223,8 @@
       "static_test_references": [
         "mcp/tests/test_core_tools.py",
         "mcp/tests/test_redirect_contract.py",
-        "mcp/tests/test_tool_policy.py"
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_transport_workflow_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -1385,6 +1394,7 @@
         "mcp/cyber_tools/exploit_db.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
         "json",
         "re",
@@ -1404,12 +1414,14 @@
         "mcp/cyber_tools/exploit_db.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
         "json",
         "re",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -1423,6 +1435,7 @@
         "mcp/cyber_tools/exploit_db.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx",
         "json",
         "re",
@@ -1666,13 +1679,16 @@
         "mcp/cyber_tools/graphql_depth_bypass.py"
       ],
       "import_roots": [
+        "functools",
         "httpx",
         "json",
         "time",
         "typing",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1684,11 +1700,15 @@
         "mcp/cyber_tools/graphql_injection.py"
       ],
       "import_roots": [
+        "functools",
         "httpx",
         "json",
-        "re"
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1839,7 +1859,9 @@
         "typing",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1894,12 +1916,15 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "json",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1917,7 +1942,8 @@
         "urllib"
       ],
       "static_test_references": [
-        "mcp/tests/test_tool_policy.py"
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_transport_workflow_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -2037,7 +2063,9 @@
         "httpx",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2118,6 +2146,7 @@
         "typing"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
@@ -2187,13 +2216,16 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "json",
         "re",
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2207,12 +2239,14 @@
       "import_roots": [
         "asyncio",
         "base64",
+        "functools",
         "httpx",
         "re",
         "urllib"
       ],
       "static_test_references": [
-        "mcp/tests/test_core_tools.py"
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_detector_failure_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -2292,10 +2326,14 @@
         "mcp/cyber_tools/log4j_scan.py"
       ],
       "import_roots": [
+        "functools",
         "httpx",
-        "re"
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2345,12 +2383,14 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "json",
         "re",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py",
         "mcp/tests/test_rails_accuracy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2504,12 +2544,15 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "json",
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2603,7 +2646,9 @@
       "import_roots": [
         "httpx"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2787,7 +2832,9 @@
         "httpx",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2812,6 +2859,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2867,12 +2915,15 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "json",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2891,7 +2942,9 @@
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2925,10 +2978,12 @@
         "json",
         "socket",
         "ssl",
+        "time",
         "urllib"
       ],
       "static_test_references": [
-        "mcp/tests/test_audit_regressions.py"
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_transport_workflow_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -3297,7 +3352,9 @@
         "ssl",
         "time"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_transport_workflow_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3393,6 +3450,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_skill_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -3545,11 +3603,14 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3745,7 +3806,9 @@
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3765,6 +3828,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -3846,6 +3910,7 @@
       "static_test_references": [
         "mcp/tests/test_core_tools.py",
         "mcp/tests/test_php2shell.py",
+        "mcp/tests/test_transport_workflow_boundaries.py",
         "mcp/tests/test_vuln_scan_epss_intel.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -3895,7 +3960,8 @@
       "static_test_references": [
         "mcp/tests/test_core_tools.py",
         "mcp/tests/test_redirect_contract.py",
-        "mcp/tests/test_tool_policy.py"
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_transport_workflow_boundaries.py"
       ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
@@ -3947,7 +4013,9 @@
         "httpx",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -3984,6 +4052,7 @@
         "typing"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -4001,7 +4070,9 @@
         "re",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -4133,6 +4204,7 @@
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_generated_artifact_boundaries.py",
         "mcp/tests/test_skill_contract.py",
         "mcp/tests/test_tool_policy.py"
       ],
@@ -4173,12 +4245,15 @@
       ],
       "import_roots": [
         "asyncio",
+        "functools",
         "httpx",
         "re",
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_detector_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

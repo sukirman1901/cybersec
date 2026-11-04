@@ -35,14 +35,17 @@ async def webshell_connect(
     """
     result: dict[str, Any] = {
         "executed": False,
+        "verified": False,
+        "request_sent": False,
+        "coverage": "http_response_only",
         "output": "",
         "response_code": 0,
         "shell_alive": False,
         "error": None,
     }
 
-    if not shell_url:
-        result["error"] = "shell_url is required."
+    if not isinstance(shell_url, str) or not shell_url.strip() or len(shell_url) > 8192 or any(ord(c) < 32 for c in shell_url):
+        result["error"] = "Invalid shell_url"
         return result
 
     method = method.lower()
@@ -74,13 +77,12 @@ async def webshell_connect(
                 resp = await client.post(shell_url, data=params)
 
             result["response_code"] = resp.status_code
+            result["request_sent"] = True
             output = resp.text.strip()
 
             if resp.status_code == 200:
-                result["shell_alive"] = True
                 result["output"] = output
-                if command:
-                    result["executed"] = True
+                result["note"] = "HTTP success does not verify shell availability or command execution."
             elif resp.status_code == 404:
                 result["error"] = "Shell not found (404). Check the URL."
             elif resp.status_code == 403:
@@ -94,6 +96,6 @@ async def webshell_connect(
     except httpx.ConnectError:
         result["error"] = "Connection failed. Check if the shell URL is reachable."
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "Request failed; command execution is unverified."
 
     return result

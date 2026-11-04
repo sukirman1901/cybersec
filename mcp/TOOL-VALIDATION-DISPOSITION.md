@@ -4,13 +4,13 @@
 
 ## Counts and evidence boundary
 
-- **209/209** inventory registrations have a disposition and mapped implementation(s). **189** have static test-reference candidates; **20** have none in the supplied inventory.
-- **173** tools have individually attributable documented execution evidence of some kind in the reviewed records; **36** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
+- **209/209** inventory registrations have a disposition and mapped implementation(s). **209** have static test-reference candidates; **0** have none in the supplied inventory.
+- **209** tools have individually attributable documented execution evidence of some kind in the reviewed records; **0** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
 - The historical ledger attributes 26 selected fixture/smoke tools, 2 dependency startup-only checks and one runtime diagnostic. The newer `offline-tool-execution.json` separately records actual mapped entry calls with test IDs; overlapping sets must not be added together.
 - Historical production smoke, local integrations and current mocked entry traces are different evidence classes. A called function is not proof that every action, external service or platform works.
 - Latest verification counts and cycle-specific limits are in `TUNING-PROGRESS.md`. This report generator reads those records; it does not execute tests. The separate runtime trace includes its own test count and success status.
 - The ledger's older **98 referenced / 111 unreferenced** baseline is stale relative to the supplied inventory. Inventory references can include mocks, strings and generic contract cases. Current tree changes after the inventory snapshot are not silently added to these counts.
-- Input inventory SHA-256: `9d887dc328b817449a9725a160fe258a6be6d3469581c876b5f7cd94118a4c19`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
+- Input inventory SHA-256: `9f746a9278a94799c5234ed3dea5a9993851e4e75b81c0c963501ad4e5705ed2`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
 
 ## How to read each row
 
@@ -264,8 +264,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 026. `cache_poison_check` — HTTP
 - **Mapped module:** `mcp/cyber_tools/cache_poison_check.py`.
 - **Declared scope:** Web cache poisoning detection — header manipulation, cache key injection, cache deception, scheme bypass.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_tool_policy.py`; `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -328,16 +328,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 034. `cmd_injection` — HTTP
 - **Mapped module:** `mcp/cyber_tools/cmd_injection.py`.
 - **Declared scope:** Test for command injection (semicolon, pipe, subshell, etc).
-- **Static refs:** `mcp/tests/test_core_tools.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 035. `cmd_oast_helper` — OAST
 - **Mapped module:** `mcp/cyber_tools/cmd_oast_helper.py`.
 - **Declared scope:** Command injection OAST helper — blind CMD testing with OOB callback correlation and time-based detection.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Loopback fixture/collector for local integration; reachable controlled callback endpoint and vulnerable service for remote effect; DNS unsupported by current HTTP collector. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock callback correlation, TTL, blocked/absent callback and cleanup; later local callback round-trip; remote callback reachability not established. Proposed exact group module: `mcp/tests/test_validation_oast.py`; existing exact regression modules are the static refs above.
 
@@ -488,8 +488,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 054. `dir_bruteforce` — HTTP
 - **Mapped module:** `mcp/cyber_tools/web_fuzz.py`.
 - **Declared scope:** Brute-force directories and files on a web target.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -544,8 +544,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 061. `dork_scan` — INTEL
 - **Mapped module:** `mcp/cyber_tools/dork_scan.py`.
 - **Declared scope:** Execute dork queries via multiple search engines (DuckDuckGo, Bing, Google). Returns URLs found. Avoids CAPTCHA by using DDG HTML version + Bing.
-- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_redirect_contract.py`; `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_redirect_contract.py`; `mcp/tests/test_tool_policy.py`; `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): import roots: httpx; environment variable names: SERPAPI_API_KEY.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -616,8 +616,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 070. `exploit_db_download` — INTEL
 - **Mapped module:** `mcp/cyber_tools/exploit_db.py`.
 - **Declared scope:** Download exploit code from Exploit-DB by exploit ID.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 4 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -720,16 +720,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 083. `graphql_depth_bypass` — HTTP
 - **Mapped module:** `mcp/cyber_tools/graphql_depth_bypass.py`.
 - **Declared scope:** GraphQL depth limit bypass — batching, alias attacks, circular fragments, resource exhaustion.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 084. `graphql_injection` — HTTP
 - **Mapped module:** `mcp/cyber_tools/graphql_injection.py`.
 - **Declared scope:** Test GraphQL endpoints — SQL injection, deep nesting, alias batching, introspection, auth bypass.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -792,8 +792,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 092. `http_request_splitting` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/http_request_splitting.py`.
 - **Declared scope:** HTTP request splitting — CRLF injection in headers, request line splitting, chunked encoding abuse.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -816,16 +816,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 095. `idor_detect` — AUTH
 - **Mapped module:** `mcp/cyber_tools/idor_detect.py`.
 - **Declared scope:** Test for Insecure Direct Object References by accessing sequential IDs.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic sessions plus controlled app with two identities, ownership policy and state oracle; lockout-safe accounts for credential checks. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock authenticated/anonymous/other-owner responses, expired session, denial and redaction; later disposable app state proof, not status-only success. Proposed exact group module: `mcp/tests/test_validation_auth_flows.py`; existing exact regression modules are the static refs above.
 
 ### 096. `injection_validator` — ORCHESTRATION
 - **Mapped module:** `mcp/cyber_tools/injection_validator.py`.
 - **Declared scope:** Unified injection validator — SQLi, XSS, NoSQL, CMD, LDAP, SSTI, XXE with multi-technique payloads.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_tool_policy.py`; `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Scoped child-tool fixtures, authorization/approval state and deterministic child results; real child capabilities require their own environments. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock child dispatch, scope denial, budget cancellation, skipped/error propagation and normalization; orchestration success is not child exploit proof. Proposed exact group module: `mcp/tests/test_validation_orchestration.py`; existing exact regression modules are the static refs above.
 
@@ -872,8 +872,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 102. `java_deserialize` — HTTP
 - **Mapped module:** `mcp/cyber_tools/java_deserialize.py`.
 - **Declared scope:** Check for Java deserialization endpoints, RMI, JNDI, and serialized data.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -904,8 +904,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 106. `jwt_forgery` — AUTH
 - **Mapped module:** `mcp/cyber_tools/jwt_forgery.py`.
 - **Declared scope:** Test JWT for known attacks — none algorithm, weak secret, kid injection, algorithm confusion.
-- **Static refs:** `mcp/tests/test_tool_policy.py`; `mcp/tests/test_workflow_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_tool_policy.py`; `mcp/tests/test_workflow_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic sessions plus controlled app with two identities, ownership policy and state oracle; lockout-safe accounts for credential checks. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock authenticated/anonymous/other-owner responses, expired session, denial and redaction; later disposable app state proof, not status-only success. Proposed exact group module: `mcp/tests/test_validation_auth_flows.py`; existing exact regression modules are the static refs above.
 
@@ -936,16 +936,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 110. `ldap_inject` — HTTP
 - **Mapped module:** `mcp/cyber_tools/ldap_inject.py`.
 - **Declared scope:** LDAP injection — test for LDAP query manipulation, auth bypass, error-based, boolean-blind, time-blind.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 111. `lfi_detect` — HTTP
 - **Mapped module:** `mcp/cyber_tools/lfi_detect.py`.
 - **Declared scope:** Test for Local/Remote File Inclusion vulnerabilities.
-- **Static refs:** `mcp/tests/test_core_tools.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -984,8 +984,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 116. `log4j_scan` — OAST
 - **Mapped module:** `mcp/cyber_tools/log4j_scan.py`.
 - **Declared scope:** Test for Log4j JNDI injection via headers and params.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Loopback fixture/collector for local integration; reachable controlled callback endpoint and vulnerable service for remote effect; DNS unsupported by current HTTP collector. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock callback correlation, TTL, blocked/absent callback and cleanup; later local callback round-trip; remote callback reachability not established. Proposed exact group module: `mcp/tests/test_validation_oast.py`; existing exact regression modules are the static refs above.
 
@@ -1008,8 +1008,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 119. `mass_assignment` — AUTH
 - **Mapped module:** `mcp/cyber_tools/mass_assignment.py`.
 - **Declared scope:** Mass assignment / overposting — test for parameter overwriting in APIs, privilege escalation.
-- **Static refs:** `mcp/tests/test_rails_accuracy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`; `mcp/tests/test_rails_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic sessions plus controlled app with two identities, ownership policy and state oracle; lockout-safe accounts for credential checks. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock authenticated/anonymous/other-owner responses, expired session, denial and redaction; later disposable app state proof, not status-only success. Proposed exact group module: `mcp/tests/test_validation_auth_flows.py`; existing exact regression modules are the static refs above.
 
@@ -1072,8 +1072,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 127. `nosql_inject` — HTTP
 - **Mapped module:** `mcp/cyber_tools/nosql_inject.py`.
 - **Declared scope:** Test for NoSQL injection (MongoDB $ne, $gt, $where payloads).
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1112,8 +1112,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 132. `oob_test` — OAST
 - **Mapped module:** `mcp/cyber_tools/oob_test.py`.
 - **Declared scope:** Test for blind OOB interaction (SSRF, RCE, template injection).
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Loopback fixture/collector for local integration; reachable controlled callback endpoint and vulnerable service for remote effect; DNS unsupported by current HTTP collector. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock callback correlation, TTL, blocked/absent callback and cleanup; later local callback round-trip; remote callback reachability not established. Proposed exact group module: `mcp/tests/test_validation_oast.py`; existing exact regression modules are the static refs above.
 
@@ -1184,16 +1184,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 141. `php_deserialize` — HTTP
 - **Mapped module:** `mcp/cyber_tools/php_deserialize.py`.
 - **Declared scope:** Check for PHP deserialization vulnerabilities via gadget chains.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 142. `pickle_deserialize` — HTTP
 - **Mapped module:** `mcp/cyber_tools/pickle_deserialize.py`.
 - **Declared scope:** Python pickle deserialization — detect and test for insecure deserialization, RCE confirmation.
-- **Static refs:** `mcp/tests/test_skill_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_skill_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1216,16 +1216,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 145. `prototype_pollution` — HTTP
 - **Mapped module:** `mcp/cyber_tools/prototype_pollution.py`.
 - **Declared scope:** Test for client-side/server-side prototype pollution via query params and JSON body.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 146. `race_condition` — HTTP
 - **Mapped module:** `mcp/cyber_tools/race_condition.py`.
 - **Declared scope:** Test for race conditions by sending parallel requests to sensitive endpoints.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1240,8 +1240,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 148. `raw_replay` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/raw_replay.py`.
 - **Declared scope:** Faithful raw HTTP request replay — send exact bytes, capture full response.
-- **Static refs:** `mcp/tests/test_audit_regressions.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_audit_regressions.py`; `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 4 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -1392,8 +1392,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 167. `smuggling_check` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/smuggling_check.py`.
 - **Declared scope:** Test for HTTP request smuggling (CL.TE, TE.CL).
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -1432,8 +1432,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 172. `sqli_exploit` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/sqli_exploit.py`.
 - **Declared scope:** Generate PoC SQL injection exploit payloads. Techniques: error-based, union-based, boolean, time-based, stacked.
-- **Static refs:** `mcp/tests/test_skill_contract.py`; `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_skill_contract.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -1488,8 +1488,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 179. `ssti_detect` — HTTP
 - **Mapped module:** `mcp/cyber_tools/ssti_detect.py`.
 - **Declared scope:** Test for Server-Side Template Injection vulnerabilities.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1560,16 +1560,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 188. `upload_bypass` — HTTP
 - **Mapped module:** `mcp/cyber_tools/upload_bypass.py`.
 - **Declared scope:** Test file upload filters — PHP/JSP/ASP shell, double ext, null byte, SVG XSS.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
 ### 189. `upload_exploit_chain` — HTTP
 - **Mapped module:** `mcp/cyber_tools/upload_exploit_chain.py`.
 - **Declared scope:** Upload exploit-chain validation — upload (PHP/JSP/ASP/SVG/PY/SH) → verify accessibility → execute payload.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1600,8 +1600,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 193. `vuln_scan` — HTTP
 - **Mapped module:** `mcp/cyber_tools/vuln_scanner.py`.
 - **Declared scope:** Scan headers, exposed paths and CVE patterns; includes non-destructive PHP2SHELL header assessment.
-- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_php2shell.py`; `mcp/tests/test_vuln_scan_epss_intel.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_php2shell.py`; `mcp/tests/test_transport_workflow_boundaries.py`; `mcp/tests/test_vuln_scan_epss_intel.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 15 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1616,8 +1616,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 195. `vulnerable_fixture` — OAST
 - **Mapped module:** `mcp/cyber_tools/vulnerable_fixture.py`.
 - **Declared scope:** Vulnerable fixture — local vulnerable app for E2E tool validation. Actions: start, stop, status, endpoints, e2e, cleanup.
-- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_redirect_contract.py`; `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_redirect_contract.py`; `mcp/tests/test_tool_policy.py`; `mcp/tests/test_transport_workflow_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Loopback fixture/collector for local integration; reachable controlled callback endpoint and vulnerable service for remote effect; DNS unsupported by current HTTP collector. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock callback correlation, TTL, blocked/absent callback and cleanup; later local callback round-trip; remote callback reachability not established. Proposed exact group module: `mcp/tests/test_validation_oast.py`; existing exact regression modules are the static refs above.
 
@@ -1640,8 +1640,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 198. `webshell_connect` — HTTP
 - **Mapped module:** `mcp/cyber_tools/webshell_connect.py`.
 - **Declared scope:** Connect to an uploaded web shell and execute commands. Supports GET/POST, password auth, and extra parameters.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 3 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1656,16 +1656,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 200. `webshell_gen` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/webshell_gen.py`.
 - **Declared scope:** Generate a web shell payload (PHP/JSP/ASP/ASPX). Types: cmd (command exec), eval (eval code), reverse (reverse shell). Optional obfuscation and password protection.
-- **Static refs:** `mcp/tests/test_skill_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_skill_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
 ### 201. `webshell_upload` — HTTP
 - **Mapped module:** `mcp/cyber_tools/webshell_upload.py`.
 - **Declared scope:** Upload a web shell to a target via file upload vulnerability. Auto-discovers upload endpoints and verifies shell accessibility.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1712,8 +1712,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 207. `xss_exploit` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/xss_exploit.py`.
 - **Declared scope:** Generate PoC XSS exploit payloads and steal links. Types: reflected, stored, dom_based, bypass_waf, cookie_steal.
-- **Static refs:** `mcp/tests/test_skill_contract.py`; `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_generated_artifact_boundaries.py`; `mcp/tests/test_skill_contract.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -1728,8 +1728,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 209. `xxe_detect` — HTTP
 - **Mapped module:** `mcp/cyber_tools/xxe_detect.py`.
 - **Declared scope:** Test for XML External Entity injection vulnerabilities.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_detector_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 

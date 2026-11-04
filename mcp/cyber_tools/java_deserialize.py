@@ -23,6 +23,8 @@ SIGNATURES = [
 
 
 async def java_deserialize(target: str) -> dict:
+    if not isinstance(target, str) or not target.strip() or len(target) > 8192 or any(ord(c) < 32 for c in target):
+        return {"error": "Invalid target", "verified": False}
     findings = []
     base = target.rstrip("/")
     async with httpx.AsyncClient(timeout=10.0, verify=False) as client:

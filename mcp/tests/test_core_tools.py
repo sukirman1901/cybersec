@@ -112,10 +112,14 @@ class TestDetectorRegression(unittest.IsolatedAsyncioTestCase):
         except Exception:
             pass
 
-    async def test_lfi_detect_finds_traversal(self):
+    async def test_lfi_detect_retains_unverified_traversal_signal(self):
         from cyber_tools.lfi_detect import lfi_detect
         r = await lfi_detect(f"{self.base}/lfi?file=x")
-        self.assertTrue(r["vulnerable"], f"expected traversal found, got: {r}")
+        self.assertIn("path_traversal", {s["technique"] for s in r["heuristic_signals"]})
+        self.assertIsNone(r["vulnerable"])
+        self.assertEqual(r["verification"], "unsupported")
+        self.assertEqual(r["confirmed_findings"], 0)
+        self.assertLessEqual(len(r["observations"]), 32)
 
     def test_http_probe_respects_custom_port(self):
         from cyber_tools.http_probe import http_probe

@@ -17,6 +17,8 @@ SIGNATURES = [
 
 
 async def php_deserialize(target: str, param: str = "") -> dict:
+    if not isinstance(target, str) or not target.strip() or len(target) > 8192 or any(ord(c) < 32 for c in target):
+        return {"error": "Invalid target", "verified": False}
     results = []
     async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
         resp = await client.get(target)

@@ -204,6 +204,8 @@ def _decode_possible_payloads(body: str) -> list[tuple[str, bytes]]:
 
 async def pickle_deserialize(target: str) -> dict:
     """Pickle deserialization detection — probe endpoints, detect pickle magic bytes, test cookie deserialization, RCE confirmation."""
+    if not isinstance(target, str) or not target.strip() or len(target) > 8192 or any(ord(c) < 32 for c in target):
+        return {"error": "Invalid target", "verified": False}
     if not target.startswith(("http://", "https://")):
         target = f"https://{target}"
 

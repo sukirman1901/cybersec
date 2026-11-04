@@ -6,6 +6,9 @@ import re
 from .http_guard import guarded_urlopen
 
 def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = "X-Forwarded-Host,X-Forwarded-For,X-Original-URL,X-Rewrite-URL,X-Custom-IP-Authorization,X-Real-IP") -> str:
+    header_list = list(dict.fromkeys(h.strip() for h in test_headers.split(",")))
+    if len(header_list) > 16 or any(not re.fullmatch(r"[A-Za-z0-9-]{1,100}", h) for h in header_list):
+        return json.dumps({"error": "Invalid headers or header budget exceeded", "poisonable": False})
     if not target.startswith("http"):
         target = "http://" + target
 
@@ -32,12 +35,13 @@ def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = 
         "cache_headers": baseline.get("cache_headers", {}),
     }
     result["cache_detected"] = baseline.get("cache_detected", False)
+    failures = 0
 
     # Test cache poisoning via headers
-    header_list = [h.strip() for h in test_headers.split(",")]
     for hdr in header_list:
         test_val = "evil.com"
         r = _fetch(base_url, extra_headers={hdr: test_val})
+        failures += not r.get("success") or r.get("status", 0) in (401, 403, 429) or r.get("status", 0) >= 500
         if r.get("success") and r["body_size"] != baseline["body_size"]:
             result["tests"].append({
                 "type": "cache_poison",
@@ -66,6 +70,7 @@ def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = 
     for dp in deception_paths:
         url = target.rstrip("/") + dp + "?" + cb
         r = _fetch(url)
+        failures += not r.get("success") or r.get("status", 0) in (401, 403, 429) or r.get("status", 0) >= 500
         if r.get("success") and "text/css" not in r.get("content_type", "") and "image/" not in r.get("content_type", ""):
             result["tests"].append({
                 "type": "cache_deception",
@@ -80,6 +85,7 @@ def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = 
     # Test cache key manipulation
     for hdr, val in [("X-Forwarded-Scheme", "http"), ("X-Forwarded-Proto", "http")]:
         r = _fetch(base_url, extra_headers={hdr: val})
+        failures += not r.get("success") or r.get("status", 0) in (401, 403, 429) or r.get("status", 0) >= 500
         if r.get("success") and r["status"] != baseline["status"]:
             result["tests"].append({
                 "type": "scheme_bypass",
@@ -90,6 +96,17 @@ def cache_poison_check(target: str, cache_buster: str = "", test_headers: str = 
             })
             result["poisonable"] = True
 
+    result["potential_indicators"] = result["poisonable"]
+    result["coverage_complete"] = failures == 0
+    result["requests_failed_or_blocked"] = failures
+    if failures:
+        result["error"] = "Some probes failed or were blocked; assessment incomplete"
+    result["poisonable"] = False
+    result["remote_effects_verified"] = False
+    result["coverage"] = "Response differences only; cache persistence and cross-client effects unverified"
+    for finding in result["tests"]:
+        finding["poisoned"] = False
+        finding["confidence"] = "unverified"
     result["total_tests"] = len(result["tests"])
     result["risk"] = "high" if result["poisonable"] else "info"
     result["remediation"] = "Cache key must include all input-determining headers. Use Vary headers appropriately. Disable caching for dynamic content. Implement cache key normalization."
@@ -105,7 +122,10 @@ def _fetch(url, extra_headers=None):
     try:
         req = urllib.request.Request(url, headers=headers)
         resp = guarded_urlopen(req, timeout=10)
-        body = resp.read().decode("utf-8", errors="ignore")
+        try:
+            body = resp.read(1048576).decode("utf-8", errors="ignore")
+        finally:
+            resp.close()
         resp_headers = dict(resp.headers)
 
         header_map = {k.lower(): k for k in resp_headers}
@@ -126,6 +146,7 @@ def _fetch(url, extra_headers=None):
             "cache_detected": cache_detected,
         }
     except urllib.error.HTTPError as e:
-        return {"success": True, "status": e.code, "headers": dict(e.headers), "body_size": 0, "cache_headers": {}, "cache_detected": False}
+        e.close()
+        return {"success": False, "status": e.code}
     except Exception:
         return {"success": False}
