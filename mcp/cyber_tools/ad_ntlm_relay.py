@@ -9,6 +9,7 @@ dumping, command execution, or SOCKS proxying.
 import asyncio
 import logging
 import shutil
+from .cli_tools import _run_cli
 from typing import Any
 
 from impacket.examples import logger as impacket_logger
@@ -51,12 +52,16 @@ async def ad_ntlm_relay(
         "target": target or targets_file,
         "executed": False,
         "output": "",
-        "socks_active": socks_mode,
+        "socks_active": False,
         "error": None,
     }
 
     if not target and not targets_file:
         result["error"] = "Either target or targets_file must be provided."
+        return result
+
+    if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 3600:
+        result["error"] = "timeout must be an integer between 1 and 3600 seconds."
         return result
 
     script = shutil.which("ntlmrelayx.py")
@@ -89,31 +94,16 @@ async def ad_ntlm_relay(
     cmd.extend(["-l", loot_dir])
 
     try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-
-        try:
-            stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                proc.communicate(), timeout=timeout
-            )
-            output = stdout_bytes.decode("utf-8", errors="replace")
-            stderr = stderr_bytes.decode("utf-8", errors="replace")
-            result["output"] = output.strip()
-            result["executed"] = True
-            if stderr and proc.returncode and proc.returncode != 0:
-                result["error"] = stderr.strip()
-        except asyncio.TimeoutError:
-            proc.terminate()
-            await proc.wait()
-            stdout_bytes = await proc.stdout.read() if proc.stdout else b""
-            result["output"] = stdout_bytes.decode("utf-8", errors="replace").strip()
-            result["executed"] = True
-            result["error"] = f"Relay server timed out after {timeout}s (normal for relay mode)."
+        run = await _run_cli(cmd, timeout=timeout)
+        failed = run["exit_code"] != 0 or run.get("error_kind") or run.get("output_truncated")
+        result["executed"] = not bool(failed)
+        result["output_truncated"] = bool(run.get("output_truncated"))
+        if failed:
+            result["error"] = "Relay execution incomplete or failed; server is not active."
+        else:
+            result["output"] = run["stdout"].strip()
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "Relay execution failed."
 
     return result

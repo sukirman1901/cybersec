@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 171,
+  "with_static_test_references": 189,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -23,7 +23,9 @@
         "random",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -41,7 +43,9 @@
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -57,7 +61,9 @@
         "logging",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -74,7 +80,9 @@
         "logging",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -92,7 +100,9 @@
         "pyasn1",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -110,7 +120,9 @@
         "shutil",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -125,11 +137,14 @@
         "asyncio",
         "impacket",
         "logging",
+        "os",
         "shutil",
         "sys",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -146,7 +161,9 @@
         "logging",
         "typing"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -310,7 +327,9 @@
         "time",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_runtime_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -410,7 +429,9 @@
       "import_roots": [
         "asyncio"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ad_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -447,10 +468,11 @@
       ],
       "import_roots": [
         "httpx",
-        "re",
-        "urllib"
+        "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -523,6 +545,7 @@
       ],
       "import_roots": [
         "PIL",
+        "asyncio",
         "base64",
         "httpx",
         "io",
@@ -530,7 +553,9 @@
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_runtime_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1928,10 +1953,10 @@
         "mcp/cyber_tools/ios_frida.py"
       ],
       "import_roots": [
-        "asyncio",
         "shutil"
       ],
       "static_test_references": [
+        "mcp/tests/test_runtime_failure_boundaries.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -1945,10 +1970,10 @@
         "mcp/cyber_tools/ios_objection.py"
       ],
       "import_roots": [
-        "asyncio",
         "shutil"
       ],
       "static_test_references": [
+        "mcp/tests/test_runtime_failure_boundaries.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2202,7 +2227,9 @@
       "import_roots": [
         "httpx"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2217,7 +2244,9 @@
         "httpx",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2232,7 +2261,9 @@
         "httpx",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2247,7 +2278,9 @@
         "httpx",
         "time"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2359,7 +2392,9 @@
         "json",
         "re"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2814,9 +2849,12 @@
         "mcp/cyber_tools/prompt_injection.py"
       ],
       "import_roots": [
+        "asyncio",
         "httpx"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_ai_failure_boundaries.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

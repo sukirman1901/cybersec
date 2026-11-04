@@ -139,6 +139,10 @@ async def ad_dcsync(
     smb_conn: SMBConnection | None = None
     remote_ops: RemoteOperations | None = None
 
+    if not domain.strip() or not dc_ip.strip():
+        result["error"] = "domain and dc_ip are required."
+        return result
+
     try:
         # ------------------------------------------------------------------
         # 1. SMB connection – used for authentication and endpoint mapping
@@ -187,7 +191,7 @@ async def ad_dcsync(
         result["count"] = len(collector.accounts)
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "Replication failed."
     finally:
         if remote_ops is not None:
             try:

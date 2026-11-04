@@ -182,7 +182,7 @@ def _request_asrep(
             # User requires pre-authentication — not vulnerable
             return None
         # Some other Kerberos error
-        logging.debug("AS-REQ failed for %s: %s", username, error_str)
+        logging.debug("AS-REQ failed; diagnostic details suppressed.")
         return None
 
     # Try to decode as AS-REP
@@ -244,7 +244,7 @@ async def ad_asrep_roast(
     result: dict[str, Any] = {
         "domain": domain,
         "dc_ip": dc_ip,
-        "authenticated": bool(username and password),
+        "authenticated": False,
         "hashes": [],
         "accounts": [],
         "count": 0,
@@ -255,6 +255,9 @@ async def ad_asrep_roast(
         # ------------------------------------------------------------------
         # 1. LDAP search — find users with DONT_REQUIRE_PREAUTH
         # ------------------------------------------------------------------
+        if not domain.strip() or not dc_ip.strip():
+            result["error"] = "domain and dc_ip are required."
+            return result
         base_dn = _make_search_base(domain)
 
         ldap_conn = ldap_login(
@@ -270,6 +273,7 @@ async def ad_asrep_roast(
             "",  # nthash
             "",  # aesKey
         )
+        result["authenticated"] = bool(username and password)
 
         # LDAP filter:
         #   - objectCategory=person
@@ -303,6 +307,7 @@ async def ad_asrep_roast(
         except ldap.LDAPSearchError as e:
             if "sizeLimitExceeded" in str(e):
                 resp = e.getAnswers()
+                result["error"] = "LDAP results incomplete: size limit exceeded."
             else:
                 raise
 
@@ -373,6 +378,7 @@ async def ad_asrep_roast(
         for sam_name in vulnerable_users:
             asrep_data = _request_asrep(sam_name, domain, dc_ip)
             if asrep_data is None:
+                result["error"] = "One or more AS-REP requests returned no usable result; coverage incomplete."
                 logging.debug(
                     "AS-REP request failed for %s (requires preauth or error)",
                     sam_name,
@@ -404,7 +410,7 @@ async def ad_asrep_roast(
         result["count"] = len(result["hashes"])
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "AS-REP collection failed."
     finally:
         if ldap_conn is not None:
             try:

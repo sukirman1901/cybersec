@@ -3,6 +3,7 @@
 import httpx
 import json
 import re
+from .prompt_injection import _validate, _report, _failure, _request, _BoundaryError
 
 
 DANGEROUS_TOOL_PATTERNS = [
@@ -29,7 +30,42 @@ MCP_METHODS = [
 
 
 async def mcp_abuse_test(target: str) -> dict:
-    findings = []
+    result = _report(target, mcp_endpoint='', findings=[], vulnerable=False, total_findings=0,
+                     note='Protocol responses and description keywords do not verify execution or abuse.')
+    try:
+        _validate(target)
+        base = target.rstrip('/')
+        mcp_url = base if base.endswith('/mcp') else base + '/mcp'
+        result['mcp_endpoint'] = _report(mcp_url)['target']
+        await _analyze(target, result['findings'])
+    except Exception as error:
+        _failure(result, error)
+    for finding in result['findings']:
+        finding.update(status='candidate', confidence='low', risk='INFO')
+    result['total_findings'] = len(result['findings'])
+    return result
+
+
+def _rpc(response, request_id):
+    data = response.json()
+    if (not isinstance(data, dict) or data.get('jsonrpc') != '2.0'
+            or type(data.get('id')) is not int or data['id'] != request_id
+            or ('error' in data) or not isinstance(data.get('result'), dict)):
+        raise _BoundaryError('invalid or failed JSON-RPC response')
+    result = data['result']
+    if 'tools' in result:
+        tools = result['tools']
+        if not isinstance(tools, list) or len(tools) > 128:
+            raise _BoundaryError('invalid or oversized tools list')
+        for tool in tools:
+            if not isinstance(tool, dict) or any(
+                    not isinstance(tool.get(key, ''), str) or len(tool.get(key, '')) > 4096
+                    for key in ('name', 'description')):
+                raise _BoundaryError('invalid tool metadata')
+    return data
+
+
+async def _analyze(target, findings):
     base = target.rstrip("/")
     mcp_url = base
     if not mcp_url.endswith("/mcp"):
@@ -40,9 +76,11 @@ async def mcp_abuse_test(target: str) -> dict:
         for method in MCP_METHODS:
             try:
                 payload = {"jsonrpc": "2.0", "method": method, "params": {}, "id": 1}
-                resp = await client.post(mcp_url, json=payload)
+                resp = await _request(client, 'POST', mcp_url, json=payload)
+                if resp.status_code != 200:
+                    raise _BoundaryError('expected JSON-RPC response with HTTP 200')
                 if resp.status_code == 200:
-                    data = resp.json()
+                    data = _rpc(resp, payload['id'])
                     if "result" in data:
                         findings.append({
                             "test": "mcp_method_access",
@@ -61,13 +99,13 @@ async def mcp_abuse_test(target: str) -> dict:
                                     if re.search(pattern, combined):
                                         findings.append({
                                             "test": "dangerous_tool_exposed",
-                                            "tool": name,
+                                            "tool": "[omitted]",
                                             "matched_pattern": pattern,
                                             "risk": "CRITICAL",
                                         })
                                         break
             except (httpx.HTTPError, json.JSONDecodeError, Exception):
-                pass
+                raise
 
         # Test 2: JSON-RPC injection (parameter pollution in tool calls)
         injection_payloads = [
@@ -79,9 +117,11 @@ async def mcp_abuse_test(target: str) -> dict:
         ]
         for payload in injection_payloads:
             try:
-                resp = await client.post(mcp_url, json=payload)
+                resp = await _request(client, 'POST', mcp_url, json=payload)
+                if resp.status_code != 200:
+                    raise _BoundaryError('expected JSON-RPC response with HTTP 200')
                 if resp.status_code == 200:
-                    data = resp.json()
+                    data = _rpc(resp, payload['id'])
                     if "result" in data and data["result"]:
                         content = str(data["result"])
                         if len(content) > 10:
@@ -89,18 +129,21 @@ async def mcp_abuse_test(target: str) -> dict:
                                 "test": "json_rpc_injection",
                                 "payload": payload["method"],
                                 "params": str(payload["params"])[:80],
-                                "injected": True,
+                                "injected": False,
+                                "result_observed": True,
                                 "risk": "CRITICAL",
                             })
             except Exception:
-                pass
+                raise
 
         # Test 3: Tool description injection (prompt injection via tool names)
         try:
             probe = {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 7}
-            resp = await client.post(mcp_url, json=probe)
+            resp = await _request(client, 'POST', mcp_url, json=probe)
+            if resp.status_code != 200:
+                raise _BoundaryError('expected JSON-RPC response with HTTP 200')
             if resp.status_code == 200:
-                data = resp.json()
+                data = _rpc(resp, probe['id'])
                 tools = data.get("result", {}).get("tools", [])
                 for tool in tools:
                     desc = tool.get("description", "")
@@ -110,17 +153,9 @@ async def mcp_abuse_test(target: str) -> dict:
                     ]):
                         findings.append({
                             "test": "tool_description_prompt_injection",
-                            "tool": tool.get("name"),
-                            "description_snippet": desc[:100],
+                            "tool": "[omitted]",
+                            "description_snippet": "[omitted]",
                             "risk": "HIGH",
                         })
         except Exception:
-            pass
-
-    return {
-        "target": target,
-        "mcp_endpoint": mcp_url,
-        "findings": findings,
-        "vulnerable": any(f.get("risk") in ["CRITICAL", "HIGH"] for f in findings),
-        "total_findings": len(findings),
-    }
+            raise

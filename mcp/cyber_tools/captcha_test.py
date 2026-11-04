@@ -1,8 +1,10 @@
 """CAPTCHA bypass testing — token reuse, OCR, math solving, header/cookie manipulation, hCaptcha/Turnstile detection."""
 
 import re, base64, io
+import asyncio
 import httpx
 from .http_guard import GuardedAsyncClient
+from .surface_probe import SurfaceProbe
 from urllib.parse import urlencode
 
 # Optional OCR
@@ -28,6 +30,63 @@ CAPTCHA_COOKIE = re.compile(r'captcha[_-]?solved|captchaVerified|cf-turnstile-re
 
 
 async def captcha_test(target: str, action: str = "all", captcha_url: str = "") -> dict:
+    """Bound the legacy probes and report only unverified, redacted observations."""
+    failure = {"status": "incomplete", "confirmed": False, "summary": {"vulnerable": None}}
+    if (not isinstance(target, str) or not target.strip() or len(target) > 8192
+            or not isinstance(action, str) or action not in ("all", "reuse", "ocr", "math", "header", "cookie", "recaptcha", "detect")):
+        return {**failure, "error_kind": "invalid_input"}
+    try:
+        url = httpx.URL(target)
+        if url.scheme not in ("http", "https") or not url.host or url.userinfo or any(c.isspace() for c in target):
+            return {**failure, "error_kind": "invalid_input"}
+    except Exception:
+        return {**failure, "error_kind": "invalid_input"}
+    if captcha_url or action in ("recaptcha", "ocr"):
+        return {**failure, "error_kind": "unsupported",
+                "error": "Custom image URLs, standalone reCAPTCHA analysis and unbounded OCR are unsupported"}
+    try:
+        raw = await asyncio.wait_for(_captcha_test(target, action, captcha_url), timeout=30)
+    except asyncio.TimeoutError:
+        return {**failure, "error_kind": "timeout"}
+    except Exception:
+        return {**failure, "error_kind": "runtime_error"}
+    if raw.get("status") == "incomplete":
+        return raw
+    observations = [{"test": f["test"], "risk": "INFO", "confirmed": False,
+                     "note": "Heuristic observation only; server-side acceptance was not verified",
+                     **({"error": "Probe incomplete; details withheld"} if "error" in f else {})}
+                    for f in raw["findings"]]
+    return {"status": "unverified", "confirmed": False, "findings": observations,
+            "captcha_types": [{"type": t["type"]} for t in raw["captcha_types"] if isinstance(t, dict)],
+            "summary": {"total_tests": len(observations), "critical": 0, "high": 0, "vulnerable": None},
+            "risk": "INFO", "coverage": "Heuristics only; OCR skipped; no browser or server-side verification",
+            "time_budget_seconds": 30}
+
+
+class _CaptchaProbe(SurfaceProbe):
+    """Adapt legacy call sites to bounded streaming, with no automatic redirects."""
+
+    async def get(self, url, **kwargs):
+        return await self._response("GET", url, **kwargs)
+
+    async def post(self, url, **kwargs):
+        return await self._response("POST", url, **kwargs)
+
+    async def _response(self, method, url, **kwargs):
+        response = await self.request(method, url, **kwargs)
+        if response is None:
+            raise RuntimeError("Probe incomplete")
+        return response
+
+    def failure(self):
+        kind = "request_budget" if "budget_exhausted" in self.errors else "detection_failed"
+        if "body_limit_exceeded" in self.errors:
+            kind = "body_limit_exceeded"
+        return {"status": "incomplete", "confirmed": False, "error_kind": kind,
+                "requests_attempted": self.requests, "summary": {"vulnerable": None}}
+
+
+async def _captcha_test(target, action, captcha_url):
     """Test CAPTCHA bypass — 15 attack vectors.
 
     action:
@@ -43,8 +102,8 @@ async def captcha_test(target: str, action: str = "all", captcha_url: str = "") 
     findings = []
     base_url = target.rstrip("/")
     parsed = httpx.URL(base_url)
-
-    async with GuardedAsyncClient(timeout=20.0, verify=False, follow_redirects=True) as client:
+    async with GuardedAsyncClient(timeout=20.0, verify=False, follow_redirects=False) as transport:
+        client = _CaptchaProbe(transport, seconds=30, max_requests=8, max_bytes=262144)
         # ── 0. Detect captcha type ──
         try:
             resp = await client.get(base_url)
@@ -83,9 +142,8 @@ async def captcha_test(target: str, action: str = "all", captcha_url: str = "") 
                 })
 
             findings.append({"test": "captcha_detection", "types": captcha_types, "risk": "INFO"})
-        except Exception as e:
-            captcha_types = []
-            findings.append({"test": "captcha_detection", "error": str(e)[:100], "risk": "INFO"})
+        except Exception:
+            return client.failure()
 
         if action in ["detect", "all"]:
             pass  # continue to other tests
@@ -225,7 +283,7 @@ async def captcha_test(target: str, action: str = "all", captcha_url: str = "") 
                     findings.append({"test": "math_captcha_solved", "error": str(e)[:80], "risk": "INFO"})
 
         # ── 5. Image Captcha OCR ──
-        if action in ["all", "ocr"] and captcha_images:
+        if action == "ocr" and captcha_images:
             try:
                 for img_url in captcha_images[:1]:
                     if not img_url.startswith("http"):
@@ -391,6 +449,9 @@ async def captcha_test(target: str, action: str = "all", captcha_url: str = "") 
                     "risk": "MEDIUM",
                     "note": "reCAPTCHA v2 detected — audio challenge available for manual solving via Google's speech-to-text",
                 })
+
+    if client.stopped:
+        return client.failure()
 
     # ── Summary ──
     critical = [f for f in findings if f.get("risk") == "CRITICAL"]

@@ -597,6 +597,46 @@ After all edits stopped, full integration passed **1044 tests + 1948 subtests**,
 operational accuracy or complete action coverage. Trace/inventory/disposition
 refreshed; no live OSINT, DNS or cloud requests were made in this cycle.
 
+## Autonomous cycle 7 — verified source integration
+
+Three parallel groups focus on failure reporting, privacy and resource limits in
+AD, AI-testing and runtime adapters. No credentials, domains, model endpoints,
+devices or real external tools are used. Attack payloads and successful exploit
+behavior are outside these defensive fixes.
+
+Parent verified AD regressions: **13 tests + 36 subtests passed**, two dependency
+deprecation warnings. A missing standalone test import path was fixed first.
+The changed adapters redact tested secrets, reject selected invalid bounds and
+distinguish failed/truncated subprocess results. Existing bounded runner is reused
+where compatible; its lifecycle was mocked here, not independently retested.
+Remaining explicit gaps: synchronous native calls and Pass-the-Hash subprocess
+execution lack full bounds; optional-dependency import failures are not covered.
+Passing these failure-path fixtures does not validate AD operational behavior.
+
+Parent independently verified AI boundaries: **12 tests + 101 subtests passed**.
+Seven adapters bound responses to 64 KiB and individual requests to a 30-second
+wall deadline, sanitize failures and omit raw response/PII. Marker/status evidence
+does not confirm hijack, data exposure or exhaustion; external effects remain
+unverified. Per-request bounds are not an aggregate multi-request deadline.
+Runtime suite needed standalone import setup and unittest-compatible tests for
+the offline runner; response buffering and aggregate auth deadline follow-ups
+are pending before integration. No live models, devices or authentication used.
+
+Runtime follow-up completed before source freeze: CAPTCHA uses bounded streaming
+through SurfaceProbe (256 KiB / eight requests); auth clamps remaining per-request
+time against a cooperative 30-second aggregate deadline and reports skipped steps.
+Synchronous auth I/O cannot be forcibly preempted. Runtime suite now uses unittest
+and is included in the network-disabled runner; targeted agent evidence was
+21 tests plus 30 pytest subtests. Device/CLI cleanup relies on the previously
+verified shared runner, mocked in this suite.
+
+Stable integration:
+- Full pytest: **1090 tests + 2115 subtests passed**, 97 warnings, **137.09 seconds**.
+- Network-disabled trace: **1057 tests passed**, **96.575 seconds**, no failures/errors.
+- Mapped entries observed: **173/209**; **36 unobserved** in this trace.
+  Error-path execution is not successful operational coverage. AD native-call
+  bounds, external labs and authenticated runtime validation remain explicit gaps.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

@@ -52,7 +52,7 @@ async def ad_spray(
     result: dict[str, Any] = {
         "domain": domain,
         "dc_ip": dc_ip,
-        "password": password,
+        "password": "[REDACTED]",
         "results": [],
         "valid_count": 0,
         "attempted_count": 0,
@@ -65,6 +65,13 @@ async def ad_spray(
     # ------------------------------------------------------------------
     users: list[str] = []
 
+    if not domain.strip() or not dc_ip.strip():
+        result["error"] = "domain and dc_ip are required."
+        return result
+    if any(isinstance(v, bool) or not isinstance(v, int) or v < 0 for v in (delay, max_attempts)):
+        result["error"] = "delay and max_attempts must be nonnegative integers."
+        return result
+
     if usernames:
         users = [u.strip() for u in usernames.split(",") if u.strip()]
     elif username_file:
@@ -72,7 +79,7 @@ async def ad_spray(
             with open(username_file) as f:
                 users = [line.strip() for line in f if line.strip() and not line.startswith("#")]
         except Exception as exc:
-            result["error"] = f"Failed to read username file: {exc}"
+            result["error"] = "Failed to read username file."
             return result
     else:
         result["error"] = "Either usernames or username_file must be provided."
@@ -121,9 +128,9 @@ async def ad_spray(
             elif "data 773" in err_str:
                 entry["error"] = "Password must change"
             else:
-                entry["error"] = err_str
+                entry["error"] = "LDAP authentication failed."
         except Exception as exc:
-            entry["error"] = str(exc)
+            entry["error"] = "Authentication attempt failed."
         finally:
             if ldap_conn is not None:
                 try:

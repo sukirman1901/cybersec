@@ -1,14 +1,15 @@
 import shutil
-import asyncio
+from .cli_tools import _run_cli
 
 
 async def ios_objection(action: str = "keychain", package: str = "") -> dict:
     """Run objection iOS runtime exploration — keychain dump, sqlite, nsuserdefaults."""
+    if (not isinstance(action, str) or action not in ("keychain", "sqlite", "nsuserdefaults")
+            or not isinstance(package, str) or not package.strip() or len(package) > 256
+            or any(ord(c) < 32 for c in package)):
+        return {"available": False, "error_kind": "invalid_input", "error": "Valid action and package required"}
     if not shutil.which("objection"):
-        return {"available": False, "error": "'objection' CLI not found in PATH. Install with: pip install objection"}
-
-    if not package:
-        return {"available": False, "error": "package name is required for objection runtime exploration"}
+        return {"available": False, "error_kind": "unavailable", "error": "Required CLI not found"}
 
     action_map = {
         "keychain": ["objection", "-g", package, "run", "ios", "keychain", "dump"],
@@ -17,23 +18,14 @@ async def ios_objection(action: str = "keychain", package: str = "") -> dict:
     }
 
     cmd = action_map.get(action)
-    if not cmd:
-        return {"available": False, "error": f"Unknown action: '{action}'. Use: keychain, sqlite, nsuserdefaults"}
-
     try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
-        return {
-            "action": action,
-            "package": package,
-            "stdout": stdout.decode("utf-8", errors="replace")[:1000],
-            "stderr": stderr.decode("utf-8", errors="replace")[:500],
-            "exit_code": proc.returncode,
-            "available": True,
-        }
-    except asyncio.TimeoutError:
-        return {"action": action, "package": package, "error": "timed out", "exit_code": -1, "available": True}
-    except Exception as e:
-        return {"action": action, "package": package, "error": str(e), "available": True}
+        result = await _run_cli(cmd, timeout=120)
+    except Exception:
+        result = {"exit_code": -1, "error_kind": "runtime_error"}
+    # Keychain/database output may consist entirely of secrets.
+    result.pop("stdout", None)
+    result.pop("stderr", None)
+    result.update(action=action, available=result.get("error_kind") != "spawn_error",
+                  confirmed=False, output_redacted=True,
+                  status="completed" if result.get("exit_code") == 0 and not result.get("error_kind") else "failed")
+    return result

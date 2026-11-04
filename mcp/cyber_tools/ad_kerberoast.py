@@ -106,7 +106,7 @@ async def ad_kerberoast(
     result: dict[str, Any] = {
         "domain": domain,
         "dc_ip": dc_ip,
-        "authenticated": bool(username and password),
+        "authenticated": False,
         "hashes": [],
         "accounts": [],
         "count": 0,
@@ -117,6 +117,9 @@ async def ad_kerberoast(
         # ------------------------------------------------------------------
         # 1. LDAP search — find user accounts with SPNs
         # ------------------------------------------------------------------
+        if not domain.strip() or not dc_ip.strip():
+            result["error"] = "domain and dc_ip are required."
+            return result
         base_dn = _make_search_base(domain)
 
         ldap_conn = ldap_login(
@@ -132,6 +135,7 @@ async def ad_kerberoast(
             "",  # nthash
             "",  # aesKey
         )
+        result["authenticated"] = bool(username and password)
 
         search_filter = (
             "(&"
@@ -160,6 +164,7 @@ async def ad_kerberoast(
         except ldap.LDAPSearchError as e:
             if "sizeLimitExceeded" in str(e):
                 resp = e.getAnswers()
+                result["error"] = "LDAP results incomplete: size limit exceeded."
             else:
                 raise
 
@@ -310,14 +315,12 @@ async def ad_kerberoast(
                     })
 
             except Exception as exc:
-                logging.debug(
-                    "TGS request failed for %s/%s: %s", sam_name, spn, exc
-                )
+                result["error"] = "One or more TGS requests failed; coverage incomplete."
 
         result["count"] = len(result["hashes"])
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "TGS collection failed."
     finally:
         if ldap_conn is not None:
             try:

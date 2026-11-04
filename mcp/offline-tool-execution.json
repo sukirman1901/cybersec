@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 153,
-  "tests_run": 1011,
+  "entry_execution_observed": 173,
+  "tests_run": 1057,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -14,9 +14,14 @@
           "symbol": "ad_asrep_roast"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_bind_failure_is_secret_safe",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_empty_inputs_do_not_bind",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_roast_invalid_format_does_not_bind",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_roast_partial_ldap_response_is_marked_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_certipy",
@@ -26,9 +31,13 @@
           "symbol": "ad_certipy"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_failures_never_report_success_or_live_socks",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_invalid_inputs_do_not_execute",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_missing_cli_dependency_is_not_success"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_dcsync",
@@ -38,9 +47,12 @@
           "symbol": "ad_dcsync"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_dcsync_auth_failure_is_secret_safe_and_closes",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_dcsync_invalid_inputs_do_not_connect"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_enum",
@@ -50,9 +62,13 @@
           "symbol": "ad_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_enum_partial_search_failure_is_not_clean",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_bind_failure_is_secret_safe",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_empty_inputs_do_not_bind"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_kerberoast",
@@ -62,9 +78,14 @@
           "symbol": "ad_kerberoast"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_bind_failure_is_secret_safe",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_native_empty_inputs_do_not_bind",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_roast_invalid_format_does_not_bind",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_roast_partial_ldap_response_is_marked_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_ntlm_relay",
@@ -74,9 +95,13 @@
           "symbol": "ad_ntlm_relay"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_failures_never_report_success_or_live_socks",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_invalid_inputs_do_not_execute",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_missing_cli_dependency_is_not_success"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_passthehash",
@@ -86,9 +111,12 @@
           "symbol": "ad_passthehash"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_missing_cli_dependency_is_not_success",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_passthehash_nonzero_empty_stderr_is_failure"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ad_spray",
@@ -98,9 +126,12 @@
           "symbol": "ad_spray"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_spray_failure_and_missing_file_redact_secrets",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_spray_invalid_bounds_do_not_authenticate"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "amass_enum",
@@ -241,9 +272,18 @@
           "symbol": "auth_macro_runner"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_aggregate_deadline_clamps_remaining_and_skips",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_basic_redacts_and_does_not_confirm",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_deadline_after_open_closes_before_read",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_failed_step_stops_chain",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_failure_does_not_echo_exception",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_invalid_input_never_opens",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_oversized_response_closes_and_stops",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_auth_response_read_is_bounded_and_closed"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "authenticated_scan",
@@ -322,9 +362,12 @@
           "symbol": "bloodhound_collect"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_failures_never_report_success_or_live_socks",
+        "test_ad_failure_boundaries.ADFailureBoundaries.test_cli_invalid_inputs_do_not_execute"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "branded_report",
@@ -353,9 +396,18 @@
           "symbol": "browser_agent_hijack"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "bulk_scan",
@@ -420,9 +472,17 @@
           "symbol": "captcha_test"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_detection_failure_stops_and_redacts",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_heuristics_are_not_confirmed",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_invalid_or_unsupported_never_connects",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_request_budget",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_runtime_unavailable_is_structured",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_stream_limit_closes_without_consuming_tail",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_captcha_total_timeout_is_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ci_cd_scan",
@@ -1762,9 +1822,15 @@
           "symbol": "ios_frida"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_frida_placeholder_is_explicitly_unsupported",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_frida_ps_checks_actual_executable",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_invalid_input",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_missing_cli_and_cancellation",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_suppresses_raw_output_and_preserves_failure"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ios_objection",
@@ -1774,9 +1840,13 @@
           "symbol": "ios_objection"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_invalid_input",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_missing_cli_and_cancellation",
+        "test_runtime_failure_boundaries.RuntimeFailureBoundaries.test_runtime_suppresses_raw_output_and_preserves_failure"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ios_signing",
@@ -2006,9 +2076,19 @@
           "symbol": "llm_agent_hijack"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_partial_candidates_survive_later_failure",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "llm_data_exposure",
@@ -2018,9 +2098,20 @@
           "symbol": "llm_data_exposure"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_input_prompts_and_url_credentials_are_not_reported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_partial_candidates_survive_later_failure",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "llm_guardrails",
@@ -2030,9 +2121,19 @@
           "symbol": "llm_guardrails"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_input_prompts_and_url_credentials_are_not_reported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "llm_model_dos",
@@ -2042,9 +2143,19 @@
           "symbol": "llm_model_dos"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_partial_candidates_survive_later_failure",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "log4j_scan",
@@ -2133,9 +2244,21 @@
           "symbol": "mcp_abuse_test"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_malformed_rpc_is_coverage_gap",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_mcp_non_rpc_success_status_is_not_complete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_partial_candidates_survive_later_failure",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "metrics_check",
@@ -2568,9 +2691,19 @@
           "symbol": "prompt_injection"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_compressed_body_is_rejected_without_reading",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_echo_and_rpc_result_are_not_confirmed_effects",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_failed_http_stops_and_reports_incomplete",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_input_prompts_and_url_credentials_are_not_reported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_invalid_inputs_make_no_requests",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_raw_content_is_not_exported",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_response_limit_closes_stream_and_stops",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_stream_wall_deadline_closes_without_retry",
+        "test_ai_failure_boundaries.AiFailureBoundaries.test_timeout_is_private_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "prototype_pollution",

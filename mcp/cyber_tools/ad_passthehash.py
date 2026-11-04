@@ -11,6 +11,7 @@ import asyncio
 import logging
 import shutil
 import sys
+import os
 from typing import Any
 
 from impacket.examples import logger as impacket_logger
@@ -32,7 +33,8 @@ def _find_script(name: str) -> str | None:
     if path:
         return path
     venv_bin = sys.prefix + "/bin"
-    return f"{venv_bin}/{name}"
+    candidate = f"{venv_bin}/{name}"
+    return candidate if os.path.isfile(candidate) and os.access(candidate, os.X_OK) else None
 
 
 async def ad_passthehash(
@@ -88,6 +90,10 @@ async def ad_passthehash(
         )
         return result
 
+    if not target.strip() or not username.strip() or not nt_hash.strip():
+        result["error"] = "target, username and nt_hash are required."
+        return result
+
     if not command:
         result["error"] = "No command provided to execute."
         return result
@@ -135,10 +141,15 @@ async def ad_passthehash(
         result["output"] = output.strip()
         result["executed"] = proc.returncode == 0
 
-        if proc.returncode != 0 and stderr:
-            result["error"] = stderr.strip() or f"Exit code: {proc.returncode}"
+        if proc.returncode != 0:
+            result["output"] = ""
+            result["error"] = f"Execution failed (exit code {proc.returncode})."
+        else:
+            for secret in (nt_hash, lm_hash):
+                if secret:
+                    result["output"] = result["output"].replace(secret, "[REDACTED]")
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "Execution failed."
 
     return result

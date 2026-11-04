@@ -4,13 +4,13 @@
 
 ## Counts and evidence boundary
 
-- **209/209** inventory registrations have a disposition and mapped implementation(s). **171** have static test-reference candidates; **38** have none in the supplied inventory.
-- **154** tools have individually attributable documented execution evidence of some kind in the reviewed records; **55** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
+- **209/209** inventory registrations have a disposition and mapped implementation(s). **189** have static test-reference candidates; **20** have none in the supplied inventory.
+- **173** tools have individually attributable documented execution evidence of some kind in the reviewed records; **36** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
 - The historical ledger attributes 26 selected fixture/smoke tools, 2 dependency startup-only checks and one runtime diagnostic. The newer `offline-tool-execution.json` separately records actual mapped entry calls with test IDs; overlapping sets must not be added together.
 - Historical production smoke, local integrations and current mocked entry traces are different evidence classes. A called function is not proof that every action, external service or platform works.
 - Latest verification counts and cycle-specific limits are in `TUNING-PROGRESS.md`. This report generator reads those records; it does not execute tests. The separate runtime trace includes its own test count and success status.
 - The ledger's older **98 referenced / 111 unreferenced** baseline is stale relative to the supplied inventory. Inventory references can include mocks, strings and generic contract cases. Current tree changes after the inventory snapshot are not silently added to these counts.
-- Input inventory SHA-256: `15b040a6d664283b610396b6146c633f39f20b70d81346e707ce64f2baf542f9`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
+- Input inventory SHA-256: `9d887dc328b817449a9725a160fe258a6be6d3469581c876b5f7cd94118a4c19`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
 
 ## How to read each row
 
@@ -64,64 +64,64 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 001. `ad_asrep_roast` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_asrep_roast.py`.
 - **Declared scope:** ASREP Roasting — request AS-REP tickets for accounts with DONT_REQUIRE_PREAUTH and return crackable hashes.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 4 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket, pyasn1.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 002. `ad_certipy` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_certipy.py`.
 - **Declared scope:** AD CS abuse via Certipy — enumerate certificate services (ESC1-15), request certificates, PKINIT auth, shadow credentials. Actions: find, req, auth, shadow.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** REMEDIATION-2026-11.md §Verification: dependency CLI startup/help only (SSLyze 6.0.0 / Certipy 5.1.0); public tool operational execution NOT established
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** REMEDIATION-2026-11.md §Verification: dependency CLI startup/help only (SSLyze 6.0.0 / Certipy 5.1.0); public tool operational execution NOT established; offline-tool-execution.json: mapped Python implementation entry observed in 3 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 003. `ad_dcsync` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_dcsync.py`.
 - **Declared scope:** DCSync — extract password hashes from domain controller via DRSUAPI replication. Requires Domain Admin privileges.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 004. `ad_enum` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_enum.py`.
 - **Declared scope:** Comprehensive Active Directory enumeration via LDAP — users, groups, computers, trusts, password policy.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 3 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 005. `ad_kerberoast` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_kerberoast.py`.
 - **Declared scope:** Kerberoasting — request TGS tickets for SPN accounts and return crackable hashes (hashcat format).
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 4 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket, pyasn1.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 006. `ad_ntlm_relay` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_ntlm_relay.py`.
 - **Declared scope:** NTLM Relay — set up relay server to capture and relay NTLM authentications to target systems via ntlmrelayx.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 3 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket; literal resolver names: ntlmrelayx.py.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 007. `ad_passthehash` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_passthehash.py`.
 - **Declared scope:** Pass-the-Hash — execute commands on remote targets using NTLM hash authentication. Protocols: smbexec, wmiexec, atexec, psexec.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 008. `ad_spray` — AD
 - **Mapped module:** `mcp/cyber_tools/ad_spray.py`.
 - **Declared scope:** Password spraying — test a single password against multiple AD accounts while respecting lockout policy.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): import roots: impacket.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -184,8 +184,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 016. `auth_macro_runner` — AUTH
 - **Mapped module:** `mcp/cyber_tools/auth_macro_runner.py`.
 - **Declared scope:** Multi-step auth macro runner — form login, basic auth, bearer token, custom step chains with cookie persistence.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_runtime_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 8 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic sessions plus controlled app with two identities, ownership policy and state oracle; lockout-safe accounts for credential checks. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock authenticated/anonymous/other-owner responses, expired session, denial and redaction; later disposable app state proof, not status-only success. Proposed exact group module: `mcp/tests/test_validation_auth_flows.py`; existing exact regression modules are the static refs above.
 
@@ -224,8 +224,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 021. `bloodhound_collect` — AD
 - **Mapped module:** `mcp/cyber_tools/bloodhound_collect.py`.
 - **Declared scope:** Collect AD data for BloodHound analysis. Requires bloodhound-python CLI.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ad_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 2 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Impacket/LDAP/Kerberos; isolated domain controller, domain identities and role-specific permissions; Certipy/BloodHound or relay CLI where applicable. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock protocol/CLI responses, permission denial, timeout and secret redaction; real behavior blocked on isolated AD lab. Proposed exact group module: `mcp/tests/test_validation_ad_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -240,8 +240,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 023. `browser_agent_hijack` — AI
 - **Mapped module:** `mcp/cyber_tools/browser_agent_hijack.py`.
 - **Declared scope:** Test browser-based AI agents for hijack — prompt injection via web content, hidden forms, autofill, clickjacking.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 8 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -272,8 +272,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 027. `captcha_test` — AI
 - **Mapped module:** `mcp/cyber_tools/captcha_test.py`.
 - **Declared scope:** Test CAPTCHA bypass — 10 vectors: token reuse, OCR, math solving, header/cookie bypass, hCaptcha/Turnstile detection. action: all|reuse|ocr|math|header|cookie|recaptcha|detect
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_runtime_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 7 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: PIL, httpx, pytesseract.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -840,16 +840,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 098. `ios_frida` — DEVICE
 - **Mapped module:** `mcp/cyber_tools/ios_frida.py`.
 - **Declared scope:** Run frida on iOS device — SSL pinning bypass, method tracing, process list.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
-- **Dependencies:** Frida/Objection CLI and attached authorized iOS device/app with compatible instrumentation. Source hints (not installation checks): literal resolver names: frida.
+- **Static refs:** `mcp/tests/test_runtime_failure_boundaries.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 5 named test cases; dependencies may be mocked; not an operational pass
+- **Dependencies:** Frida/Objection CLI and attached authorized iOS device/app with compatible instrumentation. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock CLI output, missing device, timeout and redaction; runtime coverage blocked on device lab. Proposed exact group module: `mcp/tests/test_validation_device_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 099. `ios_objection` — DEVICE
 - **Mapped module:** `mcp/cyber_tools/ios_objection.py`.
 - **Declared scope:** Run objection iOS runtime exploration — keychain dump, sqlite, nsuserdefaults.
-- **Static refs:** `mcp/tests/test_tool_policy.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_runtime_failure_boundaries.py`; `mcp/tests/test_tool_policy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 3 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Frida/Objection CLI and attached authorized iOS device/app with compatible instrumentation. Source hints (not installation checks): literal resolver names: objection.
 - **Next validation / blocker:** Mock CLI output, missing device, timeout and redaction; runtime coverage blocked on device lab. Proposed exact group module: `mcp/tests/test_validation_device_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -952,32 +952,32 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 112. `llm_agent_hijack` — AI
 - **Mapped module:** `mcp/cyber_tools/llm_agent_hijack.py`.
 - **Declared scope:** Test agent function call/tool injection in LLM.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 9 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 113. `llm_data_exposure` — AI
 - **Mapped module:** `mcp/cyber_tools/llm_data_exposure.py`.
 - **Declared scope:** Test for training data leakage (PII exposure) from LLM.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 114. `llm_guardrails` — AI
 - **Mapped module:** `mcp/cyber_tools/llm_guardrails.py`.
 - **Declared scope:** Check if LLM output is sanitized against XSS and event handlers.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 9 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 115. `llm_model_dos` — AI
 - **Mapped module:** `mcp/cyber_tools/llm_model_dos.py`.
 - **Declared scope:** Test LLM for DoS via excessive token generation.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 9 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -1024,8 +1024,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 121. `mcp_abuse_test` — AI
 - **Mapped module:** `mcp/cyber_tools/mcp_abuse_test.py`.
 - **Declared scope:** Test MCP server for abuse vectors — dangerous tools, JSON-RPC injection, prompt injection in tool descriptions.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -1208,8 +1208,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 144. `prompt_injection` — AI
 - **Mapped module:** `mcp/cyber_tools/prompt_injection.py`.
 - **Declared scope:** Test LLM endpoint for prompt injection vulnerability.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_ai_failure_boundaries.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 9 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled model/agent/MCP or browser test application, synthetic data, explicit cost/action limits and observable effect oracle. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Mock responses and budget/denial handling; test plan vs execution distinction; behavioral proof blocked on configured agent/browser/model lab. Proposed exact group module: `mcp/tests/test_validation_ai_adapters.py`; existing exact regression modules are the static refs above.
 

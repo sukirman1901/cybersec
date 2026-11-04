@@ -264,7 +264,7 @@ async def ad_enum(
     result: dict[str, Any] = {
         "domain": domain,
         "dc_ip": dc_ip,
-        "authenticated": bool(username and password),
+        "authenticated": False,
         "users": [],
         "groups": [],
         "computers": [],
@@ -275,6 +275,9 @@ async def ad_enum(
     }
 
     ldap_conn = None
+    if not domain.strip() or not dc_ip.strip():
+        result["error"] = "domain and dc_ip are required."
+        return result
     try:
         base = _make_search_base(domain)
         bind_user = username or f"anonymous@{domain}"
@@ -282,6 +285,7 @@ async def ad_enum(
             None, base, dc_ip, None, False,
             bind_user, password, domain, "", "", "",
         )
+        result["authenticated"] = bool(username and password)
 
         # ---- Password policy ------------------------------------------------
         try:
@@ -321,7 +325,8 @@ async def ad_enum(
                 result["password_policy"] = pp
                 break  # only one domainDNS object
         except Exception as exc:
-            result["password_policy"]["error"] = str(exc)
+            result["password_policy"]["error"] = "Password policy query failed."
+            result["error"] = "Enumeration incomplete."
 
         # ---- Users ----------------------------------------------------------
         if enum_users:
@@ -387,7 +392,8 @@ async def ad_enum(
                         }
                     )
             except Exception as exc:
-                result["users_error"] = str(exc)
+                result["users_error"] = "User query failed."
+                result["error"] = "Enumeration incomplete."
 
         # ---- Groups ---------------------------------------------------------
         if enum_groups:
@@ -426,7 +432,8 @@ async def ad_enum(
                         }
                     )
             except Exception as exc:
-                result["groups_error"] = str(exc)
+                result["groups_error"] = "Group query failed."
+                result["error"] = "Enumeration incomplete."
 
         # ---- Computers ------------------------------------------------------
         if enum_computers:
@@ -469,7 +476,8 @@ async def ad_enum(
                         }
                     )
             except Exception as exc:
-                result["computers_error"] = str(exc)
+                result["computers_error"] = "Computer query failed."
+                result["error"] = "Enumeration incomplete."
 
         # ---- Domain trusts --------------------------------------------------
         if enum_trusts:
@@ -506,10 +514,11 @@ async def ad_enum(
                         }
                     )
             except Exception as exc:
-                result["trusts_error"] = str(exc)
+                result["trusts_error"] = "Trust query failed."
+                result["error"] = "Enumeration incomplete."
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "LDAP enumeration failed."
     finally:
         if ldap_conn is not None:
             try:

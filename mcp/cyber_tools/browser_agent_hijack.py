@@ -3,7 +3,7 @@
 import httpx
 from .http_guard import GuardedAsyncClient
 import re
-import urllib.parse
+from .prompt_injection import _validate, _report, _failure, _request
 
 
 INJECTION_PATTERNS = [
@@ -25,13 +25,26 @@ SENSITIVE_KEYWORDS = [
 
 
 async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
-    findings = []
+    result = _report(target, findings=[], vulnerable=False, total_findings=0,
+                     note='Static page indicators only; no browser or agent execution was observed.')
+    try:
+        _validate(target, page_content)
+        await _analyze(target, page_content, result['findings'])
+    except Exception as error:
+        _failure(result, error)
+    for finding in result['findings']:
+        finding.update(status='candidate', confidence='low', risk='INFO')
+    result['total_findings'] = len(result['findings'])
+    return result
+
+
+async def _analyze(target, page_content, findings):
     base = target.rstrip("/")
 
     async with GuardedAsyncClient(timeout=15.0, verify=False) as client:
         # Test 1: Fetch the page and analyze for agent hijacking risks
         try:
-            resp = await client.get(base, follow_redirects=True)
+            resp = await _request(client, 'GET', base)
             html = resp.text
             headers = dict(resp.headers)
 
@@ -47,8 +60,8 @@ async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
                     if name_match and val_match:
                         findings.append({
                             "test": "hidden_form_fields",
-                            "name": name_match.group(1),
-                            "value": val_match.group(1)[:30],
+                            "name": "[omitted]",
+                            "value": "[omitted]",
                             "risk": "MEDIUM",
                             "note": "Hidden fields may trick agents into submitting unintended data",
                         })
@@ -111,7 +124,7 @@ async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
             if iframes:
                 findings.append({
                     "test": "cross_origin_iframes",
-                    "sources": iframes[:5],
+                    "sources": ["[omitted]"] * min(len(iframes), 5),
                     "risk": "MEDIUM",
                     "note": f"Iframes from {len(iframes)} external sources may leak agent context",
                 })
@@ -124,13 +137,13 @@ async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
             if meta_refresh:
                 findings.append({
                     "test": "meta_refresh_redirect",
-                    "url": meta_refresh[0][:80],
+                    "url": "[omitted]",
                     "risk": "MEDIUM",
                     "note": "Meta refresh redirect may hijack agent navigation",
                 })
 
-        except httpx.HTTPError as e:
-            findings.append({"test": "page_fetch", "error": str(e)[:80], "risk": "INFO"})
+        except httpx.HTTPError:
+            raise
 
         # Test 2: Analyze provided custom page content
         if page_content:
@@ -156,26 +169,19 @@ async def browser_agent_hijack(target: str, page_content: str = "") -> dict:
 
         # Test 3: Check security headers that protect agents
         try:
-            resp = await client.get(base)
+            resp = await _request(client, 'GET', base)
             headers = dict(resp.headers)
             if "x-frame-options" not in headers:
                 findings.append({
                     "test": "missing_x_frame_options",
                     "risk": "MEDIUM",
-                    "note": "Missing X-Frame-Options — page can be iframed for clickjacking",
+                    "note": "X-Frame-Options absent; framing behavior was not tested and CSP may restrict it",
                 })
             if "content-security-policy" not in headers:
                 findings.append({
                     "test": "missing_csp",
                     "risk": "MEDIUM",
-                    "note": "Missing Content-Security-Policy — agent may execute injected scripts",
+                    "note": "Content-Security-Policy absent; script execution was not tested",
                 })
         except Exception:
-            pass
-
-    return {
-        "target": target,
-        "findings": findings,
-        "vulnerable": any(f.get("risk") in ["CRITICAL", "HIGH"] for f in findings),
-        "total_findings": len(findings),
-    }
+            raise

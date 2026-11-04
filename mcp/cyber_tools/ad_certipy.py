@@ -8,6 +8,7 @@ certificate requests, PKINIT authentication, and shadow credentials attacks.
 import asyncio
 import logging
 import shutil
+from .cli_tools import _run_cli
 from typing import Any
 
 from impacket.examples import logger as impacket_logger
@@ -63,6 +64,10 @@ async def ad_certipy(
             f"Unsupported action: '{action}'. "
             f"Must be one of: {', '.join(sorted(_VALID_ACTIONS))}."
         )
+        return result
+
+    if not target.strip() or target.startswith("-") or any(c in target for c in "\x00\r\n"):
+        result["error"] = "Invalid target."
         return result
 
     from .tool_paths import which_cli
@@ -123,23 +128,17 @@ async def ad_certipy(
         cmd.extend(["-account", account])
 
     try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout_bytes, stderr_bytes = await proc.communicate()
-
-        output = stdout_bytes.decode("utf-8", errors="replace")
-        stderr = stderr_bytes.decode("utf-8", errors="replace")
-
-        result["output"] = output.strip()
-        result["executed"] = proc.returncode == 0
-
-        if proc.returncode != 0 and stderr:
-            result["error"] = stderr.strip() or f"Exit code: {proc.returncode}"
+        run = await _run_cli(cmd, timeout=120)
+        failed = run["exit_code"] != 0 or run.get("error_kind") or run.get("output_truncated")
+        result["executed"] = not bool(failed)
+        result["output_truncated"] = bool(run.get("output_truncated"))
+        if failed:
+            result["error"] = "Certipy execution incomplete or failed."
+        else:
+            output = run["stdout"].strip()
+            result["output"] = output.replace(password, "[REDACTED]") if password else output
 
     except Exception as exc:
-        result["error"] = str(exc)
+        result["error"] = "Certipy execution failed."
 
     return result

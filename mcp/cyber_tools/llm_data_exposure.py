@@ -1,5 +1,6 @@
 import httpx
 import re
+from .prompt_injection import _validate, _report, _failure, _request
 
 
 # PII extraction prompts
@@ -22,31 +23,27 @@ PII_PATTERNS = {
 async def llm_data_exposure(target: str, extraction_prompt: str = None) -> dict:
     prompts_to_try = [extraction_prompt] if extraction_prompt else EXTRACTION_PROMPTS
     findings = []
-    data_exposure_found = False
+    result = _report(target, data_exposure_found=False, findings=findings, risk='INFO',
+                     note='PII-shaped text is a candidate only; provenance and disclosure are unverified.')
 
     try:
+        _validate(target, *([] if extraction_prompt is None else [extraction_prompt]))
         async with httpx.AsyncClient(timeout=30.0, verify=False) as client:
             for prompt in prompts_to_try:
-                resp = await client.post(target, json={"prompt": prompt, "max_tokens": 500})
+                resp = await _request(client, 'POST', target, json={"prompt": prompt, "max_tokens": 500})
                 text = resp.text
                 for pii_type, pattern in PII_PATTERNS.items():
                     matches = re.findall(pattern, text)
                     if matches:
-                        data_exposure_found = True
                         findings.append({
-                            "prompt": prompt[:80],
+                            "prompt": "[omitted]",
                             "type": pii_type,
                             "count": len(matches),
-                            "samples": list(set(matches))[:5],
-                            "response_snippet": text[:200],
+                            "samples": [],
+                            "response_snippet": "[omitted]",
+                            "status": "candidate",
+                            "confidence": "low",
                         })
     except Exception as e:
-        return {"target": target, "data_exposure_found": False, "findings": [], "risk": "INFO", "error": str(e)}
-
-    risk = "CRITICAL" if data_exposure_found else "INFO"
-    return {
-        "target": target,
-        "data_exposure_found": data_exposure_found,
-        "findings": findings,
-        "risk": risk,
-    }
+        return _failure(result, e)
+    return result
