@@ -25,13 +25,28 @@ class CliRemainingAccuracy(unittest.IsolatedAsyncioTestCase):
         proc = AsyncMock()
         proc.returncode = None if timeout else code
         proc.kill = Mock()
-        proc.communicate.return_value = (stdout if stdout is not None else (NMAP if name == 'nmap_scan' else SEARCH),
-                                         b'Authorization: secret-exception-material')
-        with patch.object(module.asyncio, 'create_subprocess_exec', return_value=proc) as spawn:
+        proc.stdout = asyncio.StreamReader()
+        proc.stdout.feed_data(stdout if stdout is not None else (NMAP if name == 'nmap_scan' else SEARCH))
+        proc.stdout.feed_eof()
+        proc.stderr = asyncio.StreamReader()
+        proc.stderr.feed_data(b'Authorization: secret-exception-material')
+        proc.stderr.feed_eof()
+        proc.wait.return_value = code
+        with patch.object(module.asyncio, 'create_subprocess_exec', return_value=proc) as spawn, \
+             patch('cyber_tools.cli_tools.os.killpg'):
             if timeout:
+                real_wait_for = asyncio.wait_for
                 async def expired(awaitable, timeout):
+                    if timeout not in (30, 180):
+                        return await real_wait_for(awaitable, timeout)
                     if asyncio.iscoroutine(awaitable):
                         awaitable.close()
+                    elif isinstance(awaitable, asyncio.Future):
+                        awaitable.cancel()
+                        try:
+                            await awaitable
+                        except asyncio.CancelledError:
+                            pass
                     raise asyncio.TimeoutError('secret-exception-material')
                 with patch.object(module.asyncio, 'wait_for', side_effect=expired):
                     result = await getattr(module, name)('fixture argument; unchanged')
@@ -75,7 +90,6 @@ class CliRemainingAccuracy(unittest.IsolatedAsyncioTestCase):
         for name in ('nmap_scan', 'searchsploit'):
             result, proc, _ = await self.invoke(name, timeout=True)
             proc.kill.assert_called_once()
-            self.assertEqual(proc.communicate.await_count, 1)
             self.assertFalse(result['coverage_complete'])
             self.assertNotIn('secret-exception-material', json.dumps(result))
 

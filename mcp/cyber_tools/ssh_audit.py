@@ -1,27 +1,41 @@
-"""Audit SSH server banner and algorithm support."""
-
+"""Bounded SSH identification; key exchange algorithms are not enumerated."""
 import re
 import asyncio
 
+from .ssl_analyzer import _normalize_host
+from .service_fingerprint import _close_writer
+
 
 async def ssh_audit(target: str, port: int = 22) -> dict:
-    host = target.split(":")[0]
+    result = {'target': None, 'port': None, 'banner': None, 'ssh_version': None,
+              'weak_algorithms': [], 'coverage_complete': False, 'execution_status': 'partial',
+              'confidence': 'LOW', 'coverage': 'One SSH identification sample; algorithms not enumerated, software vulnerabilities not verified'}
+    writer = None
     try:
-        r, w = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=10)
-        banner = (await asyncio.wait_for(r.readline(), timeout=10)).decode(errors="replace").strip()
-        w.close()
-
-        ssh_ver = None
-        if "SSH-" in banner:
-            parts = banner.split("-")
-            ssh_ver = parts[1] if len(parts) > 1 else None
-
-        weak = []
-        if "CBC" in banner:
-            weak.append("CBC mode ciphers supported")
-        if "SSH-1" in banner or "1.5" in banner:
-            weak.append("SSH protocol version 1 (insecure)")
-
-        return {"target": host, "port": port, "banner": banner, "ssh_version": ssh_ver, "weak_algorithms": weak}
-    except Exception as e:
-        return {"target": host, "port": port, "error": str(e)}
+        host, port = _normalize_host(target, port)
+        result.update(target=host, port=port)
+        async with asyncio.timeout(10):
+            reader, writer = await asyncio.open_connection(host, port)
+            # Identification is <=255 bytes including CRLF. Never readline an
+            # unbounded malicious greeting or return arbitrary server comments.
+            data = b''
+            while len(data) < 256 and b'\n' not in data:
+                chunk = await reader.read(256 - len(data))
+                if not chunk:
+                    break
+                data += chunk
+            line = data.split(b'\n', 1)[0].rstrip(b'\r')
+            if len(line) > 253 or b'\n' not in data:
+                raise ValueError('incomplete_identification')
+            match = re.fullmatch(rb'SSH-(1\.5|1\.99|2\.0)-[^\s\x00-\x1f]+(?: [^\x00-\x1f]*)?', line)
+            if not match:
+                raise ValueError('invalid_identification')
+            version = match.group(1).decode()
+            result.update(ssh_version=version, banner=f'SSH-{version}-[software/comments withheld]',
+                          coverage_complete=True, execution_status='completed')
+            result['legacy_protocol_advertised'] = version == '1.5'
+    except (OSError, ValueError, asyncio.TimeoutError):
+        result['error'] = 'SSH identification incomplete'
+    finally:
+        await _close_writer(writer)
+    return result

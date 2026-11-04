@@ -8,42 +8,116 @@ import shutil
 import asyncio
 import ipaddress
 import re
+import os
+import signal
+import time
 from typing import Dict, Any
 from .tool_paths import isolated_cli
 
 
+MAX_OUTPUT_BYTES = 2 * 1024 * 1024
+
+
 async def _run_cli(cmd: list, timeout: int = 120) -> Dict[str, Any]:
-    """Run a CLI command and return structured result."""
-    import datetime
-    start = datetime.datetime.now()
+    """Collect at most 2 MiB across both streams; terminate incomplete children."""
+    start = time.monotonic()
     proc = None
+    buffers = [bytearray(), bytearray()]
+    tasks = []
+    error_kind = ''
+    cleanup_complete = True
+    cancelled = False
+
+    class OutputLimit(Exception):
+        pass
+
+    async def collect(stream, index):
+        while True:
+            chunk = await stream.read(16384)
+            if not chunk:
+                return
+            remaining = MAX_OUTPUT_BYTES - sum(map(len, buffers))
+            buffers[index].extend(chunk[:remaining])
+            if len(chunk) > remaining:
+                raise OutputLimit()
+
+    async def stop():
+        nonlocal cleanup_complete
+        if proc is None:
+            return
+        # A child may have exited while descendants still hold its output pipes.
+        if os.name == 'posix':
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            except OSError:
+                cleanup_complete = False
+        if proc.returncode is None:
+            try:
+                proc.kill()
+            except ProcessLookupError:
+                pass
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        async def discard(stream):
+            # Resume paused pipe readers after termination without retaining bytes.
+            while await stream.read(16384):
+                pass
+        try:
+            await asyncio.wait_for(asyncio.gather(discard(proc.stdout), discard(proc.stderr), proc.wait()), timeout=2)
+        except asyncio.TimeoutError:
+            cleanup_complete = False
+            # Last-resort pipe release for descendants outside the owned group.
+            transport = getattr(proc, '_transport', None)
+            if transport is not None:
+                transport.close()
+            try:
+                await asyncio.wait_for(proc.wait(), timeout=.5)
+            except asyncio.TimeoutError:
+                pass
+
     try:
         proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+            start_new_session=os.name == 'posix',
         )
-        communication = asyncio.create_task(proc.communicate())
-        stdout, stderr = await asyncio.wait_for(asyncio.shield(communication), timeout=timeout)
-        result = {
-            "exit_code": proc.returncode,
-            "stdout": stdout.decode("utf-8", errors="replace"),
-            "stderr": stderr.decode("utf-8", errors="replace"),
-            "duration": (datetime.datetime.now() - start).total_seconds(),
-        }
+        tasks = [asyncio.create_task(collect(proc.stdout, 0)),
+                 asyncio.create_task(collect(proc.stderr, 1)),
+                 asyncio.create_task(proc.wait())]
+        await asyncio.wait_for(asyncio.gather(*tasks), timeout=timeout)
+    except OutputLimit:
+        error_kind = 'output_limit'
     except asyncio.TimeoutError:
-        if proc is not None and proc.returncode is None:
-            proc.kill()
-        stdout, stderr = await communication
-        result = {"exit_code": -1, "stdout": stdout.decode(errors="replace"),
-                  "stderr": "timed out; " + stderr.decode(errors="replace"), "duration": timeout}
-    except OSError as exc:
-        result = {"exit_code": -1, "stdout": "", "stderr": str(exc), "duration": 0}
+        error_kind = 'timeout'
+    except OSError:
+        error_kind = 'spawn_error' if proc is None else 'io_error'
     except asyncio.CancelledError:
-        if proc is not None and proc.returncode is None:
-            proc.kill()
-        if proc is not None:
-            await communication
-        raise
-    return result
+        cancelled = True
+    finally:
+        if proc is not None and (error_kind or cancelled):
+            # Keep a strong reference and shield cleanup from repeated caller
+            # cancellation, then propagate cancellation after bounded cleanup.
+            cleanup = asyncio.create_task(stop())
+            while not cleanup.done():
+                try:
+                    await asyncio.shield(cleanup)
+                except asyncio.CancelledError:
+                    cancelled = True
+            cleanup.result()
+    if cancelled:
+        raise asyncio.CancelledError
+    stderr = buffers[1].decode('utf-8', errors='replace')
+    if error_kind:
+        stderr = {'timeout': 'timed out', 'output_limit': 'output limit exceeded',
+                  'spawn_error': 'process could not start', 'io_error': 'process output unavailable'}[error_kind]
+    return {'exit_code': -1 if error_kind else proc.returncode,
+            'stdout': buffers[0].decode('utf-8', errors='replace'), 'stderr': stderr,
+            'duration': time.monotonic() - start, 'error_kind': error_kind or None,
+            'output_truncated': error_kind == 'output_limit', 'output_byte_limit': MAX_OUTPUT_BYTES,
+            'cleanup_complete': cleanup_complete}
 
 
 def _check(tool: str) -> bool:
@@ -102,7 +176,11 @@ def _stamp_ok(payload: Dict, tool: str, execution: Dict = None) -> Dict:
         out["coverage_complete"] = not failed
         out["execution_status"] = "error" if failed else "completed"
         if failed:
-            out["error"] = run.get("stderr", "")[-1000:] or f"{tool} exited {run.get('exit_code')}"
+            out["error"] = out.get("error") or f"{tool} execution incomplete (exit {run.get('exit_code')})"
+            if run.get('error_kind'):
+                out['error_kind'] = run['error_kind']
+            if run.get('output_truncated'):
+                out['output_truncated'] = True
             out["confidence"] = "LOW"
             out["coverage"] += "; incomplete"
             if out.get("details") == "No injection detected":

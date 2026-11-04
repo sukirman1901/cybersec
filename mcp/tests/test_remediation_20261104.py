@@ -181,14 +181,20 @@ class AuditRegression(unittest.IsolatedAsyncioTestCase):
         cli = mod('cli_tools')
         proc = AsyncMock(); proc.returncode = None
         proc.kill = unittest.mock.Mock()
-        async def communicate():
+        proc.stdout = asyncio.StreamReader()
+        proc.stdout.feed_data(b'partial')
+        proc.stdout.feed_eof()
+        proc.stderr = asyncio.StreamReader()
+        proc.stderr.feed_eof()
+        async def wait():
             await asyncio.sleep(.02)
-            return (b'partial', b'')
-        proc.communicate.side_effect = communicate
-        with patch.object(cli.asyncio, 'create_subprocess_exec', return_value=proc):
+            proc.returncode = -9
+            return -9
+        proc.wait.side_effect = wait
+        with patch.object(cli.asyncio, 'create_subprocess_exec', return_value=proc), patch.object(cli.os, 'killpg'):
             r = await cli._run_cli(['fake'], timeout=.001)
         proc.kill.assert_called_once()
-        self.assertEqual(proc.communicate.await_count, 1)
+        self.assertIsNotNone(proc.returncode)
         self.assertIn('partial', r['stdout'])
 
 

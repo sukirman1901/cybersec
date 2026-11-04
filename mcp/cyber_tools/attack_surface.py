@@ -1,7 +1,52 @@
 """Attack surface mapping — aggregate scan results into a graph."""
 
 import json
+import re
+from urllib.parse import urlsplit, urlunsplit
 from datetime import datetime
+
+
+def _check(value):
+    """1 MiB input text, <=1000 items/container, <=10000 nodes, depth <=32."""
+    stack, nodes, size = [(value, 0)], 0, 0
+    while stack:
+        item, depth = stack.pop()
+        nodes += 1
+        if nodes > 10000 or depth > 32:
+            raise ValueError('Input structure budget exceeded')
+        if isinstance(item, str):
+            if len(item) > 1048576:
+                raise ValueError('Input exceeds 1 MiB')
+            size += len(item.encode('utf-8'))
+            if size > 1048576:
+                raise ValueError('Input exceeds 1 MiB')
+        elif isinstance(item, (dict, list)):
+            if len(item) > 1000:
+                raise ValueError('Collection exceeds 1000 items')
+            children = list(item.keys()) + list(item.values()) if isinstance(item, dict) else item
+            stack.extend((v, depth + 1) for v in children)
+
+
+def _redact(value, key=''):
+    """Named credentials/raw payloads and HTTP URL secrets only; not arbitrary prose."""
+    if re.search(r'password|passwd|secret|token|authorization|cookie|api[_-]?key', key, re.I) or key.lower() in ('raw', 'body', 'content', 'post_data'):
+        return '[REDACTED]'
+    if isinstance(value, dict):
+        if key.lower() == 'headers':
+            return {k: '[REDACTED]' for k in value}
+        return {_redact(k): _redact(v, k) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_redact(v, key) for v in value]
+    if isinstance(value, str):
+        def clean(match):
+            try:
+                p = urlsplit(match.group())
+                return urlunsplit((p.scheme, p.netloc.rsplit('@', 1)[-1], p.path,
+                                   '[REDACTED]' if p.query else '', '[REDACTED]' if p.fragment else ''))
+            except ValueError:
+                return '[REDACTED URL]'
+        return re.sub(r'https?://[^\s<>"\']+', clean, value, flags=re.I)
+    return value
 
 
 def attack_surface_map(scan_results: str) -> str:
@@ -12,8 +57,30 @@ def attack_surface_map(scan_results: str) -> str:
     Returns a structured attack surface graph.
     """
     try:
+        _check(scan_results)
         data = json.loads(scan_results)
-    except json.JSONDecodeError:
+        _check(data)
+        items = data if isinstance(data, list) else [data]
+        for item in items:
+            if not isinstance(item, dict):
+                raise ValueError('Expected scan objects')
+            if not isinstance(item.get('target', item.get('domain', item.get('host', 'unknown'))), str):
+                raise ValueError('Target must be a string')
+            for key in ('open_ports', 'vulnerabilities', 'subdomains', 'technologies'):
+                if key in item and not isinstance(item[key], list):
+                    raise ValueError('Expected result lists')
+            for key in ('open_ports', 'vulnerabilities'):
+                if any(not isinstance(v, dict) for v in item.get(key, [])):
+                    raise ValueError('Expected result objects')
+            for key in ('subdomains', 'technologies'):
+                if any(not isinstance(v, str) for v in item.get(key, [])):
+                    raise ValueError('Expected string list')
+            if 'records' in item and (not isinstance(item['records'], dict) or not isinstance(item['records'].get('A', []), list)):
+                raise ValueError('Invalid DNS records')
+            if any(not isinstance(v.get('severity', 'info'), str) for v in item.get('vulnerabilities', [])):
+                raise ValueError('Invalid severity')
+        data = _redact(data)
+    except (ValueError, TypeError, AttributeError, RecursionError):
         return json.dumps({"error": "Invalid JSON input. Provide scan results as JSON string."})
 
     surface = {
@@ -40,6 +107,8 @@ def attack_surface_map(scan_results: str) -> str:
             continue
 
         target = item.get("target", item.get("domain", item.get("host", "unknown")))
+        if item.get('vulnerabilities') or item.get('technologies'):
+            surface['hosts'].setdefault(target, {'ports': [], 'services': [], 'technologies': []})
 
         if "open_ports" in item:
             ports = item.get("open_ports", [])
@@ -83,7 +152,7 @@ def attack_surface_map(scan_results: str) -> str:
                 vuln = {**v, "host": target}
                 surface["vulnerabilities"].append(vuln)
                 sev = v.get("severity", "info").lower()
-                if sev in surface["stats"]:
+                if sev in ('critical', 'high', 'medium', 'low', 'info'):
                     surface["stats"][sev] += 1
                 surface["stats"]["total_vulns"] += 1
 
@@ -105,6 +174,10 @@ def attack_surface_map(scan_results: str) -> str:
     elif surface["stats"]["total_ports"] > 0:
         surface["exposure_level"] = "low"
     else:
-        surface["exposure_level"] = "minimal"
+        surface["exposure_level"] = "unknown"
 
-    return json.dumps(surface, indent=2)
+    surface['limitations'] = 'Aggregation of supplied observations, not proof of assessment coverage or safety. Finding status is not independently verified.'
+    result = json.dumps(surface, indent=2)
+    if len(result.encode('utf-8')) > 4 * 1024 * 1024:
+        return json.dumps({'error': 'Output exceeds 4 MiB; reduce input'})
+    return result

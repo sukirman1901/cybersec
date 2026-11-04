@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 96,
-  "tests_run": 636,
+  "entry_execution_observed": 112,
+  "tests_run": 757,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -215,9 +215,15 @@
           "symbol": "attack_surface_map"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_store_report_accuracy.StoreReportTests.test_collection_and_store_record_limits",
+        "test_store_report_accuracy.StoreReportTests.test_oversize_inputs_and_stores_are_bounded",
+        "test_store_report_accuracy.StoreReportTests.test_surface_all_supported_observation_families",
+        "test_store_report_accuracy.StoreReportTests.test_surface_invalid_and_empty_unknown",
+        "test_store_report_accuracy.StoreReportTests.test_surface_registers_vulnerability_host_and_redacts"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "auth_macro_runner",
@@ -283,9 +289,22 @@
           "symbol": "binary_checksec"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_arguments_snapshot_and_cleanup",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_cancel_reaps_process",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_failed_command_not_success",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_invalid_or_oversize_no_process",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_keywords_are_not_high_severity_secrets",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_macho_redacts_libraries_and_scopes_checks",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_missing_tools_and_timeout_cleanup",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_nx_is_not_pie",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_open_time_swap_no_process",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_output_is_bounded",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_pie_executable_stack_and_unknown_headers",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_binary_real_synthetic_output_limit_closes_transport"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "bloodhound_collect",
@@ -307,9 +326,16 @@
           "symbol": "branded_report"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_store_report_accuracy.StoreReportTests.test_branded_escapes_redacts_and_preserves_candidate",
+        "test_store_report_accuracy.StoreReportTests.test_branded_invalid_input_and_no_fake_assessment",
+        "test_store_report_accuracy.StoreReportTests.test_branded_logo_rejects_arbitrary_file_and_oversize",
+        "test_store_report_accuracy.StoreReportTests.test_collection_and_store_record_limits",
+        "test_store_report_accuracy.StoreReportTests.test_logo_read_rejects_symlink_and_identity_swap",
+        "test_store_report_accuracy.StoreReportTests.test_oversize_inputs_and_stores_are_bounded"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "browser_agent_hijack",
@@ -1466,9 +1492,21 @@
           "symbol": "http_logger"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_store_report_accuracy.StoreReportTests.test_collection_and_store_record_limits",
+        "test_store_report_accuracy.StoreReportTests.test_legacy_store_secrets_are_redacted_on_read",
+        "test_store_report_accuracy.StoreReportTests.test_logger_append_rejects_symlink_swap_without_writing_target",
+        "test_store_report_accuracy.StoreReportTests.test_logger_corrupt_store_not_silently_clean",
+        "test_store_report_accuracy.StoreReportTests.test_logger_empty_and_malformed_structured_input",
+        "test_store_report_accuracy.StoreReportTests.test_logger_raw_http_is_stored_as_redacted_metadata",
+        "test_store_report_accuracy.StoreReportTests.test_logger_read_rejects_symlink_and_identity_swap",
+        "test_store_report_accuracy.StoreReportTests.test_logger_redacts_before_persisting_and_exporting",
+        "test_store_report_accuracy.StoreReportTests.test_logger_response_status_and_search",
+        "test_store_report_accuracy.StoreReportTests.test_oversize_inputs_and_stores_are_bounded",
+        "test_store_report_accuracy.StoreReportTests.test_persistence_failures_are_errors_not_success"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "http_probe_target",
@@ -2086,9 +2124,17 @@
           "symbol": "origin_ip_discovery"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_dns_provider_errors_are_not_nxdomain",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_empty_success_distinguished_from_provider_incomplete",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_http_errors_timeouts_malformed_and_size_limits",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_malformed_provider_schema_not_empty_success",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_origin_ct_field_not_supported_mapping",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_origin_ct_page_limit_explicit",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_origin_dns_candidates_not_origin_or_scope_proof"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "param_discovery",
@@ -2257,9 +2303,11 @@
           "symbol": "scan_ports"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_legacy_scan_error_is_not_empty_closed_result"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "prompt_injection",
@@ -2455,9 +2503,23 @@
           "symbol": "sast_review"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_comments_and_literals_not_executable",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_js_positive_and_unclosed_comments",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_malformed_python_is_incomplete",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_multiline_calls_and_parameterized_sql",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_python3_input_not_code_injection",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_sast_real_calls_are_candidates_not_raw_source",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_directory_file_budget",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_directory_swap_rejected",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_missing_invalid_and_read_errors",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_nonregular_directory_entry_is_incomplete",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_oversize_and_symlinks",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_swap_rejected",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_total_bytes_and_entry_budgets"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "scan_template",
@@ -2514,9 +2576,23 @@
           "symbol": "secret_scanner"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_dotenv_and_low_entropy_structural_key",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_false_assignments_and_prefixes",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_findings_cap",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_generic_entropy_and_pem_boundaries",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_invalid_entropy",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_private_key_pattern_positive",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_secret_redaction_and_location",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_directory_swap_rejected",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_missing_invalid_and_read_errors",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_nonregular_directory_entry_is_incomplete",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_oversize_and_symlinks",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_swap_rejected",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_source_total_bytes_and_entry_budgets"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "semgrep_scan",
@@ -2540,9 +2616,15 @@
           "symbol": "service_fingerprint"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_https_uses_tls_and_correct_host",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_invalid_stream_targets_no_connection",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_service_positive_bounded_single_read_redacts_banner",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_service_read_and_drain_have_total_deadline",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_stream_errors_are_incomplete_and_writers_closed"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "session_verification",
@@ -2756,9 +2838,15 @@
           "symbol": "ssh_audit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_invalid_stream_targets_no_connection",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_ssh_banner_not_algorithm_or_version_vulnerability",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_ssh_fragmented_identification_preserves_positive",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_ssh_malformed_and_empty_are_incomplete",
+        "test_protocol_adapter_accuracy.ProtocolAsyncAccuracy.test_stream_errors_are_incomplete_and_writers_closed"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ssl_check",
@@ -2768,9 +2856,15 @@
           "symbol": "ssl_analyze"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_bad_tls_target_never_connects",
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_certificate_verification_error_is_not_secure",
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_expired_mock_certificate_not_reported_valid",
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_missing_or_malformed_cert_is_incomplete",
+        "test_protocol_adapter_accuracy.ProtocolTLSAccuracy.test_verified_certificate_serial_dates_and_hostname"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "ssl_pinning_check",
@@ -2854,9 +2948,14 @@
           "symbol": "sub_takeover"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_http_errors_timeouts_malformed_and_size_limits",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_takeover_generic_service_prose_never_confirmation",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_takeover_malformed_xml_is_not_candidate",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_takeover_specific_error_is_candidate_only"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "subdomain_enum",
@@ -2866,9 +2965,18 @@
           "symbol": "enumerate_subdomains"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_dns_provider_errors_are_not_nxdomain",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_dns_wildcard_is_not_many_discovered_hosts",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_empty_success_distinguished_from_provider_incomplete",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_http_errors_timeouts_malformed_and_size_limits",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_malformed_provider_schema_not_empty_success",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_positive_dns_candidate_is_retained_and_bounded",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_provider_result_caps_are_explicit",
+        "test_discovery_intel_accuracy.DiscoveryIntelAccuracy.test_scope_boundary_and_mixed_provider_positives"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "supply_chain",
@@ -2878,9 +2986,19 @@
           "symbol": "supply_chain"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_blocked_network_and_response_bounds",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_duplicate_sections",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_html_and_malformed_are_not_manifests",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_invalid_advisory_is_inconclusive",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_invalid_target_no_client",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_metadata_ranges_and_ecosystems",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_mock_advisories_composer_and_pip",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_unsupported_advisory_ecosystems_and_dependency_budget",
+        "test_source_artifact_accuracy.SourceArtifactAccuracy.test_supply_version_comparison_with_mock_advisory"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "tech_detect",
@@ -3002,9 +3120,20 @@
           "symbol": "vuln_database"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_store_report_accuracy.StoreReportTests.test_collection_and_store_record_limits",
+        "test_store_report_accuracy.StoreReportTests.test_database_corrupt_store_never_overwritten",
+        "test_store_report_accuracy.StoreReportTests.test_database_import_atomic_and_identity_immutable",
+        "test_store_report_accuracy.StoreReportTests.test_database_import_roundtrip_update_and_tags",
+        "test_store_report_accuracy.StoreReportTests.test_database_persists_redacted_data_and_replace_failure_preserves_old",
+        "test_store_report_accuracy.StoreReportTests.test_database_read_rejects_symlink_and_identity_swap",
+        "test_store_report_accuracy.StoreReportTests.test_database_rejects_bad_entries_without_writing",
+        "test_store_report_accuracy.StoreReportTests.test_legacy_store_secrets_are_redacted_on_read",
+        "test_store_report_accuracy.StoreReportTests.test_oversize_inputs_and_stores_are_bounded",
+        "test_store_report_accuracy.StoreReportTests.test_persistence_failures_are_errors_not_success"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "vuln_diff",
@@ -3197,9 +3326,22 @@
           "symbol": "whois_lookup"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_cli_cleanup_failure_is_reported_without_source_text",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_cli_failed_mismatched_malformed_timeout_and_oversized",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_cli_oversize_kills_and_reaps_running_process",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_cli_positive_identity_and_allowlisted_redacted_fields",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_explicit_no_match_and_line_limit",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_non_string_domain_is_structured_failure",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_partial_socket_timeout_and_size_limit_close_writer",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_real_synthetic_inherited_pipe_drains_and_reaps",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_real_synthetic_output_cap_drains_and_reaps",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_repeated_caller_cancellation_during_output_limit_cleanup",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_socket_positive_bounded_and_closed",
+        "test_discovery_intel_accuracy.WhoisAccuracy.test_untrusted_iana_referral_not_followed"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "wordpress_scan",

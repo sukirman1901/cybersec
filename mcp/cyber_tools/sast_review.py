@@ -1,103 +1,155 @@
+"""Bounded source review. Syntax/pattern observations are never exploit proof."""
+import ast
 import os
 import re
+import stat
 
 DANGEROUS_PATTERNS = {
-    "Python": [
-        (r'\beval\s*\(', 'eval() — arbitrary code execution', 'CRITICAL'),
-        (r'\bexec\s*\(', 'exec() — arbitrary code execution', 'CRITICAL'),
-        (r'\b__import__\s*\(', '__import__() — dynamic import', 'HIGH'),
-        (r'\bpickle\.loads?\s*\(', 'pickle deserialization — RCE risk', 'CRITICAL'),
-        (r'\bsubprocess\.(call|Popen|run)\s*\(', 'subprocess execution — command injection risk', 'HIGH'),
-        (r'\bos\.system\s*\(', 'os.system() — command injection risk', 'HIGH'),
-        (r'\binput\s*\(', 'input() — code injection in Python 2', 'MEDIUM'),
-        (r'(?i)(execute|cursor\.execute|db\.execute)\s*\(\s*["\']\s*SELECT',
-         'Raw SQL construction — SQL injection risk', 'HIGH'),
-        (r'(?i)render_template_string\s*\(', 'Template injection — SSTI risk', 'HIGH'),
-    ],
-    "JavaScript/TypeScript": [
-        (r'\beval\s*\(', 'eval() — arbitrary code execution', 'CRITICAL'),
-        (r'new\s+Function\s*\(', 'Function() — eval-like code execution', 'CRITICAL'),
-        (r'\binnerHTML\s*=', 'innerHTML assignment — XSS risk', 'HIGH'),
-        (r'\bdocument\.write\s*\(', 'document.write() — XSS risk', 'HIGH'),
-        (r'require\s*\(\s*["\']child_process["\']\s*\)',
-         'require(child_process) — shell access', 'CRITICAL'),
-        (r'\bexec\s*\(', 'exec() — shell command execution', 'CRITICAL'),
+    'JavaScript/TypeScript': [
+        (r'\beval\s*\(', 'Dynamic eval call', 'MEDIUM'),
+        (r'\bnew\s+Function\s*\(', 'Dynamic Function constructor', 'MEDIUM'),
+        (r'\binnerHTML\s*=', 'HTML assignment requires data-flow review', 'MEDIUM'),
+        (r'\bdocument\.write\s*\(', 'Document write requires data-flow review', 'MEDIUM'),
+        (r'\brequire\s*\(\s*["\']child_process["\']\s*\)', 'Child-process module use', 'MEDIUM'),
+        (r'\bexec\s*\(', 'exec-named call requires resolution', 'MEDIUM'),
     ],
 }
-
 EXTENSIONS_SAST = {'.py', '.js', '.ts', '.jsx', '.tsx'}
-SKIP_DIRS_SAST = {
-    '.git', '__pycache__', 'node_modules', '.venv', 'venv',
-    '.svn', '.hg', '.idea', '.vscode', 'dist', 'build',
-}
+SKIP_DIRS_SAST = {'.git', '__pycache__', 'node_modules', '.venv', 'venv', '.svn', '.hg', '.idea', '.vscode', 'dist', 'build'}
+MAX_FILE = 256 * 1024
+MAX_TOTAL = 8 * 1024 * 1024
+MAX_FINDINGS = 200
 
 
 def _get_language(ext: str) -> str:
-    """Map file extension to language group."""
-    if ext == '.py':
-        return 'Python'
-    return 'JavaScript/TypeScript'
+    return 'Python' if ext == '.py' else 'JavaScript/TypeScript'
+
+
+def _targets(path, errors):
+    info = os.lstat(path)
+    if stat.S_ISREG(info.st_mode):
+        if os.path.splitext(path)[1].lower() not in EXTENSIONS_SAST:
+            raise ValueError('Unsupported source extension')
+        return [(path, info)]
+    if not stat.S_ISDIR(info.st_mode):
+        raise ValueError('Non-regular target')
+    pending, files, visited = [(path, info)], [], 0
+    while pending:
+        directory, expected = pending.pop()
+        fd = None
+        try:
+            fd = os.open(directory, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0))
+            opened = os.fstat(fd)
+            if not stat.S_ISDIR(opened.st_mode) or (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino):
+                raise OSError('Directory changed')
+            with os.scandir(fd) as entries:
+                for entry in entries:
+                    visited += 1
+                    if visited > 1000 or len(files) >= 100:
+                        errors.append('Traversal budget exhausted')
+                        return files
+                    child = os.path.join(directory, entry.name)
+                    child_info = entry.stat(follow_symlinks=False)
+                    if stat.S_ISDIR(child_info.st_mode):
+                        if entry.name not in SKIP_DIRS_SAST:
+                            pending.append((child, child_info))
+                    elif stat.S_ISLNK(child_info.st_mode):
+                        errors.append('Symlink skipped')
+                    elif not stat.S_ISREG(child_info.st_mode):
+                        errors.append('Non-regular entry skipped')
+                    elif stat.S_ISREG(child_info.st_mode) and os.path.splitext(entry.name)[1].lower() in EXTENSIONS_SAST:
+                        files.append((child, child_info))
+        except OSError:
+            errors.append('Directory unreadable or changed')
+        finally:
+            if fd is not None:
+                os.close(fd)
+    return files
+
+
+def _read_source(path, expected, remaining):
+    if expected.st_size > min(MAX_FILE, remaining):
+        raise ValueError('Read budget exceeded')
+    def open_regular(name, flags):
+        return os.open(name, flags | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0))
+    with open(path, 'rb', opener=open_regular) as stream:
+        opened = os.fstat(stream.fileno())
+        if not stat.S_ISREG(opened.st_mode) or (opened.st_dev, opened.st_ino) != (expected.st_dev, expected.st_ino):
+            raise OSError('File changed')
+        data = stream.read(min(MAX_FILE, remaining) + 1)
+    if len(data) > min(MAX_FILE, remaining):
+        raise ValueError('Read budget exceeded')
+    return data
+
+
+def _python_observations(content):
+    tree = ast.parse(content)
+    names = {'eval', 'exec', '__import__', 'pickle.load', 'pickle.loads',
+             'subprocess.call', 'subprocess.Popen', 'subprocess.run', 'os.system', 'render_template_string'}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        function = node.func
+        if isinstance(function, ast.Name):
+            name = function.id
+        elif isinstance(function, ast.Attribute) and isinstance(function.value, ast.Name):
+            name = function.value.id + '.' + function.attr
+        else:
+            continue
+        if name in names:
+            yield node.lineno, 'Review call to ' + name, 'MEDIUM'
+        elif isinstance(function, ast.Attribute) and function.attr == 'execute' and node.args and isinstance(node.args[0], (ast.JoinedStr, ast.BinOp)):
+            yield node.lineno, 'Dynamically constructed query requires data-flow review', 'MEDIUM'
+
+
+def _js_observations(content):
+    def mask(match):
+        # Preserve only the module literal needed for the require rule.
+        if match[0] in {'"child_process"', "'child_process'"}:
+            return match[0]
+        return re.sub(r'[^\n]', ' ', match[0])
+    code = re.sub(r'//[^\n]*|/\*[\s\S]*?(?:\*/|$)|"(?:\\.|[^"\\])*(?:"|$)|\'(?:\\.|[^\'\\])*(?:\'|$)|`(?:\\.|[^`\\])*(?:`|$)', mask, content)
+    for pattern, issue, severity in DANGEROUS_PATTERNS['JavaScript/TypeScript']:
+        for match in re.finditer(pattern, code):
+            yield code.count('\n', 0, match.start()) + 1, issue, severity
 
 
 async def sast_review(path: str) -> dict:
-    """Scan source code for dangerous patterns (eval, exec, deserialization, SQLi, XSS)."""
-    if not os.path.exists(path):
-        return {"error": f"Path not found: {path}"}
-
-    files_scanned = 0
-    findings = []
-
-    def _scan_file(fpath: str, rel_path: str) -> None:
-        """Scan a single file for dangerous patterns."""
-        nonlocal files_scanned
-        ext = os.path.splitext(fpath)[1].lower()
-        if ext not in EXTENSIONS_SAST:
-            return
-        files_scanned += 1
+    if not isinstance(path, str):
+        return {'error': 'Expected a local source path', 'coverage_complete': False, 'execution_status': 'not_started'}
+    errors, findings = [], []
+    try:
+        files = _targets(path, errors)
+    except (OSError, ValueError):
+        return {'error': 'Target missing, inaccessible, non-regular or unsupported', 'coverage_complete': False, 'execution_status': 'not_started'}
+    scanned = total_bytes = 0
+    truncated = False
+    for file, info in files:
         try:
-            with open(fpath, 'r', errors='replace') as fh:
-                lines = fh.readlines()
-        except Exception:
-            return
-
-        lang = _get_language(ext)
-        patterns = DANGEROUS_PATTERNS.get(lang, [])
-        for i, line in enumerate(lines, 1):
-            for pattern, issue, severity in patterns:
-                if re.search(pattern, line):
-                    findings.append({
-                        "file": rel_path,
-                        "line": i,
-                        "language": lang,
-                        "issue": issue,
-                        "severity": severity,
-                        "match": line.strip()[:60],
-                    })
-
-    if os.path.isfile(path):
-        _scan_file(path, os.path.basename(path))
-    else:
-        for root, dirs, files in os.walk(path):
-            dirs[:] = [d for d in dirs if d not in SKIP_DIRS_SAST]
-            for f in files:
-                fpath = os.path.join(root, f)
-                rel_path = os.path.relpath(fpath, path)
-                _scan_file(fpath, rel_path)
-
-    total_findings = len(findings)
-    if total_findings > 10:
-        risk = "CRITICAL"
-    elif total_findings > 5:
-        risk = "HIGH"
-    elif total_findings > 0:
-        risk = "MEDIUM"
-    else:
-        risk = "LOW"
-
-    return {
-        "path": path,
-        "files_scanned": files_scanned,
-        "findings": findings,
-        "total_findings": total_findings,
-        "risk": risk,
-    }
+            data = _read_source(file, info, MAX_TOTAL - total_bytes)
+            total_bytes += len(data)
+            content = data.decode('utf-8')
+            lang = _get_language(os.path.splitext(file)[1].lower())
+            observations = _python_observations(content) if lang == 'Python' else _js_observations(content)
+            file_findings = []
+            for line, issue, severity in observations:
+                if len(findings) + len(file_findings) == MAX_FINDINGS:
+                    truncated = True
+                    break
+                file_findings.append({'file': os.path.relpath(file, path) if os.path.isdir(path) else os.path.basename(path),
+                                      'line': line, 'language': lang, 'issue': issue, 'severity': severity,
+                                      'match': '[REDACTED]', 'assessment': 'candidate', 'confidence': 'medium',
+                                      'coverage': 'Static source only; no symbol/taint resolution, execution, exploit or reachability verification'})
+            findings.extend(file_findings)
+            scanned += 1
+        except (OSError, ValueError, SyntaxError, RecursionError):
+            errors.append('Source unreadable, oversized, changed or malformed')
+        if truncated:
+            errors.append('Finding budget exhausted')
+            break
+    complete = not errors and scanned > 0
+    return {'path': path, 'files_scanned': scanned, 'findings': findings, 'total_findings': len(findings),
+            'risk': 'MEDIUM' if findings else 'UNKNOWN' if not complete else 'LOW', 'errors': errors,
+            'coverage_complete': complete, 'execution_status': 'completed' if complete else 'partial' if scanned else 'not_started',
+            'truncated': truncated, 'bytes_read': total_bytes,
+            'coverage': 'Python AST and JS/TS lexical review, not runtime validation. JS regex literals and template interpolation may be misclassified. 256 KiB/file, 8 MiB total, 100 files, 1000 entries, 200 findings; dependency/build directories excluded.'}

@@ -45,6 +45,11 @@ MODULES = (
     "test_cli_adapter_accuracy",
     "test_cli_remaining_accuracy",
     "test_artifact_accuracy",
+    "test_cli_collection_limits",
+    "test_store_report_accuracy",
+    "test_protocol_adapter_accuracy",
+    "test_discovery_intel_accuracy",
+    "test_source_artifact_accuracy",
 )
 
 

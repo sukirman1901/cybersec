@@ -391,6 +391,75 @@ Stable integration evidence:
 - `offline-tool-execution.json`, inventory and disposition refreshed from these
   results. These timings are test-run measurements, not target performance.
 
+## Autonomous cycle 3 — verified source integration
+
+Independent groups cover temporary persistent stores/reports, source/binary
+scanners, discovery intelligence and protocol observers. Parent owns shared CLI
+collection. No live scanner/provider/binary execution is part of these groups.
+
+Shared `_run_cli` now retains at most **2 MiB raw output across stdout/stderr**,
+marks truncation as incomplete, uses monotonic duration, and omits raw spawn errors
+and wrapper stderr from exported errors. On timeout/output limit/cancellation it
+kills/reaps the child and, on POSIX, its process group. Post-kill streams are drained
+without retention under a two-second cleanup budget to release paused pipe readers.
+Noisy synthetic Python children reproduced the prior unbounded output and, during
+development, a paused-reader cleanup failure; both have regression coverage.
+Actual subprocess tests execute only synthetic Python scripts, not scanners.
+Existing process mocks now use real StreamReader buffers instead of assuming one
+unbounded `communicate()` call. Latest focused helper/remaining-CLI/remediation
+check: **43 tests + 2 subtests passed**; two existing datetime warnings.
+
+Completed store/report agent review: **24 tests passed** using temporary stores.
+Raw HTTP records now persist redacted placeholders and length metadata; named
+credentials/body/header values and URL userinfo/query/fragments are redacted on
+export, including legacy data. General prose-secret detection is not claimed.
+Corrupt stores preserve data and return failure rather than empty success; database
+updates use atomic replacement. Logger/database/logo leaf-file reads and logger
+appends reject tested symlink/identity swaps with no-follow/nonblocking opens.
+Full concurrent-writer/crash durability and parent-directory races remain unverified.
+
+Independent subprocess review reproduced cancellation *during* output-limit cleanup
+leaving a paused pipe (180224 bytes buffered), and found a test-only cancelled-future
+warning. A retained shielded cleanup task now finishes under repeated caller
+cancellation before cancellation propagates; incomplete drain gets a last-resort
+transport close and bounded 0.5-second reap after the two-second cleanup timeout.
+The test timeout stub now awaits cancelled futures and leaves cleanup's real
+timeouts intact. Reviewer reran the original reproducer: child exited -9, both
+streams EOF, buffers empty, transports closed, zero residual tasks. Collector
+suite **8 passed**; remaining-CLI suite **10 passed**, no gathering warnings.
+Parent's combined CLI suites passed **60 tests + 20 subtests**. This is POSIX/macOS
+synthetic-process evidence; arbitrary detached descendants/platforms are not proven.
+
+WHOIS and binary collectors received the same noisy-output and repeated-cancellation
+regressions. Final targeted agent suites: WHOIS **13 tests + 10 subtests**, source/
+binary artifacts **43 tests**. Both protected cleanup tasks finish before propagating
+caller cancellation. Target binaries and WHOIS commands were never executed; only
+harmless Python fixtures exercised actual subprocess cleanup.
+
+Other completed groups:
+- Discovery intelligence: bounded WHOIS allowlisted metadata, provider/domain
+  validation, wildcard DNS controls, origin-IP candidates and structured takeover
+  error candidates. Neither origin identity nor takeover claimability is confirmed.
+  Initial regressions reproduced 40 failures/subtest failures.
+- Source artifacts: redacted secret locations, bounded/race-checked file reads,
+  source syntax/comment/literal filtering, parsed dependency declarations with
+  ecosystem boundaries, and private binary snapshots. Advisory hints remain
+  historical candidates; JavaScript analysis remains lexical; no runtime exploit
+  confirmation. ELF NX and PIE observations are separate from runtime ASLR.
+- Protocols: refused versus unknown TCP observations, bounded connection/banner
+  attempts, SSH identity-only observations, and default-verifying TLS contexts.
+  All sockets/TLS were mocked. OS DNS/address retries for synchronous TLS remain
+  outside a hard total deadline; service hints do not establish vulnerabilities.
+  Initial regressions: 5 failures and 9 errors. Targeted suite: 22 tests passed.
+
+After all source agents stopped, full integration passed **790 tests + 1753
+subtests**, 97 existing datetime deprecation warnings, in **122.43 seconds**.
+Network-disabled traced run passed **757 tests** in **65.764 seconds**. Mapped
+implementation entries observed: **112/209**, up from 96; **97 unobserved in this
+run** remain explicit gaps. A source comparison found no changes to existing public
+function signatures across the 17 changed implementation modules. Aggregate test
+counts and trace coverage still do not establish all-action operational accuracy.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

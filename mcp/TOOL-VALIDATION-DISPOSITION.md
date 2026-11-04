@@ -4,13 +4,13 @@
 
 ## Counts and evidence boundary
 
-- **209/209** inventory registrations have a disposition and mapped implementation(s). **141** have static test-reference candidates; **68** have none in the supplied inventory.
-- **97** tools have individually attributable documented execution evidence of some kind in the reviewed records; **112** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
+- **209/209** inventory registrations have a disposition and mapped implementation(s). **149** have static test-reference candidates; **60** have none in the supplied inventory.
+- **113** tools have individually attributable documented execution evidence of some kind in the reviewed records; **96** have no individually attributed execution established by this review. The latter is an evidence gap, not proof they never ran.
 - The historical ledger attributes 26 selected fixture/smoke tools, 2 dependency startup-only checks and one runtime diagnostic. The newer `offline-tool-execution.json` separately records actual mapped entry calls with test IDs; overlapping sets must not be added together.
 - Historical production smoke, local integrations and current mocked entry traces are different evidence classes. A called function is not proof that every action, external service or platform works.
 - Latest verification counts and cycle-specific limits are in `TUNING-PROGRESS.md`. This report generator reads those records; it does not execute tests. The separate runtime trace includes its own test count and success status.
 - The ledger's older **98 referenced / 111 unreferenced** baseline is stale relative to the supplied inventory. Inventory references can include mocks, strings and generic contract cases. Current tree changes after the inventory snapshot are not silently added to these counts.
-- Input inventory SHA-256: `5bff8132c4ea240c07f8bc314f54d2c643908a8bd532ce24fce0a51e5cd90c81`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
+- Input inventory SHA-256: `0eebf42af2746cea3d5d41c800c7fde4a48c022f2e03cd201b9ece75361809b7`. All module paths below come from that inventory; source dependency hints are a separate static read of the current tree.
 
 ## How to read each row
 
@@ -42,7 +42,7 @@ All next steps start with offline fixtures/mocks. Existing reference modules can
 ## High-priority feasible omissions
 
 1. **Response-recognition gaps:** host_header_injection, sharepoint_scan and broader wordpress/redirect/parameter coverage. CRLF, CORS, misplaced files, webshell and WAF now have selected offline suites; their declared unsupported surfaces still remain gaps. Existing exact test modules below are the first regression entry points.
-2. **Offline utilities:** phone_osint parsing, persistent-store isolation and broader reporting/action coverage. Cycle 2 adds hash_detect, gf_patterns and five report/evidence utility suites. Use temporary storage; never production findings/log stores. Selected cases do not cover every format or action.
+2. **Offline utilities:** phone_osint parsing and broader reporting/action coverage. Cycles 2–3 add hash/GF/report utilities and temporary-store regression suites for HTTP logs and vulnerability DBs. Concurrency/crash durability remains unverified. Selected cases do not cover every format or action.
 3. **Adapter contracts:** missing executable, nonzero exit, malformed output, timeout cleanup, API errors and secret redaction for every CLI/provider adapter. Groups: `test_validation_cli_adapters.py`, `test_validation_cloud_adapters.py`, `test_validation_ad_adapters.py`, `test_validation_intel_adapters.py`. These are locally feasible without operational accounts; do not label mocked adapters production-validated.
 4. **Auth/orchestration effect boundaries:** anonymous vs owner vs other-owner, expired identity, scope rejection, cancellation and partial child failure. Groups: `test_validation_auth_flows.py`, `test_validation_orchestration.py`. Actual BOLA/CSRF/state-change proof needs the controlled app oracle.
 5. **Artifact fixture breadth:** four desktop scanners now have malformed archive/plist/manifest, symlink-swap, bounded-read and redaction fixtures in `test_artifact_accuracy.py`. Other native/mobile formats and platform execution remain separate gaps. No need to inspect personal installed apps or execute generated payloads.
@@ -176,8 +176,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 015. `attack_surface_map` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/attack_surface.py`.
 - **Declared scope:** Build an attack surface map from aggregated scan results. Accepts JSON string with results from port_scan, dns_lookup, subdomain_enum, http_probe, vuln_scan, etc.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_store_report_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 5 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -216,8 +216,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 020. `binary_checksec` — ARTIFACT
 - **Mapped module:** `mcp/cyber_tools/binary_checksec.py`.
 - **Declared scope:** Analyze binary security — ELF/Mach-O/PE, PIE, NX, linked libs, interesting strings.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_source_artifact_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 12 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic APK/IPA/archive/source/binary fixtures; platform extraction/signing tools for applicable formats; package advisory feed for online package checks. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Temporary synthetic positive/negative/malformed files, traversal/size limits and redaction; mock optional commands/feed; real platform formats need matching fixtures/toolchain. Proposed exact group module: `mcp/tests/test_validation_artifacts.py`; existing exact regression modules are the static refs above.
 
@@ -232,8 +232,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 022. `branded_report` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/branded_report.py`.
 - **Declared scope:** White-label pentest reports — custom logo, colors, company name, footer, disclaimer.
-- **Static refs:** `mcp/tests/test_pipeline_quality.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_pipeline_quality.py`; `mcp/tests/test_store_report_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 6 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -776,8 +776,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 090. `http_logger` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/http_logger.py`.
 - **Declared scope:** Persistent HTTP request/response logger. Actions: log, list, search, stats, export, clear.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_store_report_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 11 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -1128,8 +1128,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 134. `origin_ip_discovery` — INTEL
 - **Mapped module:** `mcp/cyber_tools/origin_ip_discovery.py`.
 - **Declared scope:** Discover origin IP behind CDN via historical DNS and records.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_discovery_intel_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 7 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 
@@ -1200,8 +1200,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 143. `port_scan` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/port_scanner.py`.
 - **Declared scope:** Scan TCP ports on a target host.
-- **Static refs:** `mcp/tests/test_audit_regressions.py`; `mcp/tests/test_tool_policy.py`; `mcp/tests/test_workflow_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_audit_regressions.py`; `mcp/tests/test_protocol_adapter_accuracy.py`; `mcp/tests/test_tool_policy.py`; `mcp/tests/test_workflow_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 1 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -1304,8 +1304,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 156. `sast_review` — ARTIFACT
 - **Mapped module:** `mcp/cyber_tools/sast_review.py`.
 - **Declared scope:** Pattern-based code review — detect eval, deserialization, SQLi, XSS patterns.
-- **Static refs:** `mcp/tests/test_workflow_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_source_artifact_accuracy.py`; `mcp/tests/test_workflow_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 13 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic APK/IPA/archive/source/binary fixtures; platform extraction/signing tools for applicable formats; package advisory feed for online package checks. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Temporary synthetic positive/negative/malformed files, traversal/size limits and redaction; mock optional commands/feed; real platform formats need matching fixtures/toolchain. Proposed exact group module: `mcp/tests/test_validation_artifacts.py`; existing exact regression modules are the static refs above.
 
@@ -1328,8 +1328,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 159. `secret_scanner` — ARTIFACT
 - **Mapped module:** `mcp/cyber_tools/secret_scanner.py`.
 - **Declared scope:** Regex + entropy-based secret scanning — API keys, tokens, passwords in code.
-- **Static refs:** `mcp/tests/test_workflow_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_source_artifact_accuracy.py`; `mcp/tests/test_workflow_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 13 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Synthetic APK/IPA/archive/source/binary fixtures; platform extraction/signing tools for applicable formats; package advisory feed for online package checks. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Temporary synthetic positive/negative/malformed files, traversal/size limits and redaction; mock optional commands/feed; real platform formats need matching fixtures/toolchain. Proposed exact group module: `mcp/tests/test_validation_artifacts.py`; existing exact regression modules are the static refs above.
 
@@ -1344,8 +1344,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 161. `service_fingerprint` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/service_fingerprint.py`.
 - **Declared scope:** Deep service fingerprinting via banner grabbing.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_protocol_adapter_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 5 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -1448,16 +1448,16 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 174. `ssh_audit` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/ssh_audit.py`.
 - **Declared scope:** Audit SSH server — grab banner and check algorithm support.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_protocol_adapter_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 5 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
 ### 175. `ssl_check` — PROTOCOL
 - **Mapped module:** `mcp/cyber_tools/ssl_analyzer.py`.
 - **Declared scope:** Analyze SSL/TLS certificate and protocol security.
-- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_routing_eval.py`; `mcp/tests/test_skill_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_protocol_adapter_accuracy.py`; `mcp/tests/test_routing_eval.py`; `mcp/tests/test_skill_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 5 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled TCP/UDP/TLS/WebSocket services; test certificates, protocol banners and timeout/error cases; proxy/backend pair for smuggling proof. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Mock sockets/TLS/protocol state first; later loopback protocol fixtures; real service/chain semantics remain unverified. Proposed exact group module: `mcp/tests/test_validation_protocols.py`; existing exact regression modules are the static refs above.
 
@@ -1504,24 +1504,24 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 181. `sub_takeover` — INTEL
 - **Mapped module:** `mcp/cyber_tools/sub_takeover.py`.
 - **Declared scope:** Check for subdomain takeover (dangling DNS CNAME).
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_discovery_intel_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 4 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 182. `subdomain_enum` — INTEL
 - **Mapped module:** `mcp/cyber_tools/subdomain_enum.py`.
 - **Declared scope:** Passive subdomain enumeration via crt.sh, DNS brute-force, and APIs.
-- **Static refs:** `mcp/tests/test_redirect_contract.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_discovery_intel_accuracy.py`; `mcp/tests/test_redirect_contract.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 8 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 
 ### 183. `supply_chain` — HTTP
 - **Mapped module:** `mcp/cyber_tools/supply_chain.py`.
 - **Declared scope:** Check exposed manifest files for known vulnerable package versions.
-- **Static refs:** `mcp/tests/test_audit_regressions.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_audit_regressions.py`; `mcp/tests/test_source_artifact_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 9 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Controlled HTTP application with positive/negative/malformed/denied responses; browser/DB/state oracle for effect claims beyond response recognition. Source hints (not installation checks): import roots: httpx.
 - **Next validation / blocker:** Offline MockTransport positive, negative, catch-all, malformed, 403/429/5xx, timeout, budget and redaction cases; later disposable app effect proof. Proposed exact group module: `mcp/tests/test_validation_http_detectors.py`; existing exact regression modules are the static refs above.
 
@@ -1584,8 +1584,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 191. `vuln_database` — LOCAL
 - **Mapped module:** `mcp/cyber_tools/vuln_database.py`.
 - **Declared scope:** Local vulnerability database. Actions: add, get, search, list, update, delete, stats, export, import, tags, clear.
-- **Static refs:** None in supplied inventory.
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_store_report_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 10 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** Python dependencies and synthetic inputs; temporary storage for persistence/export actions; phonenumbers for phone parsing; generated payloads are not executed. Source hints (not installation checks): stdlib-only imports in mapped source.
 - **Next validation / blocker:** Offline valid/invalid/empty inputs, action round-trip in temporary storage, output schema and secret redaction; scoring/plans/payloads never count as exploit validation. Proposed exact group module: `mcp/tests/test_validation_local_utilities.py`; existing exact regression modules are the static refs above.
 
@@ -1680,8 +1680,8 @@ Dependencies and next validations inherit the named group above; each row adds s
 ### 203. `whois_lookup` — INTEL
 - **Mapped module:** `mcp/cyber_tools/whois_lookup.py`.
 - **Declared scope:** Query WHOIS for domain registration information.
-- **Static refs:** `mcp/tests/test_core_tools.py`
-- **Documented executed coverage:** None attributed in reviewed execution records; aggregate suite/contract results are not a per-tool runtime trace.
+- **Static refs:** `mcp/tests/test_core_tools.py`; `mcp/tests/test_discovery_intel_accuracy.py`
+- **Documented executed coverage:** offline-tool-execution.json: mapped Python implementation entry observed in 12 named test cases; dependencies may be mocked; not an operational pass
 - **Dependencies:** DNS/WHOIS or external intelligence/search API and service availability; API keys for gated modes; no live availability established here. Source hints (not installation checks): literal resolver names: whois.
 - **Next validation / blocker:** Recorded synthetic API/DNS responses including empty, malformed, pagination, stale feed, rate limits and redaction; mock download writes into temporary paths. Proposed exact group module: `mcp/tests/test_validation_intel_adapters.py`; existing exact regression modules are the static refs above.
 

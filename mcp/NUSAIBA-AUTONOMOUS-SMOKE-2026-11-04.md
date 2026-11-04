@@ -56,3 +56,13 @@ Observed root **200**, missing-path control **404**, and presence of all four
 previously listed security headers on both responses. These are fresh availability
 and header-presence observations, not policy correctness or scanner exploit proof.
 The browser and daemon were left running. No raw body, cookies or tokens saved.
+
+## Cycle 3 repeat — 17:25:56 UTC
+
+Engagement validation again confirmed the exact origin remained authorized. One
+credential-free GET `/` through the existing una CLI browser returned **200**;
+CSP, HSTS, X-Content-Type-Options and X-Frame-Options were present. Manual redirects,
+five-second abort and immediate body cancellation were retained. No new navigation,
+body read, scanner execution or negative-route request was made in this repeat.
+This checks current availability/header presence only, not updated MCP runtime
+behavior or vulnerability absence. The persistent browser remains open.
