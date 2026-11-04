@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 111,
+  "with_static_test_references": 112,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -819,14 +819,15 @@
         "mcp/cyber_tools/csrf_detect.py"
       ],
       "import_roots": [
-        "asyncio",
-        "hashlib",
+        "html",
+        "http",
         "httpx",
-        "json",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_csrf_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

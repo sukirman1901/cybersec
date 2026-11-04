@@ -1,296 +1,158 @@
-"""Deep CSRF detection — token analysis, SameSite, Origin validation, method variation, cookie security."""
-
-import httpx
+"""Read-only CSRF indicators; exploitability requires authenticated state-change proof."""
 import re
-import urllib.parse
-import json
-import hashlib
-import asyncio
+from html.parser import HTMLParser
+from http.cookies import SimpleCookie, CookieError
+from urllib.parse import urlsplit, urljoin, parse_qsl, urlencode, urlunsplit
+import httpx
+from .surface_probe import SurfaceProbe
 
-# --- CSRF Token Patterns ---
-TOKEN_PATTERNS = [
-    r'csrf[_-]?token',
-    r'_token',
-    r'authenticity[_-]?token',
-    r'xsrf[_-]?token',
-    r'__RequestVerificationToken',
-    r'csrfmiddlewaretoken',
-    r'anti[_-]?forgery[_-]?token',
-    r'__VIEWSTATE',
-    r'__EVENTVALIDATION',
-    r'nonce',
-    r'_csrf',
-    r'csrf_token',
-    r'verification[_-]?token',
-    r'security[_-]?token',
-]
-
-# --- Cookie Security Patterns ---
-COOKIE_FLAGS = [
-    "httponly",
-    "secure",
-    "samesite",
-    "samesite=strict",
-    "samesite=lax",
-    "samesite=none",
-]
-
-# --- State-Changing Methods ---
-STATE_METHODS = ["POST", "PUT", "PATCH", "DELETE"]
-
-# --- Common Form Fields That Should Be Protected ---
-SENSITIVE_ACTIONS = [
-    "password", "email", "transfer", "payment", "delete",
-    "update", "create", "admin", "settings", "profile",
-    "invite", "share", "grant", "revoke", "approve",
-]
+TOKEN_NAMES = {'csrf_token', 'csrftoken', 'csrf-token', '_token', 'authenticity_token',
+               'xsrf_token', 'xsrf-token', '__requestverificationtoken',
+               'csrfmiddlewaretoken', 'antiforgerytoken', '_csrf', 'csrf'}
+SENSITIVE_ACTIONS = ('password','email','transfer','payment','delete','update','create',
+                     'admin','settings','profile','invite','share','grant','revoke','approve')
 
 
-def _analyze_token(token_value: str) -> dict:
-    """Analyze CSRF token for weaknesses."""
-    analysis = {
-        "length": len(token_value),
-        "entropy": "low",
-        "pattern": "unknown",
-        "weaknesses": [],
-    }
-
-    # Check entropy
-    if len(token_value) >= 32:
-        analysis["entropy"] = "high"
-    elif len(token_value) >= 16:
-        analysis["entropy"] = "medium"
-    else:
-        analysis["entropy"] = "low"
-        analysis["weaknesses"].append("Token too short (< 16 chars)")
-
-    # Check pattern
-    if re.match(r'^[0-9]+$', token_value):
-        analysis["pattern"] = "numeric_only"
-        analysis["weaknesses"].append("Numeric-only token (predictable)")
-    elif re.match(r'^[a-f0-9]+$', token_value):
-        analysis["pattern"] = "hex"
-        if len(token_value) == 32:
-            analysis["weaknesses"].append("MD5-like hash (32 hex chars)")
-        elif len(token_value) == 40:
-            analysis["weaknesses"].append("SHA1-like hash (40 hex chars)")
-    elif re.match(r'^[A-Za-z0-9+/]+=*$', token_value):
-        analysis["pattern"] = "base64"
-        analysis["weaknesses"].append("Base64-encoded token (check for predictable data)")
-    elif re.match(r'^[A-Za-z0-9_-]+$', token_value):
-        analysis["pattern"] = "alphanumeric_safe"
-
-    # Check for predictable patterns
-    if len(set(token_value)) < 10:
-        analysis["weaknesses"].append("Low character diversity (predictable)")
-    if re.search(r'(0{8,}|1{8,}|a{8,})', token_value):
-        analysis["weaknesses"].append("Repeating characters (weak entropy)")
-
-    return analysis
+def _analyze_token(value):
+    pattern = 'unknown'
+    if re.fullmatch(r'[0-9]+', value):
+        pattern = 'numeric_only'
+    elif re.fullmatch(r'[a-fA-F0-9]+', value):
+        pattern = 'hex'
+    elif re.fullmatch(r'[A-Za-z0-9+/]+=*', value):
+        pattern = 'base64_like'
+    elif re.fullmatch(r'[A-Za-z0-9_-]+', value):
+        pattern = 'alphanumeric_safe'
+    return {'length':len(value), 'entropy':'unknown', 'pattern':pattern,
+            'weaknesses':[], 'assessment':'single_sample_cannot_establish_predictability'}
 
 
-def _analyze_cookies(set_cookie_header: str) -> dict:
-    """Analyze cookie security flags."""
-    if not set_cookie_header:
-        return {"flags_present": [], "flags_missing": ["httponly", "secure", "samesite"], "risk": "HIGH"}
+def _analyze_cookies(headers):
+    if isinstance(headers, str):
+        headers = [headers] if headers else []
+    cookies, values, failures = [], [], 0
+    for header in headers:
+        parsed = SimpleCookie()
+        try:
+            parsed.load(header)
+        except CookieError:
+            failures += 1
+            continue
+        if not parsed:
+            failures += 1
+        for name, cookie in parsed.items():
+            same = cookie['samesite'].lower()
+            present = [flag for flag in ('httponly','secure') if cookie[flag]]
+            if same in ('lax','strict','none'):
+                present.append('samesite')
+            cookies.append({'name':name, 'flags_present':present,
+                            'flags_missing':[flag for flag in ('httponly','secure','samesite') if flag not in present],
+                            'samesite':same if same in ('lax','strict','none') else 'unspecified_or_invalid',
+                            'assessment':'attribute_observation_not_csrf_proof'})
+            if name.lower() in TOKEN_NAMES and cookie.value:
+                values.append(cookie.value)
+    return ({'cookies':cookies, 'parse_failures':failures,
+             'risk':'NOT_APPLICABLE' if not headers else 'UNKNOWN' if failures else 'OBSERVATION'}, values)
 
-    lower_header = set_cookie_header.lower()
-    flags_present = []
-    flags_missing = []
 
-    for flag in COOKIE_FLAGS:
-        if flag in lower_header:
-            flags_present.append(flag)
-        else:
-            flags_missing.append(flag)
+def _safe_target(target):
+    parts = urlsplit(target)
+    host = parts.hostname or ''
+    if ':' in host:
+        host = '[' + host + ']'
+    if parts.port is not None:
+        host += ':' + str(parts.port)
+    query = urlencode([(key, '[REDACTED]') for key, _ in parse_qsl(parts.query, keep_blank_values=True)])
+    return urlunsplit((parts.scheme, host, parts.path, query, ''))
 
-    return {
-        "flags_present": flags_present,
-        "flags_missing": flags_missing,
-        "risk": "HIGH" if "httponly" in flags_missing or "secure" in flags_missing else "MEDIUM",
-    }
+
+class _Forms(HTMLParser):
+    def __init__(self, target):
+        super().__init__()
+        self.target = target
+        self.forms, self.tokens = [], []
+        self.current = None
+        self.meta_token = False
+        self.deferred = 0
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'meta' and (attrs.get('name') or '').lower() in ('csrf-token','csrf_token') and attrs.get('content'):
+            self.meta_token = True
+        if tag == 'form':
+            if len(self.forms) >= 100:
+                self.deferred += 1
+                self.current = None
+                return
+            method = (attrs.get('method') or 'GET').upper()
+            if method not in ('GET','POST','DIALOG'):
+                method = 'GET'
+            try:
+                destination = urlsplit(urljoin(self.target, attrs.get('action') or self.target))
+                origin = urlsplit(self.target)
+                action = 'same_origin' if (destination.scheme, destination.hostname, destination.port or (443 if destination.scheme == 'https' else 80)) == (origin.scheme, origin.hostname, origin.port or (443 if origin.scheme == 'https' else 80)) else 'external_origin'
+            except ValueError:
+                action = 'unknown'
+            self.current = {'form_index':len(self.forms)+1, 'method':method, 'action':action,
+                            'has_csrf_token':False, 'token_details':None,
+                            'has_sensitive_fields':False, 'sensitive_fields':[], 'vulnerable':False}
+            self.forms.append(self.current)
+        if self.current is not None and tag in ('input','textarea','select'):
+            name = (attrs.get('name') or '').lower()
+            for word in SENSITIVE_ACTIONS:
+                if word in name and word not in self.current['sensitive_fields']:
+                    self.current['sensitive_fields'].append(word)
+            self.current['has_sensitive_fields'] = bool(self.current['sensitive_fields'])
+            if tag == 'input' and name in TOKEN_NAMES and attrs.get('value'):
+                self.current['has_csrf_token'] = True
+                self.current['token_details'] = _analyze_token(attrs['value'])
+                self.tokens.append(attrs['value'])
+
+    def handle_endtag(self, tag):
+        if tag == 'form':
+            self.current = None
 
 
 async def csrf_detect(target: str) -> dict:
-    """Deep CSRF detection with token analysis, SameSite, Origin validation, method variation."""
-    if not target.startswith(("http://", "https://")):
-        target = f"https://{target}"
-
-    results = []
-    forms = []
-    cookie_analysis = {}
-    header_analysis = {}
-
-    async with httpx.AsyncClient(timeout=15.0, verify=False, follow_redirects=False) as client:
-        # --- Fetch main page ---
-        try:
-            resp = await client.get(target)
-            body = resp.text
-        except Exception:
-            return {"target": target, "error": "Failed to fetch target"}
-
-        # --- Analyze cookies ---
-        set_cookie = resp.headers.get("set-cookie", "")
-        cookie_analysis = _analyze_cookies(set_cookie)
-
-        # --- Analyze security headers ---
-        security_headers = {
-            "X-Frame-Options": resp.headers.get("x-frame-options", ""),
-            "X-Content-Type-Options": resp.headers.get("x-content-type-options", ""),
-            "Strict-Transport-Security": resp.headers.get("strict-transport-security", ""),
-            "Content-Security-Policy": resp.headers.get("content-security-policy", ""),
-        }
-        header_analysis = {k: bool(v) for k, v in security_headers.items()}
-
-        # --- Find and analyze forms ---
-        form_pattern = r'<form[^>]*>(.*?)</form>'
-        form_matches = re.findall(form_pattern, body, re.DOTALL | re.IGNORECASE)
-
-        for i, form_content in enumerate(form_matches):
-            form_result = {
-                "form_index": i + 1,
-                "has_csrf_token": False,
-                "token_details": None,
-                "method": "GET",
-                "action": "same page",
-                "has_sensitive_fields": False,
-                "sensitive_fields": [],
-                "vulnerable": False,
-            }
-
-            # Extract method
-            method_match = re.search(r'method=["\']([^"\']*)["\']', form_content, re.I)
-            if method_match:
-                form_result["method"] = method_match.group(1).upper()
-
-            # Extract action
-            action_match = re.search(r'action=["\']([^"\']*)["\']', form_content, re.I)
-            if action_match:
-                form_result["action"] = action_match.group(1)
-
-            # Check for CSRF token
-            for pattern in TOKEN_PATTERNS:
-                token_match = re.search(
-                    rf'name=["\']([^"\']*{pattern}[^"\']*)["\'].*?value=["\']([^"\']*)["\']',
-                    form_content, re.I
-                )
-                if not token_match:
-                    token_match = re.search(
-                        rf'value=["\']([^"\']*)["\'].*?name=["\']([^"\']*{pattern}[^"\']*)["\']',
-                        form_content, re.I
-                    )
-                if token_match:
-                    form_result["has_csrf_token"] = True
-                    token_value = token_match.group(2) or token_match.group(1)
-                    form_result["token_details"] = _analyze_token(token_value)
-                    break
-
-            # Check meta tag tokens
-            if not form_result["has_csrf_token"]:
-                meta_match = re.search(
-                    rf'<meta[^>]*name=["\'][^"\']*csrf[^"\']*["\'][^>]*content=["\']([^"\']*)["\']',
-                    body, re.I
-                )
-                if meta_match:
-                    form_result["has_csrf_token"] = True
-                    form_result["token_details"] = _analyze_token(meta_match.group(1))
-
-            # Check for sensitive fields
-            for field_pattern in SENSITIVE_ACTIONS:
-                if re.search(rf'name=["\'][^"\']*{field_pattern}[^"\']*["\']', form_content, re.I):
-                    form_result["has_sensitive_fields"] = True
-                    form_result["sensitive_fields"].append(field_pattern)
-
-            # Determine vulnerability
-            if form_result["method"] in STATE_METHODS and not form_result["has_csrf_token"]:
-                form_result["vulnerable"] = True
-                form_result["risk"] = "HIGH"
-            elif form_result["has_csrf_token"] and form_result["token_details"] and form_result["token_details"]["weaknesses"]:
-                form_result["vulnerable"] = True
-                form_result["risk"] = "MEDIUM"
-
-            forms.append(form_result)
-
-        # --- Origin/Referer Validation Test ---
-        origin_test = {
-            "check": "Origin/Referer validation",
-            "tests": [],
-        }
-
-        # Test with malicious origin
-        for header_set in [
-            {"Origin": "https://evil.com"},
-            {"Referer": "https://evil.com/attack"},
-            {"Origin": "https://evil.com", "Referer": "https://evil.com/attack"},
-        ]:
-            try:
-                resp_with_evil = await client.get(target, headers=header_set)
-                origin_test["tests"].append({
-                    "headers": list(header_set.keys()),
-                    "status": resp_with_evil.status_code,
-                    "accepted": resp_with_evil.status_code == 200,
-                })
-            except Exception:
-                pass
-
-        origin_test["vulnerable"] = any(t["accepted"] for t in origin_test["tests"])
-        results.append(origin_test)
-
-        # --- SameSite Cookie Test ---
-        samesite_test = {
-            "check": "SameSite cookie attribute",
-            "samesite_present": "samesite" in set_cookie.lower() if set_cookie else False,
-            "cookie_flags": cookie_analysis,
-        }
-        results.append(samesite_test)
-
-        # --- Token in URL Test (Token Leakage) ---
-        token_leak_test = {
-            "check": "CSRF token in URL (leakage via Referer)",
-            "vulnerable": False,
-        }
-        url_patterns = [r'csrf=([a-zA-Z0-9+/=]+)', r'token=([a-zA-Z0-9+/=]+)', r'xsrf=([a-zA-Z0-9+/=]+)']
-        for pattern in url_patterns:
-            if re.search(pattern, target):
-                token_leak_test["vulnerable"] = True
-                token_leak_test["leaked_param"] = re.search(pattern, target).group(0).split("=")[0]
-                break
-        results.append(token_leak_test)
-
-        # --- Double Submit Cookie Test ---
-        double_submit_test = {
-            "check": "Double-submit cookie pattern",
-            "vulnerable": False,
-        }
-        cookies = resp.headers.get_list("set-cookie")
-        for cookie in cookies:
-            cookie_name = cookie.split("=")[0].strip().lower()
-            if any(tp in cookie_name for tp in ["csrf", "xsrf", "token"]):
-                # Check if same token appears in form or header
-                if cookie.split("=")[1].split(";")[0].strip() in body:
-                    double_submit_test["vulnerable"] = True
-                    double_submit_test["cookie_name"] = cookie_name
-                    break
-        results.append(double_submit_test)
-
-    # --- Summary ---
-    csrf_vulnerable_forms = [f for f in forms if f.get("vulnerable")]
-    has_vulnerabilities = len(csrf_vulnerable_forms) > 0 or any(
-        r.get("vulnerable") for r in results if isinstance(r, dict)
-    )
-
-    return {
-        "target": target,
-        "forms": forms,
-        "csrf_vulnerable_forms": csrf_vulnerable_forms,
-        "security_checks": results,
-        "cookie_analysis": cookie_analysis,
-        "header_analysis": header_analysis,
-        "csrf_vulnerable": has_vulnerabilities,
-        "total_findings": len(csrf_vulnerable_forms) + sum(1 for r in results if isinstance(r, dict) and r.get("vulnerable")),
-        "risk_summary": {
-            "critical": sum(1 for f in csrf_vulnerable_forms if f.get("risk") == "CRITICAL"),
-            "high": sum(1 for f in csrf_vulnerable_forms if f.get("risk") == "HIGH") + sum(1 for r in results if isinstance(r, dict) and r.get("vulnerable")),
-            "medium": sum(1 for f in csrf_vulnerable_forms if f.get("risk") == "MEDIUM"),
-        },
-    }
+    if not target.startswith(('http://', 'https://')):
+        target = 'https://' + target
+    result = {'target':_safe_target(target), 'forms':[], 'csrf_vulnerable_forms':[],
+              'candidate_forms':[], 'security_checks':[], 'cookie_analysis':{}, 'header_analysis':{},
+              'csrf_vulnerable':False, 'total_findings':0,
+              'risk_summary':{'critical':0,'high':0,'medium':0},
+              'assessment':'inconclusive', 'confidence':'LOW',
+              'coverage':'One bounded GET; form and cookie observations only; no authenticated cross-site state-change test',
+              'checks_not_performed':['token_validation','origin_enforcement_on_state_change',
+                                      'browser_samesite_behavior','javascript_forms','external_form_association',
+                                      'submit_button_overrides','token_entropy_measurement']}
+    async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
+        probe = SurfaceProbe(client, max_requests=1)
+        response = await probe.request('GET', target)
+        if response is None:
+            return {**result, **probe.summary()}
+        if response.status_code != 200:
+            probe.errors.append('non_success_response')
+            return {**result, **probe.summary()}
+        parser = _Forms(target)
+        parser.feed(response.text)
+        for form in parser.forms:
+            form['assessment'] = 'token_observed_not_validated' if form['has_csrf_token'] else 'token_not_observed' if form['method'] == 'POST' else 'not_assessed'
+            if form['assessment'] == 'token_not_observed':
+                result['candidate_forms'].append(form['form_index'])
+        cookie_analysis, cookie_tokens = _analyze_cookies(response.headers.get_list('set-cookie'))
+        if cookie_analysis['parse_failures']:
+            probe.errors.append('cookie_parse_incomplete')
+        if parser.deferred:
+            probe.errors.append('form_limit_exceeded')
+        result.update({'forms':parser.forms, 'forms_deferred':parser.deferred,
+                       'meta_token_observed':parser.meta_token, 'cookie_analysis':cookie_analysis,
+                       'assessment':'not_exploit_tested',
+                       'header_analysis':{name:bool(response.headers.get(name)) for name in
+                                          ('x-frame-options','x-content-type-options','strict-transport-security','content-security-policy')}})
+        result['security_checks'] = [
+            {'check':'Double-submit cookie pattern', 'observed':bool(set(cookie_tokens) & set(parser.tokens)),
+             'vulnerable':False, 'assessment':'matching_value_is_not_a_vulnerability'},
+            {'check':'Token-like URL parameter', 'observed':any(key.lower() in TOKEN_NAMES | {'token','xsrf'} for key, _ in parse_qsl(urlsplit(target).query)),
+             'vulnerable':False, 'assessment':'token_purpose_and_leakage_not_verified'},
+        ]
+    return {**result, **probe.summary()}

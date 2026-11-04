@@ -1,0 +1,66 @@
+{
+  "before": {
+    "revision": "f5f4ed2",
+    "runs": 5,
+    "unique_fixtures": 6,
+    "unsupported_vulnerability_claims": 15,
+    "scored": 15,
+    "excluded": 15,
+    "missing_token_candidate_recognized": 0,
+    "secret_exports": 30,
+    "mock_processing_p95_ms": 3.401,
+    "requests_by_case": {
+      "public": 4,
+      "missing_token": 4,
+      "protected_form": 4,
+      "blocked": 4,
+      "rate_limited": 4,
+      "offline": 1
+    },
+    "coverage_complete_by_case": {
+      "public": null,
+      "missing_token": null,
+      "protected_form": null,
+      "blocked": null,
+      "rate_limited": null,
+      "offline": null
+    },
+    "limitations": [
+      "No true-positive exploitable CSRF fixtures; vulnerability recall unmeasured.",
+      "Missing-token detection is an observation, not proof of CSRF.",
+      "Repetitions are not independent targets; timings exclude network and browser execution."
+    ]
+  },
+  "after": {
+    "revision": "working_tree",
+    "runs": 5,
+    "unique_fixtures": 6,
+    "unsupported_vulnerability_claims": 0,
+    "scored": 15,
+    "excluded": 15,
+    "missing_token_candidate_recognized": 5,
+    "secret_exports": 0,
+    "mock_processing_p95_ms": 1.191,
+    "requests_by_case": {
+      "public": 1,
+      "missing_token": 1,
+      "protected_form": 1,
+      "blocked": 1,
+      "rate_limited": 1,
+      "offline": 1
+    },
+    "coverage_complete_by_case": {
+      "public": true,
+      "missing_token": true,
+      "protected_form": true,
+      "blocked": false,
+      "rate_limited": false,
+      "offline": false
+    },
+    "limitations": [
+      "No true-positive exploitable CSRF fixtures; vulnerability recall unmeasured.",
+      "Missing-token detection is an observation, not proof of CSRF.",
+      "Repetitions are not independent targets; timings exclude network and browser execution."
+    ]
+  }
+}

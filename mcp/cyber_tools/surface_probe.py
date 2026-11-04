@@ -37,7 +37,9 @@ class SurfaceProbe:
                         self.stopped = True
                         return None
                     content.extend(chunk)
-                headers = dict(response.headers)
+                # Preserve repeated Set-Cookie fields; comma joining is ambiguous
+                # because Expires dates themselves contain commas.
+                headers = response.headers.copy()
                 # aiter_bytes already decoded content encodings.
                 headers.pop('content-encoding', None)
                 headers.pop('content-length', None)

@@ -215,6 +215,49 @@ guard fix, which does not alter any benchmark fixture path.
 Full 209-tool operational validation remains incomplete; the inventory is static
 test-reference accounting, not proof that every tool or signature was executed.
 
+## Batch 5 — CSRF observation accuracy and repeated cookie headers (2026-11-04)
+
+`csrf_detect` now reports read-only indicators rather than claiming exploitability
+from a successful GET. Initial fixtures reproduced **10 failing tests/subtests**:
+form attributes were read from inner HTML, reversed token attributes selected the
+field name as value, meta tokens were treated as form protection, and length or
+encoding was mislabeled as entropy/weakness. The double-submit pattern is now an
+observation, not a vulnerability. Missing tokens on POST forms become explicit
+`candidate_forms`; a single response cannot prove token validation or CSRF.
+
+- HTMLParser retains form opening-tag metadata and handles attribute order,
+  unquoted attributes, comments and entity decoding. At most 100 forms are
+  retained; excess forms and oversized bodies report incomplete coverage.
+- No Origin/Referer GET comparison: this did not test a state-changing operation.
+  Default execution uses one bounded GET, no form submission, and explicitly
+  lists unavailable token validation, browser SameSite and state-change proof.
+- Cookie attributes are parsed per cookie; cookie absence is NOT_APPLICABLE.
+  Token/cookie values are not returned. Target query values are redacted, and form
+  action output describes origin relation instead of returning potentially secret
+  action URLs. A URL parameter named token does not prove CSRF-token leakage.
+- An expiry-comma regression exposed `SurfaceProbe` collapsing repeated headers
+  through `dict(response.headers)`. Copying the HTTPX Headers object now preserves
+  distinct Set-Cookie fields across all consumers. The new fixture failed before
+  this helper fix and passes afterward.
+
+Verification: **439 tests + 1372 subtests passed**, 50 existing warnings;
+**406 network-disabled tests OK**. No production requests.
+
+`scripts/benchmark_csrf.py --revision f5f4ed2` supplies the baseline for
+`mcp/csrf-benchmark.json`: six unique fixtures repeated five times, 15 scored
+non-exploit fixtures plus 15 blocked/transport exclusions. Unsupported vulnerability
+claims: **15 → 0**. Missing-token candidates recognized: **0 → 5**. Synthetic query
+secret exported: **30 → 0**. Normal/blocked requests: **4 → 1**, transport: **1 → 1**.
+Mock-processing p95: **3.401 → 1.191 ms**. Reduced work comes from removing invalid
+GET-origin inference, not equivalent exploit validation becoming faster.
+
+There are no true-positive exploitable CSRF fixtures in this benchmark; CSRF
+vulnerability recall is unmeasured. `csrf_vulnerable=false` means no confirmed
+finding, not safe; `assessment=not_exploit_tested` makes that boundary explicit.
+Coverage completion refers only to the described snapshot analysis. JavaScript
+forms, external form associations and submit-button overrides are not modeled.
+The CRLF scanner was inspected but remains pending its own evidence-focused batch.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

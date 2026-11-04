@@ -30,6 +30,7 @@ MODULES = (
     "test_rails_accuracy",
     "test_metrics_accuracy",
     "test_framework_accuracy",
+    "test_csrf_accuracy",
 )
 
 
