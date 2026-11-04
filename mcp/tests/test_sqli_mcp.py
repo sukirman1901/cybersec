@@ -28,7 +28,8 @@ class TestSqliMcp(unittest.IsolatedAsyncioTestCase):
             tools = {tool.name: tool for tool in await client.list_tools()}
             self.assertEqual(len(tools), 209)
             schema = tools["sqli_detect"].inputSchema
-            self.assertEqual(set(schema["properties"]), {"target", "param", "preset"})
+            self.assertEqual(set(schema["properties"]), {"target", "param", "preset", "request_json"})
+            self.assertEqual(schema['properties']['request_json']['default'], '')
             self.assertEqual(schema["required"], ["target"])
             with patch("httpx.AsyncClient", side_effect=lambda **kw:
                        real(transport=httpx.MockTransport(handler), **kw)):

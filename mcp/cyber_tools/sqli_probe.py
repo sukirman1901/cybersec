@@ -20,6 +20,7 @@ from urllib.parse import quote_plus, unquote_plus, urlsplit, urlunsplit
 import httpx
 
 from .finding_contract import attach_contract_fields
+from .request_utils import request_context
 
 MAX_BODY_BYTES = 262144
 PRESETS = {
@@ -38,13 +39,24 @@ class QueryContext:
     name: str
     original: str
     guessed: bool = False
+    request: dict | None = None
 
     def url(self, value: str | None = None) -> str:
+        if self.request and ('json' in self.request or 'data' in self.request):
+            return self.base
         tokens = list(self.tokens)
         if value is not None:
             name = tokens[self.index].partition("=")[0]
             tokens[self.index] = name + "=" + quote_plus(value)
         return self.base + "?" + "&".join(tokens)
+
+    def request_kwargs(self, value):
+        spec = self.request or {}
+        kwargs = {key: dict(spec[key]) for key in ('headers', 'cookies', 'json', 'data') if key in spec}
+        body_key = 'json' if 'json' in spec else 'data' if 'data' in spec else None
+        if body_key and value is not None:
+            kwargs[body_key][self.name] = value
+        return kwargs
 
 
 def query_contexts(target: str, param: str) -> list[QueryContext]:
@@ -163,8 +175,8 @@ class ProbeSession:
         started = time.monotonic()
 
         async def read_response():
-            async with self.client.stream("GET", context.url(value),
-                                          timeout=min(8.0, remaining)) as response:
+            async with self.client.stream((context.request or {}).get('method', 'GET'), context.url(value),
+                                          timeout=min(8.0, remaining), **context.request_kwargs(value)) as response:
                 data = bytearray()
                 async for chunk in response.aiter_bytes():
                     if len(data) + len(chunk) > MAX_BODY_BYTES:
@@ -216,7 +228,20 @@ def _finding(context, technique, evidence, preset, payload, probe_values, contro
               "original_value": "<redacted>" if hide_value else context.original,
               "probe_values": ["<redacted>" if hide_value else value for value in probe_values],
               "control_values": ["<redacted>" if hide_value else value for value in control_values],
-              "requires_secrets": secrets, "complete": not secrets}
+               "requires_secrets": secrets, "complete": not secrets}
+    if context.request:
+        spec = context.request
+        replay['method'] = spec['method']
+        replay['location'] = 'json' if 'json' in spec else 'data' if 'data' in spec else 'query'
+        replay['requires_session'] = bool(spec.get('headers') or spec.get('cookies'))
+        if replay['location'] in ('json', 'data'):
+            body = spec[replay['location']]
+            replay['body'] = {key: '<redacted>' if _sensitive(key) else value for key, value in body.items()}
+            secrets += [key for key in body if _sensitive(key)]
+        if replay['requires_session']:
+            secrets.append('request_session')
+        replay['requires_secrets'] = sorted(set(secrets))
+        replay['complete'] = not secrets
     evidence = {**evidence, "replay": replay}
     # Operational timing, request counters and volatile response bodies must not
     # become the novelty identity of the same causal finding on a later scan.
@@ -232,7 +257,7 @@ def _finding(context, technique, evidence, preset, payload, probe_values, contro
         "evidence": json.dumps(evidence, sort_keys=True),
         "evidence_hash": evidence_hash, "replay": replay,
         "reproducible": not secrets,
-        "coverage": f"preset={preset}; GET/query; repeated baselines and controls; {technique}",
+        "coverage": f"preset={preset}; {replay['method']}/{replay.get('location', 'query')}; repeated baselines and controls; {technique}",
     }
 
 
@@ -379,7 +404,7 @@ async def _experiment(session, context, preset, findings, candidates):
     return findings, candidates
 
 
-async def scan_query(target, param, preset, sql_errors):
+async def scan_query(target, param, preset, sql_errors, request_json=""):
     config = PRESETS.get(preset)
     output = {
         "target": _redacted_url(target)[0], "preset": preset, "params_tested": [], "waf_detected": None,
@@ -396,7 +421,19 @@ async def scan_query(target, param, preset, sql_errors):
         return output
     try:
         contexts = query_contexts(target, param)
-    except ValueError as exc:
+        spec = request_context(request_json)
+        body_key = 'json' if 'json' in spec else 'data' if 'data' in spec else None
+        if body_key:
+            body = spec[body_key]
+            normalized_target = target if target.startswith(('http://', 'https://')) else 'https://' + target
+            contexts = [QueryContext(normalized_target, [], index, key, str(value), request=spec)
+                        for index, (key, value) in enumerate(body.items()) if not param or key == param]
+            if not contexts:
+                raise ValueError('No selected body parameter')
+        elif request_json:
+            for context in contexts:
+                context.request = spec
+    except (ValueError, TypeError) as exc:
         output["errors"].append(str(exc))
         output["coverage"] = "invalid_target; no requests sent"
         return output
@@ -427,12 +464,15 @@ async def scan_query(target, param, preset, sql_errors):
     output["confidence"] = "HIGH" if output["vulnerable"] else "LOW"
     output["risk_summary"]["high"] = len(output["findings"])
     guessed = sum(context.guessed for context in selected)
+    surface = f"{spec['method']}/{body_key or 'query'}"
+    if body_key:
+        output['techniques_skipped'] = ['time_blind', 'union_based', 'stacked', 'db_enumeration', 'cookie_injection', 'nested_json']
     output["coverage"] = (
-        f"preset={preset}; GET/query; error_based+boolean_blind; "
+        f"preset={preset}; {surface}; error_based+boolean_blind; "
         f"params={len(output['params_tested'])}; guessed_params={guessed}; "
         f"requests={session.sent}/{session.budget}; coverage_complete={output['coverage_complete']}; "
         "response_limit=256KiB; similarity_window=16KiB; "
-        "time_blind/union_based/stacked/db_enumeration/POST skipped; "
+        "time_blind/union_based/stacked/db_enumeration/nested_json/cookie_injection skipped; "
         "no_evidence does not prove absence of SQLi"
     )
     return attach_contract_fields(output, finding_type="sqli")

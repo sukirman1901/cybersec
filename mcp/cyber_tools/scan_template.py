@@ -25,7 +25,7 @@ TEMPLATES = {
             {"tool": "approval_artifact", "params": {"action": "request", "tool_name": "{approval_tool}", "target": "{target}"}},
             {"tool": "tech_detect", "params": {"target": "{target}"}},
             {"tool": "vuln_scan", "params": {"target": "{target}"}},
-            {"tool": "sqli_detect", "params": {"target": "{target}"}},
+            {"tool": "sqli_detect", "params": {"target": "{target}", "preset": "staging-deep"}},
             {"tool": "xss_detect", "params": {"target": "{target}", "preset": "staging-deep"}},
             {"tool": "cors_check", "params": {"target": "{target}", "preset": "staging-deep"}},
             {"tool": "idor_access_validation", "params": {"target": "{target}"}},

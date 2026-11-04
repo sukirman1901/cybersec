@@ -1,95 +1,126 @@
-"""OAST callback server — blind SSRF/XXE/OOB correlation with retry."""
+"""Bounded local HTTP OAST collector. No fabricated DNS or third-party polling."""
+import atexit
 import json
-import urllib.request
-import socket
+import os
+import secrets
 import threading
-import random
-import string
 import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlsplit
 
 CALLBACKS = {}
+_lock = threading.RLock()
+_server = None
+_thread = None
+_TTL = 3600
+_MAX_CALLBACKS = 256
 
-def oast_callback_server(action: str, payload: str = "", callback_id: str = "", poll_url: str = "", max_wait: int = 15, platform: str = "auto") -> str:
-    if action == "generate":
-        return _generate_callback(payload, platform)
-    elif action == "poll":
-        return _poll_callback(callback_id, max_wait)
-    elif action == "status":
-        return _status(callback_id)
-    elif action == "clear":
+
+def _prune():
+    now = time.time()
+    for key in list(CALLBACKS):
+        if now - CALLBACKS[key]['generated_at'] > _TTL:
+            del CALLBACKS[key]
+
+
+class _Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        cid = urlsplit(self.path).path.removeprefix('/oast/').strip('/')
+        with _lock:
+            _prune()
+            entry = CALLBACKS.get(cid) if self.path.startswith('/oast/') else None
+            if entry is not None:
+                # Do not retain headers, query strings, body or arbitrary secrets.
+                if len(entry['hits']) < 32:
+                    entry['hits'].append({'callback_id': cid, 'protocol': 'http',
+                                          'method': self.command, 'received_at': time.time()})
+                entry['_event'].set()
+        self.send_response(204 if entry is not None else 404)
+        self.send_header('Content-Length', '0')
+        self.end_headers()
+
+    do_HEAD = do_GET
+
+    def log_message(self, *_):
+        pass
+
+
+def _stop():
+    global _server, _thread
+    with _lock:
+        server, thread = _server, _thread
+        _server = _thread = None
+        for entry in CALLBACKS.values():
+            entry['_event'].set()
         CALLBACKS.clear()
-        return json.dumps({"status": "cleared"}, indent=2)
-    else:
-        return json.dumps({"error": "Unknown action", "actions": ["generate", "poll", "status", "clear"]}, indent=2)
+    if server is not None:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
 
 
-def _generate_callback(payload, platform):
-    cid = ''.join(random.choices(string.ascii_lowercase + string.digits, k=12))
-    # For blind testing, we generate a unique OOB URL
-    oob_domain = "oastify.com"  # example — real OOB needs a server
-
-    entry = {
-        "callback_id": cid,
-        "payload": payload,
-        "generated_at": time.time(),
-        "oob_urls": {},
-        "hits": [],
-    }
-
-    # Generate URLs for different protocols
-    entry["oob_urls"]["http"] = f"http://{cid}.{oob_domain}/"
-    entry["oob_urls"]["dns"] = f"{cid}.{oob_domain}"
-    entry["oob_urls"]["http_sub"] = payload.replace("BURPCOLLABORATOR", f"{cid}.{oob_domain}") if "BURPCOLLABORATOR" in payload else f"http://{cid}.{oob_domain}/payload"
-
-    CALLBACKS[cid] = entry
-    return json.dumps(entry, indent=2)
+atexit.register(_stop)
 
 
-def _poll_callback(callback_id, max_wait):
-    if callback_id not in CALLBACKS:
-        return json.dumps({"error": "Callback not found", "callback_id": callback_id}, indent=2)
-
-    entry = CALLBACKS[callback_id]
-    start = time.time()
-    waited = 0
-    while waited < max_wait:
-        # Simulate checking for OOB callbacks
-        # In production, this would check a real server log or database
-        hits = entry.get("hits", [])
-        if hits:
-            return json.dumps({
-                "callback_id": callback_id,
-                "received": True,
-                "hits": hits,
-                "total_hits": len(hits),
-                "wait_time": round(waited, 1),
-                "interaction_found": True,
-            }, indent=2)
-        time.sleep(1)
-        waited = time.time() - start
-
-    return json.dumps({
-        "callback_id": callback_id,
-        "received": False,
-        "hits": [],
-        "total_hits": 0,
-        "wait_time": round(waited, 1),
-        "interaction_found": False,
-    }, indent=2)
-
-
-def _status(callback_id):
-    if callback_id:
+def oast_callback_server(action: str, payload: str = '', callback_id: str = '',
+                         poll_url: str = '', max_wait: int = 15, platform: str = 'auto') -> str:
+    global _server, _thread
+    if poll_url:
+        return json.dumps({'status': 'unsupported', 'error': 'External polling is not configured; this collector polls local correlated HTTP hits only'})
+    if action == 'stop':
+        _stop()
+        return json.dumps({'status': 'stopped'})
+    if action == 'start':
+        with _lock:
+            if _server is None:
+                _server = ThreadingHTTPServer(('127.0.0.1', 0), _Handler)
+                _server.daemon_threads = True
+                _thread = threading.Thread(target=_server.serve_forever, daemon=True)
+                _thread.start()
+            return json.dumps({'status': 'listening', 'bind_url': f'http://127.0.0.1:{_server.server_port}',
+                               'protocols': ['http'], 'dns_supported': False})
+    with _lock:
+        _prune()
+        if action == 'clear':
+            for entry in CALLBACKS.values():
+                entry['_event'].set()
+            CALLBACKS.clear()
+            return json.dumps({'status': 'cleared'})
+        if action == 'generate':
+            if _server is None:
+                return json.dumps({'status': 'not_configured', 'error': 'Call start to run the loopback HTTP collector. For remote targets configure CYBERSEC_OAST_PUBLIC_URL forwarding to this listener.'})
+            if len(CALLBACKS) >= _MAX_CALLBACKS:
+                return json.dumps({'status': 'capacity_exceeded', 'error': 'Clear expired/test callbacks before generating more'})
+            public = os.environ.get('CYBERSEC_OAST_PUBLIC_URL', '').rstrip('/')
+            if public:
+                parsed = urlsplit(public)
+                if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+                    return json.dumps({'status': 'not_configured', 'error': 'Invalid CYBERSEC_OAST_PUBLIC_URL'})
+            base = public or f'http://127.0.0.1:{_server.server_port}'
+            cid = secrets.token_hex(16)
+            url = f'{base}/oast/{cid}'
+            entry = {'callback_id': cid, 'generated_at': time.time(), 'oob_urls': {'http': url},
+                     'reachability': 'public_url_unverified' if public else 'loopback_only',
+                     'protocols': ['http'], 'dns_supported': False, 'hits': [],
+                     'payload': payload.replace('BURPCOLLABORATOR', url) if payload else url}
+            CALLBACKS[cid] = {**entry, '_event': threading.Event()}
+            return json.dumps(entry)
         entry = CALLBACKS.get(callback_id)
-        if not entry:
-            return json.dumps({"error": "Not found"}, indent=2)
-        return json.dumps({
-            "callback_id": callback_id,
-            "generated_ago": round(time.time() - entry["generated_at"], 1),
-            "hits": entry.get("hits", []),
-            "total_hits": len(entry.get("hits", [])),
-        }, indent=2)
-    return json.dumps({
-        "total_callbacks": len(CALLBACKS),
-        "callbacks": list(CALLBACKS.keys()),
-    }, indent=2)
+        if action in ('poll', 'status') and callback_id:
+            if entry is None:
+                return json.dumps({'error': 'Callback not found or expired', 'callback_id': callback_id})
+            event = entry['_event']
+        elif action == 'status':
+            return json.dumps({'status': 'listening' if _server else 'stopped',
+                               'total_callbacks': len(CALLBACKS), 'protocols': ['http'], 'dns_supported': False})
+        else:
+            return json.dumps({'error': 'Unknown action or missing callback_id',
+                               'actions': ['start', 'stop', 'generate', 'poll', 'status', 'clear']})
+    if action == 'poll':
+        event.wait(max(0, min(int(max_wait), 30)))
+    with _lock:
+        hits = list(entry['hits'])
+    return json.dumps({'callback_id': callback_id, 'received': bool(hits),
+                       'interaction_found': bool(hits), 'hits': hits, 'total_hits': len(hits),
+                       'coverage': 'correlated HTTP callbacks only; no DNS polling',
+                       'reachability': entry['reachability']})

@@ -8,6 +8,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from .http_guard import guarded_urlopen
+from .request_utils import query_value
 
 
 def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5",
@@ -135,7 +136,7 @@ def idor_access_validation(target: str, resource_ids: str = "1,2,3,4,5",
 
 def _request(target, param, rid, method, cookie="", extra_header=""):
     if method == "get":
-        url = f"{target}?{urllib.parse.urlencode({param: rid})}"
+        url = query_value(target, param, rid)
         return _request_raw(url, cookie, extra_header)
     return _request_raw(
         target, cookie, extra_header,

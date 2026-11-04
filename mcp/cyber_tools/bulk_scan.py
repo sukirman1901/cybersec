@@ -29,7 +29,10 @@ def bulk_scan(targets: str, tool: str = "port_scan") -> str:
             target = futures[future]
             try:
                 result = future.result(timeout=30)
-                results.append({"target": target, "result": result})
+                entry = {"target": target, "result": result}
+                if result.get('error') or result.get('coverage_complete') is False:
+                    entry['error'] = result.get('error', 'Scan incomplete')
+                results.append(entry)
             except Exception as e:
                 results.append({"target": target, "error": str(e)})
 
@@ -114,28 +117,8 @@ def _bulk_ssl_check(target: str) -> dict:
 
 
 def _bulk_vuln_scan(target: str) -> dict:
-    issues = []
-    try:
-        resp = guarded_httpx_get(f"https://{target}", timeout=10, follow_redirects=True, verify=False)
-        headers = dict(resp.headers)
-
-        security_headers = [
-            "X-Content-Type-Options", "X-Frame-Options", "Strict-Transport-Security",
-            "Content-Security-Policy", "X-XSS-Protection", "Referrer-Policy"
-        ]
-        for header in security_headers:
-            if header not in headers:
-                issues.append({"type": "missing_header", "header": header, "severity": "medium"})
-
-        if "X-Powered-By" in headers:
-            issues.append({"type": "info_disclosure", "header": "X-Powered-By", "value": headers["X-Powered-By"], "severity": "low"})
-        if "Server" in headers and any(v in headers["Server"].lower() for v in ["apache/2.2", "nginx/1.0", "iis/6", "iis/7"]):
-            issues.append({"type": "outdated_server", "header": "Server", "value": headers["Server"], "severity": "high"})
-
-    except httpx.RequestError as e:
-        return {"error": str(e)}
-
-    return {"vulnerabilities": issues, "count": len(issues)}
+    from .vuln_scanner import scan_vulnerabilities
+    return asyncio.run(scan_vulnerabilities(target))
 
 
 def _extract_title(html):

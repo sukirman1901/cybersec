@@ -50,12 +50,13 @@ SQL_ERRORS = [
 ]
 
 
-async def sqli_detect(target: str, param: str = "", preset: str = "observe-first") -> dict:
+async def sqli_detect(target: str, param: str = "", preset: str = "observe-first", request_json: str = "") -> dict:
     """Confirm GET/query SQLi using repeated baselines, controls and paired probes.
 
     observe-first: at most 2 parameter occurrences, 80 requests, 18 seconds.
     staging-deep: at most 4 occurrences, 160 requests, 55 seconds.
     Results distinguish confirmed findings, candidates and inconclusive coverage.
-    Timing/UNION, POST/JSON/cookies and data extraction are not executed here.
+    request_json supplies method, flat json/data, headers and cookies. Timing,
+    UNION, nested JSON and cookie injection/data extraction are not executed.
     """
-    return await scan_query(target, param, preset, SQL_ERRORS)
+    return await scan_query(target, param, preset, SQL_ERRORS, request_json)

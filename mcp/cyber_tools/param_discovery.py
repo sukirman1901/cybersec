@@ -5,6 +5,7 @@ Pure Python, no external binaries.
 
 import asyncio
 from typing import Dict, List, Optional
+from .request_utils import query_value
 
 COMMON_PARAMS = [
     "id", "user", "username", "login", "email", "password", "pass",
@@ -66,7 +67,7 @@ async def discover_params(target: str, method: str = "GET", thorough: bool = Fal
                     try:
                         test_value = f"xyztest{param[:3]}789"
                         if method == "GET":
-                            test_url = f"{target}?{param}={test_value}"
+                            test_url = query_value(target, param, test_value)
                             response = await client.get(test_url)
                         else:
                             response = await client.request(method, target, data={param: test_value})

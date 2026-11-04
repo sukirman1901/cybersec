@@ -28,7 +28,7 @@ def _validate_findings(findings_json):
         return json.dumps({"error": "Invalid JSON"}, indent=2)
 
     if isinstance(findings, dict):
-        findings = findings.get("findings", findings.get("results", [findings]))
+        findings = findings.get("findings", findings.get("vulnerabilities", findings.get("results", [findings])))
 
     errors = []
     warnings = []
@@ -93,18 +93,18 @@ def _convert_v1_to_v2(findings_json):
         return json.dumps({"error": "Invalid JSON"}, indent=2)
 
     if isinstance(findings, dict):
-        findings = findings.get("findings", findings.get("results", [findings]))
+        findings = findings.get("findings", findings.get("vulnerabilities", findings.get("results", [findings])))
 
     v2_findings = []
     for f in findings:
         v2 = {
             "id": f.get("id", f.get("finding_id", str(uuid.uuid4()))),
             "schema_version": REPORT_SCHEMA_VERSION,
-            "title": f.get("title", f.get("type", "Unknown Finding")),
+            "title": f.get("title", f.get("name", f.get("type", "Unknown Finding"))),
             "type": f.get("type", f.get("vuln_type", "unknown")),
             "severity": f.get("severity", "medium").lower(),
             "cvss": f.get("cvss", f.get("cvss_score", None)),
-            "target": f.get("target", f.get("host", f.get("url", ""))),
+            "target": f.get("target", f.get("host", f.get("url", f.get("matched_at", "")))),
             "status": f.get("status", "new"),
             "evidence": f.get("evidence", f.get("response", "")),
             "remediation": f.get("remediation", f.get("fix", "")),
@@ -123,6 +123,8 @@ def _convert_v1_to_v2(findings_json):
             }
         }
         # Generate evidence hash for chain of custody
+        if not isinstance(v2['evidence'], str):
+            v2['evidence'] = json.dumps(v2['evidence'], sort_keys=True, default=str)
         evidence_hash_input = f"{v2['id']}{v2['evidence'][:500]}{v2['target']}"
         v2["metadata"]["evidence_hash"] = hashlib.sha256(evidence_hash_input.encode()).hexdigest()[:16]
         v2_findings.append(v2)

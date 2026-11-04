@@ -23,6 +23,7 @@ MODULES = (
     "test_skill_contract",
     "test_redirect_contract",
     "test_routing_eval",
+    "test_remediation_20261104",
 )
 
 

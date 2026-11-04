@@ -4,6 +4,9 @@
   "description": "Cybersecurity MCP tools and pentesting methodology skills for coding agents",
   "type": "module",
   "main": "./.opencode/plugins/cybersec.js",
+  "exports": {
+    ".": "./.opencode/plugins/cybersec.js"
+  },
   "keywords": [
     "pi-package",
     "cybersecurity",

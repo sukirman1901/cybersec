@@ -86,7 +86,10 @@ def _verify_session(session_data, session_type, target):
                     issues.append("JWT expired")
                     score -= 20
                 return json.dumps({
-                    "valid": score > 50,
+                    "valid": None,
+                    "format_valid": score > 50,
+                    "authenticated": False,
+                    "coverage": "Offline JWT parsing; signature and server acceptance not verified",
                     "score": max(0, score),
                     "type": "JWT",
                     "header": hdr,
@@ -121,7 +124,6 @@ def _verify_session(session_data, session_type, target):
 
     if target:
         SESSION_STORE[target] = {
-            "data": session_data,
             "type": session_type,
             "verified_at": datetime.utcnow().isoformat() + "Z",
             "issues": issues,
@@ -129,11 +131,14 @@ def _verify_session(session_data, session_type, target):
         }
 
     return json.dumps({
-        "valid": score > 50,
+        "valid": None,
+        "format_valid": score > 50,
+        "authenticated": False,
+        "coverage": "Offline format inspection only; server acceptance not tested",
         "score": max(0, score),
         "type": session_type,
         "issues": issues,
-        "recommendation": "Session appears valid" if score > 70 else "Review session issues before testing",
+        "recommendation": "Use authenticated_scan with an identity marker and anonymous control to verify server acceptance",
     }, indent=2)
 
 
@@ -150,8 +155,8 @@ def _analyze_session(session_data, session_type):
 
 def _refresh_session(session_data, session_type, target):
     return json.dumps({
-        "status": "refresh_initiated",
-        "message": "Session refresh simulation. In real usage, call the auth endpoint to get new credentials.",
+        "status": "unsupported",
+        "message": "No refresh request executed. Use auth_macro_runner with the application's explicit refresh flow.",
         "old_type": session_type,
         "target": target or "unknown",
     }, indent=2)

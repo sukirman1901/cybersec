@@ -65,7 +65,8 @@ async def ad_certipy(
         )
         return result
 
-    certipy_bin = shutil.which("certipy")
+    from .tool_paths import which_cli
+    certipy_bin = which_cli("certipy")
     if not certipy_bin:
         result["error"] = "certipy CLI not found in PATH."
         return result

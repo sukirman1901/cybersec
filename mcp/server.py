@@ -931,9 +931,9 @@ def misplaced_files(target: str) -> str:
     return json.dumps(_run(_misplaced(target)), indent=2)
 
 @mcp.tool()
-def sqli_detect(target: str, param: str = "", preset: str = "observe-first") -> str:
-    """Test SQL injection via URL parameters. preset observe-first (default, bounded) or staging-deep."""
-    return json.dumps(_run(_sqli(target, param, preset)), indent=2)
+def sqli_detect(target: str, param: str = "", preset: str = "observe-first", request_json: str = "") -> str:
+    """Controlled SQLi query or flat JSON/form probes. request_json: method, json/data, headers, cookies. preset observe-first or staging-deep. No extraction/timing."""
+    return json.dumps(_run(_sqli(target, param, preset, request_json)), indent=2)
 
 @mcp.tool()
 def express_scan(target: str) -> str:
@@ -964,9 +964,9 @@ def cookie_editor(target: str, cookie_str: str = "", action: str = "analyze") ->
 
 @mcp.tool()
 def xss_detect(target: str, param: str = "", method: str = "get", use_browser: bool = False,
-               preset: str = "observe-first") -> str:
-    """Active XSS testing. preset observe-first (default, bounded) or staging-deep; optional Playwright."""
-    return json.dumps(_run(_xss_detect(target, param, method, use_browser, preset)), indent=2)
+               preset: str = "observe-first", request_json: str = "") -> str:
+    """Bounded XSS HTTP reflection tests. request_json preserves flat json/data, headers and cookies. Authenticated body browser replay is not supported; reflection is not execution."""
+    return json.dumps(_run(_xss_detect(target, param, method, use_browser, preset, request_json)), indent=2)
 
 @mcp.tool()
 def wordpress_scan(target: str) -> str:
@@ -1052,9 +1052,13 @@ def vuln_validate(finding_json: str) -> str:
     return _vuln_validate(finding_json)
 
 @mcp.tool()
-def pentest_workflow(target: str, template: str = "observe-first", custom_json: str = "") -> str:
-    """Workflow plan. Templates: observe-first (default), staging-deep, enterprise-pipeline, web-audit, recon-full, network-scan, bugbounty, cloud-audit. Or custom JSON. Gates preserved."""
-    return _pentest_workflow(target, template, custom_json)
+def pentest_workflow(target: str, template: str = "observe-first", custom_json: str = "", execute: bool = False, request_json: str = "") -> str:
+    """Plan by default. execute=true runs supported HTTP detector steps with per-step scope checks, 180s budget, explicit skipped steps and normalized findings. No implicit approval, conditions, tickets or exploit actions. request_json preserves SQLi/XSS sessions/bodies."""
+    plan = _pentest_workflow(target, template, custom_json)
+    if not execute:
+        return plan
+    from cyber_tools.workflow_runner import execute_plan
+    return json.dumps(_run(execute_plan(json.loads(plan), request_json)), indent=2)
 
 @mcp.tool()
 def continuous_monitor(target: str, scan_results: str = "", action: str = "record") -> str:
@@ -1084,9 +1088,9 @@ def vuln_diff(scan_before: str, scan_after: str) -> str:
     return _vuln_diff(scan_before, scan_after)
 
 @mcp.tool()
-def authenticated_scan(target: str, login_url: str = "", username: str = "", password: str = "", auth_type: str = "form", cookies: str = "", headers: str = "") -> str:
-    """Scan a web target behind authentication. auth_type: form (username/password), cookie (session cookie JSON), header (bearer/api key JSON). Detects IDOR, sensitive data, missing headers."""
-    return _authenticated_scan(target, login_url, username, password, auth_type, cookies, headers)
+def authenticated_scan(target: str, login_url: str = "", username: str = "", password: str = "", auth_type: str = "form", cookies: str = "", headers: str = "", verification_marker: str = "") -> str:
+    """Inspect authenticated content after identity-specific verification_marker and anonymous control. Endpoint accessibility alone is not IDOR. Cookies/headers are JSON objects."""
+    return _authenticated_scan(target, login_url, username, password, auth_type, cookies, headers, verification_marker)
 
 @mcp.tool()
 def report_export(target: str, findings_json: str, format: str = "html") -> str:
@@ -1204,7 +1208,7 @@ def injection_validator(target: str, types: str = "sqli,xss,nosql,cmd,ldap,ssti,
 
 @mcp.tool()
 def oast_callback_server(action: str, payload: str = "", callback_id: str = "", poll_url: str = "", max_wait: int = 15, platform: str = "auto") -> str:
-    """OAST callback server for blind SSRF/XXE/OOB correlation. Actions: generate, poll, status, clear."""
+    """HTTP callback collector: start, generate, poll, status, clear, stop. Binds loopback; CYBERSEC_OAST_PUBLIC_URL may advertise an operator-managed forwarding endpoint. No DNS or third-party polling."""
     return _oast_callback_server(action, payload, callback_id, poll_url, max_wait, platform)
 
 @mcp.tool()

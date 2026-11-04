@@ -72,6 +72,14 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
     still_vulnerable = False
     incomplete = False
     result["verified_fixed"] = False
+    try:
+        baseline = httpx.get(target, timeout=10, follow_redirects=False, verify=False)
+    except httpx.RequestError as exc:
+        result.update(status='inconclusive', verdict='Baseline unavailable', error=type(exc).__name__)
+        return json.dumps(result, indent=2)
+    if baseline.status_code >= 400:
+        result.update(status='inconclusive', verdict='Baseline blocked or failed')
+        return json.dumps(result, indent=2)
 
     for payload in payloads:
         test = {"payload": payload, "vulnerable": False, "evidence": ""}
@@ -94,7 +102,8 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
                 incomplete = True
 
             for indicator in checks["success_indicators"]:
-                if indicator.lower() in body:
+                if (vuln_type not in ('xss', 'open_redirect', 'log4j', 'ssti', 'sqli')
+                        and indicator.lower() in body and indicator.lower() not in baseline.text.lower()):
                     test["vulnerable"] = True
                     test["evidence"] = f"Found '{indicator}' in response"
                     still_vulnerable = True
@@ -102,12 +111,20 @@ def retest_vuln(target: str, vuln_type: str, param: str = "", original_payload: 
 
             if not test["vulnerable"] and resp.status_code in (301, 302, 303, 307, 308):
                 location = resp.headers.get("location", "").lower()
-                for indicator in checks["success_indicators"]:
-                    if indicator.lower() in location:
+                if vuln_type == 'open_redirect':
+                    expected = urlsplit(payload if not payload.startswith('//') else 'https:' + payload).hostname
+                    actual = urlsplit(location if not location.startswith('//') else 'https:' + location).hostname
+                    before = urlsplit(baseline.headers.get('location', '')).hostname
+                    if expected and actual == expected and before != actual:
                         test["vulnerable"] = True
-                        test["evidence"] = f"Found '{indicator}' in redirect Location header"
+                        test["evidence"] = "Payload destination observed in Location, absent in baseline"
                         still_vulnerable = True
-                        break
+            if vuln_type == 'xss' and payload in resp.text and payload not in baseline.text:
+                test['candidate'] = 'New reflection; browser execution not verified'
+                incomplete = True
+            if vuln_type in ('sqli', 'log4j', 'ssti'):
+                test['candidate'] = 'Requires original differential/OOB evidence replay'
+                incomplete = True
 
             test["status_code"] = resp.status_code
         except httpx.RequestError as e:

@@ -25,9 +25,9 @@ if command -v gem >/dev/null 2>&1; then
   gem install wpscan 2>/dev/null || echo "WARN: wpscan gem install failed"
 fi
 
-echo "==> Optional: sslyze (Python)..."
-if command -v pip3 >/dev/null 2>&1; then
-  pip3 install sslyze 2>/dev/null || true
+echo "==> Isolated Python scanners (keeps Certipy dependencies out of core MCP)..."
+if command -v python3 >/dev/null 2>&1; then
+  python3 "$(dirname "$0")/install-python-tools.py" bandit semgrep sslyze certipy
 fi
 
-echo "Done. Restart Cursor MCP server (user-cybersec) after install."
+echo "Done. Run tool_health and scanner smoke checks; executable presence does not establish readiness."

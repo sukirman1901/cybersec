@@ -242,7 +242,8 @@ class TestCiRegressions(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         ci = (root / ".github/workflows/ci.yml").read_text()
         requirements = (root / "mcp/requirements.txt").read_text().splitlines()
-        self.assertIn("impacket>=0.12.0", ci)
+        self.assertIn("pip install -r requirements.txt", ci)
+        self.assertIn("pip check", ci)
         self.assertIn("impacket>=0.12.0", requirements)
         self.assertFalse(any(line.startswith("imp>=") for line in requirements))
 

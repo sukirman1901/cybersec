@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import subprocess
+from .tool_paths import isolated_cli
 
 
 async def bandit_scan(path: str, severity: str = "medium") -> dict:
@@ -9,7 +10,8 @@ async def bandit_scan(path: str, severity: str = "medium") -> dict:
     if not os.path.exists(path):
         return {"error": f"Path not found: {path}"}
 
-    if not shutil.which("bandit"):
+    executable = shutil.which('bandit') or isolated_cli('bandit')
+    if not executable:
         return {"error": "bandit CLI not found. Install with: pip install bandit"}
 
     severity_map = {"low": "low", "medium": "medium", "high": "high"}
@@ -17,7 +19,7 @@ async def bandit_scan(path: str, severity: str = "medium") -> dict:
 
     try:
         result = subprocess.run(
-            ["bandit", "-r", path, "-f", "json", "-s", sev],
+            [executable, "-r", path, "-f", "json", "--severity-level", sev],
             capture_output=True, text=True, timeout=120,
         )
         output = result.stdout
@@ -35,18 +37,9 @@ async def bandit_scan(path: str, severity: str = "medium") -> dict:
     metrics = data.get("metrics", {})
 
     # Extract summary metrics
-    summary = {
-        "total": metrics.get("total", len(results)),
-    }
-    if isinstance(metrics, dict):
-        # bandit metrics are keyed by severity level
-        summary["high"] = metrics.get("high", 0) if isinstance(metrics.get("high"), int) else 0
-        summary["medium"] = metrics.get("medium", 0) if isinstance(metrics.get("medium"), int) else 0
-        summary["low"] = metrics.get("low", 0) if isinstance(metrics.get("low"), int) else 0
-    else:
-        summary["high"] = 0
-        summary["medium"] = 0
-        summary["low"] = 0
+    totals = metrics.get('_totals', {}) if isinstance(metrics, dict) else {}
+    summary = {'total': len(results), **{sev: totals.get('SEVERITY.' + sev.upper(), 0)
+                                       for sev in ('high', 'medium', 'low')}}
 
     findings = []
     for r in results[:100]:
@@ -59,9 +52,15 @@ async def bandit_scan(path: str, severity: str = "medium") -> dict:
             "issue_text": r.get("issue_text", ""),
         })
 
-    return {
+    response = {
         "path": path,
         "summary": summary,
         "findings": findings,
         "total_findings": len(results),
+        "exit_code": result.returncode,
+        "coverage_complete": result.returncode in (0, 1) and not data.get('errors'),
+        "coverage": "Bandit Python source rules; no runtime exploitability verification",
     }
+    if not response['coverage_complete']:
+        response['error'] = result.stderr[-1000:] or str(data.get('errors', 'Bandit failed'))
+    return response

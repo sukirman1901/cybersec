@@ -87,7 +87,7 @@ def check_dispatch(name, arguments):
     if name == "vulnerable_fixture":
         # Local lab on 127.0.0.1: binder hosts the fixture itself, never a target.
         return
-    if name == "oast_callback_server" and arguments.get("action") in ("generate", "poll", "status", "clear"):
+    if name == "oast_callback_server" and arguments.get("action") in ("start", "stop", "generate", "poll", "status", "clear"):
         # poll reads the in-memory callback registry; no target I/O happens there.
         return
     if name == "dork_hunt" and arguments.get("probe", True) is False:

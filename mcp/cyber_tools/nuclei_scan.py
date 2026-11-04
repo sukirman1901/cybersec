@@ -9,11 +9,13 @@ async def nuclei_scan(target: str, template: str = "", severity: str = "") -> di
     if severity:
         cmd.extend(["-severity", severity])
 
+    proc = None
     try:
         proc = await asyncio.create_subprocess_exec(
             *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+        communication = asyncio.create_task(proc.communicate())
+        stdout, stderr = await asyncio.wait_for(asyncio.shield(communication), timeout=120)
         output = stdout.decode(errors="replace").strip()
         err = stderr.decode(errors="replace").strip()
 
@@ -33,11 +35,34 @@ async def nuclei_scan(target: str, template: str = "", severity: str = "") -> di
             "template": template or "all",
             "confidence": "HIGH" if findings else "LOW",
             "coverage": "nuclei_cli; jsonl_stdout",
+            "exit_code": proc.returncode,
+            "coverage_complete": proc.returncode == 0,
+            "execution_status": "completed" if proc.returncode == 0 else "error",
         }
+        if proc.returncode != 0:
+            result["error"] = err[-1000:] or f"nuclei exited {proc.returncode}"
         if err and not findings:
             result["stderr_tail"] = err[-500:]
         return result
     except FileNotFoundError:
         return {"target": target, "error": "nuclei not found. Install: go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest", "findings": [], "confidence": "LOW", "coverage": "cli_missing"}
     except asyncio.TimeoutError:
-        return {"target": target, "error": "nuclei scan timed out (120s)", "findings": [], "confidence": "LOW", "coverage": "timeout"}
+        if proc is not None and proc.returncode is None:
+            proc.kill()
+        stdout, stderr = await communication
+        import json
+        partial = []
+        for line in stdout.decode(errors="replace").splitlines():
+            try:
+                partial.append(json.loads(line))
+            except ValueError:
+                pass
+        return {"target": target, "error": "nuclei scan timed out (120s)", "findings": partial,
+                "count": len(partial), "confidence": "LOW", "coverage": "timeout; partial stdout",
+                "coverage_complete": False, "execution_status": "partial"}
+    except asyncio.CancelledError:
+        if proc is not None:
+            if proc.returncode is None:
+                proc.kill()
+            await communication
+        raise

@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import subprocess
+from .tool_paths import isolated_cli
 
 
 async def semgrep_scan(path: str, pattern: str = "") -> dict:
@@ -9,16 +10,22 @@ async def semgrep_scan(path: str, pattern: str = "") -> dict:
     if not os.path.exists(path):
         return {"error": f"Path not found: {path}"}
 
-    if not shutil.which("semgrep"):
+    executable = shutil.which('semgrep') or isolated_cli('semgrep')
+    if not executable:
         return {"error": "semgrep CLI not found. Install with: pip install semgrep"}
 
     try:
         if pattern:
-            cmd = ["semgrep", "--json", "-e", pattern, path]
+            language = {'.py': 'python', '.js': 'javascript', '.ts': 'typescript',
+                        '.java': 'java', '.go': 'go', '.php': 'php', '.rb': 'ruby'}.get(os.path.splitext(path)[1])
+            if not language:
+                return {'error': 'Custom pattern requires a single file with a supported language extension', 'coverage_complete': False}
+            cmd = [executable, "--json", "--metrics=off", '--lang', language, "-e", pattern, path]
         else:
-            cmd = ["semgrep", "--json", "--config=auto", path]
+            cmd = [executable, "--json", "--metrics=off", "--config=auto", path]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
+                                env={**os.environ, 'SEMGREP_ENABLE_VERSION_CHECK': '0', 'SEMGREP_SEND_METRICS': 'off'})
         output = result.stdout
     except subprocess.TimeoutExpired:
         return {"error": "semgrep scan timed out"}
@@ -42,8 +49,15 @@ async def semgrep_scan(path: str, pattern: str = "") -> dict:
             "message": r.get("extra", {}).get("message", ""),
         })
 
-    return {
+    response = {
         "path": path,
         "findings": findings,
         "total_findings": len(results),
+        "exit_code": result.returncode,
+        "coverage_complete": result.returncode in (0, 1) and not data.get('errors'),
+        "errors": data.get('errors', []),
+        "coverage": "Semgrep selected rules; inspect skipped files and parser errors",
     }
+    if not response['coverage_complete']:
+        response['error'] = result.stderr[-1000:] or 'Semgrep reported errors'
+    return response

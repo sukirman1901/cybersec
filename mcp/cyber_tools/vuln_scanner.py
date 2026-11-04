@@ -10,6 +10,27 @@ from .epss_lookup import epss_lookup as _epss_lookup
 
 CVE_ID_RE = re.compile(r"CVE-\d{4}-\d{4,10}")
 
+
+class _ObservedClient:
+    """Account for every attempted request, including caught transport failures."""
+    def __init__(self, client):
+        self.client = client
+        self.attempted = 0
+        self.succeeded = 0
+        self.errors = []
+
+    async def get(self, url, **kwargs):
+        self.attempted += 1
+        try:
+            response = await self.client.get(url, **kwargs)
+            self.succeeded += 1
+            if response.status_code in (401, 403, 429) or response.status_code >= 500:
+                self.errors.append({"status": response.status_code, "kind": "blocked_or_server_error"})
+            return response
+        except httpx.HTTPError as exc:
+            self.errors.append({"kind": type(exc).__name__})
+            raise
+
 # --- Security Header Checks ---
 SECURITY_CHECKS = {
     "missing-x-frame-options": {
@@ -318,12 +339,17 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
     vulnerabilities: List[Dict] = []
     php2shell = assess_headers({})
     result_enrichment: Dict = None
+    observed = None
+    baseline_body = None
 
     try:
         async with GuardedAsyncClient(timeout=30.0, follow_redirects=True, verify=False) as client:
+            observed = _ObservedClient(client)
+            client = observed
             # --- Security Header Checks ---
             try:
                 response = await client.get(target)
+                baseline_body = response.text
                 headers = response.headers
                 php2shell = assess_headers(headers)
                 for record in cve_records(php2shell):
@@ -374,6 +400,8 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                     path_url = target.rstrip("/") + pc["path"]
                     pr = await client.get(path_url)
                     if pr.status_code != 200:
+                        continue
+                    if baseline_body is not None and pr.text.strip() == baseline_body.strip():
                         continue
                     if not re.search(pc["pattern"], pr.text, re.IGNORECASE | re.MULTILINE):
                         continue
@@ -437,14 +465,14 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                     for vp in vuln_paths:
                         try:
                             vr = await client.get(target.rstrip("/") + vp)
-                            if vr.status_code == 200:
+                            if vr.status_code == 200 and vr.text.strip() != (baseline_body or '').strip():
                                 vulnerabilities.append({
                                     "name": f"WordPress {vp} Accessible",
                                     "severity": "medium",
                                     "description": f"WordPress endpoint {vp} is accessible",
                                     "matched_at": target.rstrip("/") + vp,
                                     "type": "exposure",
-                                    "confidence": "verified",
+                                    "confidence": "info",
                                 })
                         except httpx.HTTPError:
                             continue
@@ -455,10 +483,14 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                     for vp in vuln_paths:
                         try:
                             vr = await client.get(target.rstrip("/") + vp)
-                            if vr.status_code == 200 and len(vr.text) > 100:
+                            config_exposed = (vp == '/.env' and re.search(
+                                r'(?m)^(?:APP_KEY|DB_PASSWORD|DB_HOST)\s*=\s*\S+', vr.text)
+                                and '<html' not in vr.text.lower())
+                            if (vr.status_code == 200 and config_exposed
+                                    and vr.text.strip() != (baseline_body or '').strip()):
                                 vulnerabilities.append({
                                     "name": f"Laravel {vp} Accessible",
-                                    "severity": "critical" if ".env" in vp else "high",
+                                    "severity": "critical",
                                     "description": f"Laravel endpoint {vp} is accessible",
                                     "matched_at": target.rstrip("/") + vp,
                                     "type": "exposure",
@@ -473,7 +505,9 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                     for vp in vuln_paths:
                         try:
                             vr = await client.get(target.rstrip("/") + vp)
-                            if vr.status_code == 200 and ("actuator" in vr.text.lower() or "beans" in vr.text.lower()):
+                            if (vr.status_code == 200 and vr.text.strip() != (baseline_body or '').strip()
+                                    and vr.headers.get('content-type', '').startswith('application/json')
+                                    and re.search(r'"(?:propertySources|beans)"\s*:', vr.text)):
                                 vulnerabilities.append({
                                     "name": f"Spring Boot Actuator {vp} Exposed",
                                     "severity": "critical" if "/env" in vp else "high",
@@ -543,7 +577,10 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
                 pass
 
     except Exception as e:
-        return {"vulnerabilities": [], "error": str(e), "php2shell": php2shell}
+        return {"vulnerabilities": vulnerabilities, "count": len(vulnerabilities),
+                "error": type(e).__name__, "php2shell": php2shell,
+                "coverage_complete": False, "execution_status": "error",
+                "coverage": "scan interrupted; partial evidence preserved"}
 
     # Optional EPSS/KEV enrichment (opt-in; at most the two intel requests owned
     # by epss_lookup, cached KEV; never target probing; failures never fail scan)
@@ -622,6 +659,23 @@ async def vuln_scanner(target: str, epss_intel: bool = False) -> Dict:
             "correlation grades only, not verified RCE."
         ),
     }
+    errors = observed.errors if observed else [{"kind": "not_started"}]
+    response.update({
+        "requests_attempted": observed.attempted if observed else 0,
+        "requests_succeeded": observed.succeeded if observed else 0,
+        "requests_failed": observed.attempted - observed.succeeded if observed else 0,
+        "errors": errors,
+        "coverage_complete": not errors,
+        "execution_status": "partial" if errors else "completed",
+        "coverage": "HTTP headers, fixed paths, banner correlation, default HTTP credentials; no crawling or application injection",
+    })
+    if errors:
+        response["error"] = "Some requests failed, were blocked, or returned server errors; scan incomplete"
+        if not response["requests_succeeded"]:
+            response["execution_status"] = "error"
+    for finding in vulnerabilities:
+        finding.setdefault("coverage", response["coverage"] + ("; partial" if errors else ""))
+        finding.setdefault("target", finding.get("matched_at", target))
     if result_enrichment is not None:
         response["intel_summary"] = result_enrichment
     return response

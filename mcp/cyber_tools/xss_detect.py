@@ -254,26 +254,34 @@ def _is_html_response(response) -> bool:
 
 
 async def xss_detect(target: str, param: str = "", method: str = "get",
-                     use_browser: bool = False, preset: str = "observe-first") -> dict:
+                     use_browser: bool = False, preset: str = "observe-first", request_json: str = "") -> dict:
     """Deep XSS detection — reflected, stored, DOM-based with WAF bypass and context-aware payloads.
 
     preset observe-first (default): short deadline, limited payloads/params, no stored fan-out.
     staging-deep: broader payloads + stored paths within a hard deadline.
     """
     import time
+    from .request_utils import request_context, query_value, ObservedAsyncClient
+    try:
+        spec = request_context(request_json)
+    except (ValueError, TypeError) as exc:
+        return {'error': str(exc), 'coverage_complete': False, 'coverage': 'invalid request context; no requests', 'vulnerable': False}
+    method = spec['method'].lower() if request_json else method.lower()
+    body_key = 'json' if 'json' in spec else 'data'
+    supplied_body = spec.get(body_key, {})
     results = []
     waf_detected = None
     coverage_notes = [f"preset={preset}"]
     timed_out = False
     parsed = urllib.parse.urlparse(target)
-    params = urllib.parse.parse_qs(parsed.query)
+    params = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
     base = target.rstrip("/")
     deep = preset == "staging-deep"
     deadline = time.monotonic() + (45.0 if deep else 15.0)
     max_params = 8 if deep else 3
     max_payloads = 40 if deep else 12
 
-    test_params = [param] if param else list(params.keys()) if params else [
+    test_params = [param] if param else list(supplied_body) if supplied_body else list(params.keys()) if params else [
         "q", "search", "s", "id", "page", "name", "user", "input",
         "query", "text", "msg", "message", "comment", "title", "url",
         "redirect", "next", "return", "callback", "data", "value",
@@ -282,10 +290,15 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
     coverage_notes.append(f"params={len(test_params)}")
 
     async with httpx.AsyncClient(timeout=5.0, verify=False, follow_redirects=False) as client:
+        client = ObservedAsyncClient(client)
+        client.headers.update(spec.get('headers', {}))
+        for name, value in spec.get('cookies', {}).items():
+            client.cookies.set(name, value, domain=parsed.hostname)
         # Get baseline; an existing static payload is not injection evidence.
         baseline_body = ""
         try:
-            baseline_resp = await client.get(base)
+            baseline_resp = (await client.request(method.upper(), target, **{body_key: supplied_body})
+                             if method != 'get' else await client.get(base))
             baseline_len = len(baseline_resp.text)
             baseline_body = baseline_resp.text
             waf = _detect_waf(baseline_resp)
@@ -311,12 +324,10 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
                         break
                     try:
                         if method == "get":
-                            new_params = {k: v[0] for k, v in params.items()} if params else {p: payload}
-                            new_params[p] = payload
-                            url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urllib.parse.urlencode(new_params)}"
+                            url = query_value(target, p, payload)
                             resp = await client.get(url)
                         else:
-                            resp = await client.post(target, data={p: payload})
+                            resp = await client.request(method.upper(), target, **{body_key: {**supplied_body, p: payload}})
 
                         body = resp.text
                         payl = payload[:25].replace("\\", "").replace('"', "'")
@@ -355,7 +366,9 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
                     break
 
         # --- STORED XSS ---
-        stored_paths = STORED_PATHS if deep else []
+        stored_paths = STORED_PATHS if deep and not request_json else []
+        if request_json:
+            coverage_notes.append('explicit_request_context; stored fan-out skipped')
         if not deep:
             coverage_notes.append("stored_xss_skipped (observe-first)")
         for path in stored_paths:
@@ -471,7 +484,9 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
                 continue
 
         # --- BROWSER-BASED XSS (Playwright) ---
-        if use_browser:
+        if use_browser and request_json:
+            coverage_notes.append('browser replay of explicit authenticated/body context not supported; HTTP evidence only')
+        if use_browser and not request_json:
             try:
                 from playwright.async_api import async_playwright
                 async with async_playwright() as pw:
@@ -538,10 +553,17 @@ async def xss_detect(target: str, param: str = "", method: str = "get",
     if timed_out:
         coverage_notes.append("deadline_reached — remaining probes skipped")
     coverage_notes.append(f"findings={len(results)}")
+    incomplete = timed_out or bool(client.failed or client.blocked)
+    coverage_notes.append(f'requests={client.attempted}; failed={client.failed}; blocked_or_error={client.blocked}')
 
     return attach_contract_fields({
         "target": target,
         "preset": preset,
+        "coverage_complete": not incomplete,
+        "execution_status": 'partial' if incomplete else 'completed',
+        "requests_attempted": client.attempted,
+        "requests_failed": client.failed,
+        **({'error': 'Request failures, blocked responses or deadline limited XSS coverage'} if incomplete else {}),
         "waf_detected": waf_detected,
         "results": results,
         "findings": results,

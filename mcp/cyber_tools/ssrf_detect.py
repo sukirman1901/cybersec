@@ -8,6 +8,7 @@ import asyncio
 import socket
 import ipaddress
 import html
+from .request_utils import query_value
 
 # --- SSRF Parameters to Test ---
 SSRF_PARAMS = [
@@ -172,7 +173,7 @@ async def ssrf_detect(target: str) -> dict:
             for internal_ip, ip_addr, label in INTERNAL_TARGETS:
                 try:
                     payload = f"http://{ip_addr}"
-                    url = f"{base}?{p}={urllib.parse.quote(payload, safe='')}"
+                    url = query_value(target, p, payload)
 
                     start_time = asyncio.get_event_loop().time()
                     resp = await client.get(url)
@@ -195,7 +196,7 @@ async def ssrf_detect(target: str) -> dict:
                         for svc_ip, svc_port, svc_name in INTERNAL_SERVICES:
                             try:
                                 svc_url = f"http://{svc_ip}:{svc_port}"
-                                svc_test = f"{base}?{p}={urllib.parse.quote(svc_url, safe='')}"
+                                svc_test = query_value(target, p, svc_url)
                                 svc_resp = await client.get(svc_test, timeout=5.0)
                                 svc_body = _response_content(svc_resp, svc_url, baseline, controls)
                                 if re.search(r"SSH-\d|redis_version:|^220[ -].*SMTP", svc_body, re.M | re.I):
@@ -230,7 +231,7 @@ async def ssrf_detect(target: str) -> dict:
             for p in test_params:
                 for md_url in metadata_urls[:2]:  # Test top 2 per cloud
                     try:
-                        url = f"{base}?{p}={urllib.parse.quote(md_url, safe='')}"
+                        url = query_value(target, p, md_url)
                         resp = await client.get(url, timeout=10.0)
                         body = _response_content(resp, md_url, baseline, controls)
 
@@ -268,7 +269,7 @@ async def ssrf_detect(target: str) -> dict:
         for p in test_params:
             for proto_name, proto_url in PROTOCOL_PAYLOADS:
                 try:
-                    url = f"{base}?{p}={urllib.parse.quote(proto_url, safe='')}"
+                    url = query_value(target, p, proto_url)
                     resp = await client.get(url, timeout=10.0)
                     body = _response_content(resp, proto_url, baseline, controls)
                     body_len = len(body)
@@ -313,7 +314,7 @@ async def ssrf_detect(target: str) -> dict:
                     start = asyncio.get_event_loop().time()
                     try:
                         resp = await client.get(
-                            f"{base}?{p}={urllib.parse.quote(timing_url, safe='')}",
+                            query_value(target, p, timing_url),
                             timeout=10.0,
                         )
                     except Exception:
@@ -344,7 +345,7 @@ async def ssrf_detect(target: str) -> dict:
             for redir_url in redirect_payloads:
                 try:
                     # Test if server follows redirect to internal
-                    url = f"{base}?{p}={urllib.parse.quote(redir_url, safe='')}"
+                    url = query_value(target, p, redir_url)
                     resp = await client.get(url, timeout=10.0, follow_redirects=True)
 
                     if str(resp.url) != str(url) and resp.status_code == 200:
