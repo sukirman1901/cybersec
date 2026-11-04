@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 101,
+  "with_static_test_references": 104,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -194,9 +194,13 @@
         "mcp/cyber_tools/api_fuzz.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "secrets"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_discovery_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1302,9 +1306,13 @@
         "mcp/cyber_tools/exposed_backup.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "secrets"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_discovery_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -2084,9 +2092,14 @@
         "mcp/cyber_tools/log_exposure.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "json",
+        "re",
+        "secrets"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_discovery_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

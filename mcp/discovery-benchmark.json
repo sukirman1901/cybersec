@@ -1,0 +1,204 @@
+{
+  "before": {
+    "environment": "httpx.MockTransport; sequential",
+    "runs": 5,
+    "groups": {
+      "api_fuzz": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 15,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 5.005,
+        "requests_by_case": {
+          "positive": 20,
+          "catchall": 20,
+          "negative": 20,
+          "blocked": 20,
+          "transport": 20,
+          "incidental": 20,
+          "json_catchall": 20
+        },
+        "coverage_complete_by_case": {
+          "positive": null,
+          "catchall": null,
+          "negative": null,
+          "blocked": null,
+          "transport": null,
+          "incidental": null,
+          "json_catchall": null
+        }
+      },
+      "exposed_backup": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 15,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 5,
+        "mock_processing_p95_ms": 148.484,
+        "requests_by_case": {
+          "positive": 617,
+          "catchall": 617,
+          "negative": 617,
+          "blocked": 617,
+          "transport": 1,
+          "incidental": 617,
+          "json_catchall": 617
+        },
+        "coverage_complete_by_case": {
+          "positive": null,
+          "catchall": null,
+          "negative": null,
+          "blocked": null,
+          "transport": null,
+          "incidental": null,
+          "json_catchall": null
+        }
+      },
+      "log_exposure": {
+        "counts": {
+          "tp": 5,
+          "tn": 5,
+          "fp": 15,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 5.427,
+        "requests_by_case": {
+          "positive": 18,
+          "catchall": 18,
+          "negative": 18,
+          "blocked": 18,
+          "transport": 18,
+          "incidental": 18,
+          "json_catchall": 18
+        },
+        "coverage_complete_by_case": {
+          "positive": null,
+          "catchall": null,
+          "negative": null,
+          "blocked": null,
+          "transport": null,
+          "incidental": null,
+          "json_catchall": null
+        }
+      }
+    },
+    "limitations": [
+      "Selected fixture recognition, not real-world accuracy or complete scan coverage.",
+      "Repeated cases are not independent targets; p95 is local processing, not network latency.",
+      "Backup deferred candidates remain untested even when a selected positive fixture is recognized."
+    ]
+  },
+  "after": {
+    "environment": "httpx.MockTransport; sequential",
+    "runs": 5,
+    "groups": {
+      "api_fuzz": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 6.328,
+        "requests_by_case": {
+          "positive": 21,
+          "catchall": 21,
+          "negative": 21,
+          "blocked": 1,
+          "transport": 1,
+          "incidental": 21,
+          "json_catchall": 21
+        },
+        "coverage_complete_by_case": {
+          "positive": true,
+          "catchall": true,
+          "negative": true,
+          "blocked": false,
+          "transport": false,
+          "incidental": true,
+          "json_catchall": true
+        }
+      },
+      "exposed_backup": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 7.679,
+        "requests_by_case": {
+          "positive": 25,
+          "catchall": 25,
+          "negative": 25,
+          "blocked": 1,
+          "transport": 1,
+          "incidental": 25,
+          "json_catchall": 25
+        },
+        "coverage_complete_by_case": {
+          "positive": false,
+          "catchall": false,
+          "negative": false,
+          "blocked": false,
+          "transport": false,
+          "incidental": false,
+          "json_catchall": false
+        }
+      },
+      "log_exposure": {
+        "counts": {
+          "tp": 5,
+          "tn": 20,
+          "fp": 0,
+          "fn": 0
+        },
+        "scored": 25,
+        "excluded": 10,
+        "exceptions": 0,
+        "mock_processing_p95_ms": 6.253,
+        "requests_by_case": {
+          "positive": 19,
+          "catchall": 19,
+          "negative": 19,
+          "blocked": 1,
+          "transport": 1,
+          "incidental": 19,
+          "json_catchall": 19
+        },
+        "coverage_complete_by_case": {
+          "positive": true,
+          "catchall": true,
+          "negative": true,
+          "blocked": false,
+          "transport": false,
+          "incidental": true,
+          "json_catchall": true
+        }
+      }
+    },
+    "limitations": [
+      "Selected fixture recognition, not real-world accuracy or complete scan coverage.",
+      "Repeated cases are not independent targets; p95 is local processing, not network latency.",
+      "Backup deferred candidates remain untested even when a selected positive fixture is recognized."
+    ]
+  }
+}

@@ -26,6 +26,7 @@ MODULES = (
     "test_remediation_20261104",
     "test_accuracy_tuning",
     "test_web_surface_accuracy",
+    "test_discovery_accuracy",
 )
 
 

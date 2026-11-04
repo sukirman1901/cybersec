@@ -90,6 +90,52 @@ explicit coverage: Git now checks five signature-bearing metadata paths; Next.js
 no longer probes generic directories/API/404/sitemap or retrieves unlinked maps.
 No claim that omitted paths or unlinked artifacts are secure.
 
+## Batch 3 — API, backup and log discovery (2026-11-04)
+
+Tools: `api_fuzz`, `exposed_backup`, `log_exposure`. Initial labelled fixtures
+exposed 17 failing tests/subtests, including catch-all false positives, unbounded
+backup enumeration, continued requests after 429, and raw synthetic secrets in
+log snippets. Additional tests cover prioritized PHP/SQL/JSON backup formats and
+JSON log credential markers.
+
+Changes:
+- API discovery requires successful, distinctive content with schema/document or
+  endpoint markers; unrelated successful HTML and catch-all JSON are not endpoints.
+  Returned routes are observations, not vulnerability claims.
+- Backup detection uses deterministic selection of six priority filenames across
+  four suffixes, content signatures and a missing-path control. Budget: 24 candidate
+  paths plus one control; 592 of 616 candidates are deferred on a normal run.
+  Deferred coverage is explicitly partial. No linked-path expansion or archive
+  extraction. Sensitive-looking file names alone do not imply critical severity.
+- Log detection requires at least two recognized records, not keyword matches in
+  arbitrary prose. No raw snippets or secret values are returned. Credential
+  assignment patterns are candidates, not verified active credentials.
+- All three use the bounded probe and stop on denial/rate-limit, redirects,
+  server errors or transport failures. No-result logs say NO_EVIDENCE rather than PASS.
+
+Verification: **409 tests + 1318 subtests passed**, 50 existing deprecation warnings;
+**376 offline tests OK**. No production requests in this batch.
+
+`discovery-benchmark.json`: 21 unique fixtures, five repetitions, 105 executions
+per snapshot. Before: each tool had 15 FP across repeated scored fixtures; backup
+had five transport exceptions. After: 75 scored recognition executions with zero
+FP/FN; 30 blocked/transport cases excluded, zero exceptions. Backup recognition
+scores do not imply completeness: unselected paths remain unknown.
+
+| Tool | Mock-processing p95 before → after (ms) | Normal request count |
+|---|---|---|
+| api_fuzz | 5.005 → 6.328 | 20 → 21 |
+| exposed_backup | 148.484 → 7.679 | 617 → 25 |
+| log_exposure | 5.427 → 6.253 | 18 → 19 |
+
+API/log have modest extra local overhead and one control request, traded for
+better discrimination. Backup savings come primarily from intentionally reduced
+coverage, not an equivalent full scan becoming faster. All stop after one request
+on the blocked/transport fixtures. These p95 values exclude real network latency;
+resource/RSS and real-world accuracy remain unmeasured. Soft-404 equality only
+recognizes identical response bodies; dynamic variants and unsupported formats
+remain limits of these shallow detectors.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the
