@@ -243,8 +243,10 @@ def _gen_markdown(target: str, findings: dict) -> str:
     lines.append("")
     open_ports = findings.get("open_ports", [])
     vulns = findings.get("vulnerabilities", [])
-    lines.append(f"- **Open Ports Found:** {len(open_ports)}")
-    lines.append(f"- **Vulnerabilities Found:** {len(vulns)}")
+    lines.append(f"- **Open Ports Found:** {len(open_ports) if 'open_ports' in findings else 'Not assessed (inventory not supplied)'}")
+    lines.append(f"- **Observations / Findings:** {len(vulns)}")
+    if findings.get('summary'):
+        lines.append(str(findings['summary']))
     if findings.get("technologies"):
         lines.append(f"- **Technologies:** {', '.join(findings['technologies'][:5])}")
     lines.append("")
@@ -259,7 +261,7 @@ def _gen_markdown(target: str, findings: dict) -> str:
             lines.append(f"| {p.get('port', '?')} | {svc} | {banner} |")
         lines.append("")
     if vulns:
-        lines.append("## Vulnerabilities")
+        lines.append("## Observations and Findings")
         lines.append("")
         lines.append("| ID | Severity | Description |")
         lines.append("|----|----------|-------------|")
@@ -297,7 +299,7 @@ def _gen_markdown(target: str, findings: dict) -> str:
     lines.append("")
     if vulns:
         for v in vulns:
-            lines.append(f"- **{v.get('id', 'N/A')}:** Update/patch to fix {v.get('description', '')[:50]}")
+            lines.append(f"- **{v.get('id', 'N/A')}:** {v.get('recommendation') or 'Review the observation and validate impact before selecting remediation.'}")
     else:
         lines.append("- No findings supplied; this does not establish scan completion or absence of vulnerabilities.")
     lines.append("")

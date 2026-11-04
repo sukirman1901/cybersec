@@ -1,0 +1,3790 @@
+{
+  "schema_version": 1,
+  "tool_count": 209,
+  "with_static_test_references": 98,
+  "limitations": [
+    "Static references can include generic contract tests, strings and mocks.",
+    "No scanner executed. No accuracy or runtime coverage inferred.",
+    "Import roots include stdlib; CLI/API/browser prerequisites need per-tool review."
+  ],
+  "tools": [
+    {
+      "name": "ad_asrep_roast",
+      "description": "ASREP Roasting \u2014 request AS-REP tickets for accounts with DONT_REQUIRE_PREAUTH and return crackable hashes.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_asrep_roast.py"
+      ],
+      "import_roots": [
+        "binascii",
+        "datetime",
+        "impacket",
+        "logging",
+        "pyasn1",
+        "random",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_certipy",
+      "description": "AD CS abuse via Certipy \u2014 enumerate certificate services (ESC1-15), request certificates, PKINIT auth, shadow credentials. Actions: find, req, auth, shadow.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_certipy.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "impacket",
+        "logging",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_dcsync",
+      "description": "DCSync \u2014 extract password hashes from domain controller via DRSUAPI replication. Requires Domain Admin privileges.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_dcsync.py"
+      ],
+      "import_roots": [
+        "impacket",
+        "logging",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_enum",
+      "description": "Comprehensive Active Directory enumeration via LDAP \u2014 users, groups, computers, trusts, password policy.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_enum.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "impacket",
+        "logging",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_kerberoast",
+      "description": "Kerberoasting \u2014 request TGS tickets for SPN accounts and return crackable hashes (hashcat format).",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_kerberoast.py"
+      ],
+      "import_roots": [
+        "binascii",
+        "impacket",
+        "logging",
+        "pyasn1",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_ntlm_relay",
+      "description": "NTLM Relay \u2014 set up relay server to capture and relay NTLM authentications to target systems via ntlmrelayx.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_ntlm_relay.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "impacket",
+        "logging",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_passthehash",
+      "description": "Pass-the-Hash \u2014 execute commands on remote targets using NTLM hash authentication. Protocols: smbexec, wmiexec, atexec, psexec.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_passthehash.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "impacket",
+        "logging",
+        "shutil",
+        "sys",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ad_spray",
+      "description": "Password spraying \u2014 test a single password against multiple AD accounts while respecting lockout policy.",
+      "implementation_files": [
+        "mcp/cyber_tools/ad_spray.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "impacket",
+        "logging",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "amass_enum",
+      "description": "Attack surface mapping. Requires amass CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "api_auth",
+      "description": "Test API auth bypass \u2014 no auth, basic, bearer fake, internal headers.",
+      "implementation_files": [
+        "mcp/cyber_tools/api_auth.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "api_fuzz",
+      "description": "Fuzz a web target for common API endpoints and swagger docs.",
+      "implementation_files": [
+        "mcp/cyber_tools/api_fuzz.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "apk_analyze",
+      "description": "Analyze APK file \u2014 permissions, exported activities, package name, suspicious files.",
+      "implementation_files": [
+        "mcp/cyber_tools/apk_analyze.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "io",
+        "re",
+        "zipfile"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "approval_artifact",
+      "description": "Approval artifact \u2014 digital approval/signature before destructive actions.",
+      "implementation_files": [
+        "mcp/cyber_tools/approval_artifact.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py",
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "asn_lookup",
+      "description": "Look up ASN information for an IP address via Team Cymru.",
+      "implementation_files": [
+        "mcp/cyber_tools/asn_lookup.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "socket"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "attack_surface_map",
+      "description": "Build an attack surface map from aggregated scan results. Accepts JSON string with results from port_scan, dns_lookup, subdomain_enum, http_probe, vuln_scan, etc.",
+      "implementation_files": [
+        "mcp/cyber_tools/attack_surface.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "auth_macro_runner",
+      "description": "Multi-step auth macro runner \u2014 form login, basic auth, bearer token, custom step chains with cookie persistence.",
+      "implementation_files": [
+        "mcp/cyber_tools/auth_macro_runner.py"
+      ],
+      "import_roots": [
+        "base64",
+        "http",
+        "json",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "authenticated_scan",
+      "description": "Inspect authenticated content after identity-specific verification_marker and anonymous control. Endpoint accessibility alone is not IDOR. Cookies/headers are JSON objects.",
+      "implementation_files": [
+        "mcp/cyber_tools/authenticated_scan.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "auto_exploit",
+      "description": "Auto-exploit chain: detect \u2192 verify \u2192 vuln_validate \u2192 exploit. Requires approved approval_id. vuln_type: auto, sqli, xss, lfi, ssrf, open_redirect.",
+      "implementation_files": [
+        "mcp/cyber_tools/auto_exploit.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "hashlib",
+        "json",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "bandit_scan",
+      "description": "Run bandit SAST scanner on Python codebase.",
+      "implementation_files": [
+        "mcp/cyber_tools/bandit_scan.py"
+      ],
+      "import_roots": [
+        "json",
+        "os",
+        "shutil",
+        "subprocess"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "binary_checksec",
+      "description": "Analyze binary security \u2014 ELF/Mach-O/PE, PIE, NX, linked libs, interesting strings.",
+      "implementation_files": [
+        "mcp/cyber_tools/binary_checksec.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "bloodhound_collect",
+      "description": "Collect AD data for BloodHound analysis. Requires bloodhound-python CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/bloodhound_collect.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "branded_report",
+      "description": "White-label pentest reports \u2014 custom logo, colors, company name, footer, disclaimer.",
+      "implementation_files": [
+        "mcp/cyber_tools/branded_report.py"
+      ],
+      "import_roots": [
+        "base64",
+        "datetime",
+        "json",
+        "os"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "browser_agent_hijack",
+      "description": "Test browser-based AI agents for hijack \u2014 prompt injection via web content, hidden forms, autofill, clickjacking.",
+      "implementation_files": [
+        "mcp/cyber_tools/browser_agent_hijack.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "bulk_scan",
+      "description": "Scan multiple targets at once. Targets: comma or newline separated. Tool: port_scan, http_probe, ssl_check, vuln_scan. Max 50 targets.",
+      "implementation_files": [
+        "mcp/cyber_tools/bulk_scan.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "concurrent",
+        "contextvars",
+        "httpx",
+        "json",
+        "re",
+        "socket",
+        "ssl"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "bypass_403",
+      "description": "Test 403 bypass techniques (headers, path, method).",
+      "implementation_files": [
+        "mcp/cyber_tools/bypass_403.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cache_poison_check",
+      "description": "Web cache poisoning detection \u2014 header manipulation, cache key injection, cache deception, scheme bypass.",
+      "implementation_files": [
+        "mcp/cyber_tools/cache_poison_check.py"
+      ],
+      "import_roots": [
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "captcha_test",
+      "description": "Test CAPTCHA bypass \u2014 10 vectors: token reuse, OCR, math solving, header/cookie bypass, hCaptcha/Turnstile detection. action: all|reuse|ocr|math|header|cookie|recaptcha|detect",
+      "implementation_files": [
+        "mcp/cyber_tools/captcha_test.py"
+      ],
+      "import_roots": [
+        "PIL",
+        "base64",
+        "httpx",
+        "io",
+        "pytesseract",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ci_cd_scan",
+      "description": "Scan CI/CD configs \u2014 GitHub Actions, GitLab CI, Jenkins, CircleCI, secrets exposure.",
+      "implementation_files": [
+        "mcp/cyber_tools/ci_cd_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cleanup_tracking",
+      "description": "Cleanup tracking \u2014 log modifications, generate cleanup scripts, track artifact state.",
+      "implementation_files": [
+        "mcp/cyber_tools/cleanup_tracking.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cloud_audit",
+      "description": "Comprehensive cloud security audit \u2014 S3 public, K8s API, Docker socket, IAM, infra recommendations.",
+      "implementation_files": [
+        "mcp/cyber_tools/cloud_audit.py"
+      ],
+      "import_roots": [
+        "hashlib",
+        "http",
+        "json",
+        "socket",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cloud_enum",
+      "description": "Enumerate cloud storage resources (AWS S3, Azure, GCP) for a company name.",
+      "implementation_files": [
+        "mcp/cyber_tools/cloud_enum.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cloud_iam_audit",
+      "description": "Audit cloud IAM policies \u2014 overly permissive roles, public access, cross-account trust.",
+      "implementation_files": [
+        "mcp/cyber_tools/cloud_iam_audit.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "json",
+        "shutil"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cloud_infra",
+      "description": "Enumerate cloud infra config \u2014 open security groups, unencrypted storage, public endpoints.",
+      "implementation_files": [
+        "mcp/cyber_tools/cloud_infra.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "json",
+        "shutil"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cmd_injection",
+      "description": "Test for command injection (semicolon, pipe, subshell, etc).",
+      "implementation_files": [
+        "mcp/cyber_tools/cmd_injection.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cmd_oast_helper",
+      "description": "Command injection OAST helper \u2014 blind CMD testing with OOB callback correlation and time-based detection.",
+      "implementation_files": [
+        "mcp/cyber_tools/cmd_oast_helper.py"
+      ],
+      "import_roots": [
+        "json",
+        "random",
+        "socket",
+        "string",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cmseek_check",
+      "description": "CMS detection and version identification. Requires cmseek CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "compliance_map",
+      "description": "Map findings to compliance frameworks: SOC2, ISO27001, GDPR, PCI-DSS, NIST 800-53.",
+      "implementation_files": [
+        "mcp/cyber_tools/compliance_map.py"
+      ],
+      "import_roots": [
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "continuous_monitor",
+      "description": "Monitor a target for changes over time. Actions: record, history, diff, stats, clear. Stores snapshots and detects changes.",
+      "implementation_files": [
+        "mcp/cyber_tools/continuous_monitor.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "hashlib",
+        "json",
+        "os"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cookie_audit",
+      "description": "Audit cookie security \u2014 HttpOnly, Secure, SameSite, sensitive cookies.",
+      "implementation_files": [
+        "mcp/cyber_tools/cookie_audit.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "email",
+        "http",
+        "httpx"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_accuracy_tuning.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cookie_editor",
+      "description": "Decode, forge, and test cookie manipulation \u2014 base64/JSON decode, privilege escalation.",
+      "implementation_files": [
+        "mcp/cyber_tools/cookie_editor.py"
+      ],
+      "import_roots": [
+        "base64",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cors_check",
+      "description": "Test for CORS misconfiguration. preset: observe-first (default, bounded) or staging-deep.",
+      "implementation_files": [
+        "mcp/cyber_tools/cors_check.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "asyncio",
+        "httpx",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "crlf_inject",
+      "description": "CRLF injection \u2014 inject HTTP headers via \\r\\n in parameters, response splitting, log forgery, redirect injection.",
+      "implementation_files": [
+        "mcp/cyber_tools/crlf_inject.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "random",
+        "re",
+        "string",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "crt_search",
+      "description": "Search Certificate Transparency logs for certificates.",
+      "implementation_files": [
+        "mcp/cyber_tools/crt_search.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "csp_analyze",
+      "description": "Analyze Content-Security-Policy header + other security headers.",
+      "implementation_files": [
+        "mcp/cyber_tools/csp_analyze.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_accuracy_tuning.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "csrf_detect",
+      "description": "Check forms for CSRF tokens, SameSite cookies, and Origin/Referer validation.",
+      "implementation_files": [
+        "mcp/cyber_tools/csrf_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "hashlib",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "csrf_extract",
+      "description": "Extract and analyze anti-CSRF tokens from meta tags, hidden inputs, JS variables, cookies, headers.",
+      "implementation_files": [
+        "mcp/cyber_tools/csrf_extract.py"
+      ],
+      "import_roots": [
+        "base64",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "custom_wordlist",
+      "description": "Custom wordlist manager. Actions: create, list, show, delete, merge, generate, import, builtin, append.",
+      "implementation_files": [
+        "mcp/cyber_tools/custom_wordlist.py"
+      ],
+      "import_roots": [
+        "itertools",
+        "json",
+        "os"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "cve_search",
+      "description": "Look up known CVEs by service/version, including offline PHP2SHELL version correlation (not verified RCE).",
+      "implementation_files": [
+        "mcp/cyber_tools/vuln_db.py"
+      ],
+      "import_roots": [
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_php2shell.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "desktop_config",
+      "description": "Scan for exposed config files and saved credentials in desktop apps.",
+      "implementation_files": [
+        "mcp/cyber_tools/desktop_config.py"
+      ],
+      "import_roots": [
+        "os",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "desktop_electron",
+      "description": "Analyze Electron app \u2014 ASAR unpack, preload inspection, IPC safety.",
+      "implementation_files": [
+        "mcp/cyber_tools/desktop_electron.py"
+      ],
+      "import_roots": [
+        "os",
+        "re",
+        "subprocess"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "desktop_entitlements",
+      "description": "Check macOS entitlements, Windows manifest, Linux capabilities in desktop apps.",
+      "implementation_files": [
+        "mcp/cyber_tools/desktop_entitlements.py"
+      ],
+      "import_roots": [
+        "os",
+        "plistlib",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "desktop_packages",
+      "description": "Check bundled package versions in desktop apps for known CVEs.",
+      "implementation_files": [
+        "mcp/cyber_tools/desktop_packages.py"
+      ],
+      "import_roots": [
+        "json",
+        "os",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "desktop_strings",
+      "description": "Extract strings from desktop binaries \u2014 find secrets, API keys, URLs, IPs.",
+      "implementation_files": [
+        "mcp/cyber_tools/desktop_strings.py"
+      ],
+      "import_roots": [
+        "os",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dir_bruteforce",
+      "description": "Brute-force directories and files on a web target.",
+      "implementation_files": [
+        "mcp/cyber_tools/web_fuzz.py"
+      ],
+      "import_roots": [
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "django_scan",
+      "description": "Django security scan \u2014 debug mode, SECRET_KEY, admin, session flags.",
+      "implementation_files": [
+        "mcp/cyber_tools/django_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dns_lookup",
+      "description": "Enumerate DNS records for a domain (A, AAAA, MX, NS, TXT, CNAME).",
+      "implementation_files": [
+        "mcp/cyber_tools/dns_enum.py"
+      ],
+      "import_roots": [
+        "socket"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "docker_scan",
+      "description": "Scan for Docker socket exposure, container escape paths, env leaks.",
+      "implementation_files": [
+        "mcp/cyber_tools/docker_scan.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dork_and_scan",
+      "description": "Bulk dork pipeline: generate dorks \u2192 search \u2192 list ALL websites \u2192 parallel vuln_scan/tech_detect/sqli_detect. scan_mode=hosts (unique domains) or urls (every URL). max_scan up to 50.",
+      "implementation_files": [
+        "mcp/cyber_tools/dork_pipeline.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "cyber_tools",
+        "re",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dork_gen",
+      "description": "Generate Google dorks for target discovery. Categories: vuln_sites, config_leak, admin_panels, db_dumps, backup_files, git_exposed, api_keys, iot_devices, login_portals, phpinfo, error_messages, upload_forms, exposed_cms, shell_upload, deface_target, s3_buckets, exposed_docs. Tech: wordpress, laravel, django, spring, nodejs, jenkins, gitlab, kibana, grafana. Vuln: sqli, lfi, xss, rce.",
+      "implementation_files": [
+        "mcp/cyber_tools/dork_gen.py"
+      ],
+      "import_roots": [
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dork_hunt",
+      "description": "Full dorking pipeline: generate dorks \u2192 scan engines \u2192 HTTP probe \u2192 validate vulnerabilities. One-call target discovery \u2014 give a category, get back validated vulnerable URLs.",
+      "implementation_files": [
+        "mcp/cyber_tools/dork_hunt.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "cyber_tools",
+        "httpx",
+        "re",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dork_scan",
+      "description": "Execute dork queries via multiple search engines (DuckDuckGo, Bing, Google). Returns URLs found. Avoids CAPTCHA by using DDG HTML version + Bing.",
+      "implementation_files": [
+        "mcp/cyber_tools/dork_scan.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "os",
+        "re",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "dork_search",
+      "description": "Perform Google dorking to find vulnerable targets or exposed information.",
+      "implementation_files": [
+        "mcp/cyber_tools/google_dork.py"
+      ],
+      "import_roots": [
+        "re",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "drupal_scan",
+      "description": "Drupal security scan \u2014 drupalgeddon, install.php, settings.php, jsonapi.",
+      "implementation_files": [
+        "mcp/cyber_tools/drupal_scan.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "email_osint",
+      "description": "Email intelligence \u2014 validate format, check MX records, domain reputation, Gravatar profile, and generate breach lookup URLs (HIBP, GhostProject, IntelligenceX). No paid APIs.",
+      "implementation_files": [
+        "mcp/cyber_tools/email_osint.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "dns",
+        "hashlib",
+        "httpx",
+        "re",
+        "socket",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "engagement_gate",
+      "description": "Engagement gate \u2014 scope validation, authorization check, pre-flight approval rules.",
+      "implementation_files": [
+        "mcp/cyber_tools/engagement_gate.py"
+      ],
+      "import_roots": [
+        "contextlib",
+        "contextvars",
+        "copy",
+        "datetime",
+        "ipaddress",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_php2shell.py",
+        "mcp/tests/test_php2shell_remote.py",
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_sqli_mcp.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "epss_lookup",
+      "description": "FIRST EPSS probability + percentile per CVE, plus CISA KEV membership and\npatch priority (P0 KEV / P1 >=50% / P2 >=10% / P3 low; unknown if no score).\nin_kev is true/false only for fresh evidence, null if stale/unavailable/disabled.\nsources records feed status, retrieval/source dates and one-hour KEV cache age;\nstale_in_kev is historical only. Missing EPSS rows retain nullable entries.\nRead-only, no target\ntraffic; max 2 outbound requests (FIRST + CISA feed, cached). Batch up to 25\nCVE IDs. Use for patch prioritization instead of CVSS-alone decisions.",
+      "implementation_files": [
+        "mcp/cyber_tools/epss_lookup.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "httpx",
+        "math",
+        "re",
+        "time"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_epss_freshness.py",
+        "mcp/tests/test_epss_lookup.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_vuln_scan_epss_intel.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "evidence_manifest",
+      "description": "Evidence manifest \u2014 SHA256 hash chain for court-admissible evidence integrity.",
+      "implementation_files": [
+        "mcp/cyber_tools/evidence_manifest.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "hashlib",
+        "json",
+        "time"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "executive_summary",
+      "description": "Auto-generate executive summary from findings JSON. Risk posture, severity breakdown, top findings, recommendations.",
+      "implementation_files": [
+        "mcp/cyber_tools/executive_summary.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "exploit_db_detail",
+      "description": "Get Exploit-DB exploit details \u2014 title, author, CVE, code, download link.",
+      "implementation_files": [
+        "mcp/cyber_tools/exploit_db.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "exploit_db_download",
+      "description": "Download exploit code from Exploit-DB by exploit ID.",
+      "implementation_files": [
+        "mcp/cyber_tools/exploit_db.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "exploit_db_search",
+      "description": "Search Exploit-DB for public exploits by keyword, CVE, type (dos/local/remote/webapps), platform.",
+      "implementation_files": [
+        "mcp/cyber_tools/exploit_db.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "exposed_backup",
+      "description": "Scan for exposed backup files (.bak, .old, .sql, .dump, ~, etc).",
+      "implementation_files": [
+        "mcp/cyber_tools/exposed_backup.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "exposed_git",
+      "description": "Check for exposed .git folder \u2014 config, HEAD, logs, objects.",
+      "implementation_files": [
+        "mcp/cyber_tools/exposed_git.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "express_scan",
+      "description": "Scan Express.js app \u2014 header disclosure, error handling, directory listing, exposed paths.",
+      "implementation_files": [
+        "mcp/cyber_tools/express_scan.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ffuf_fuzz",
+      "description": "Fast web fuzzing. Requires ffuf CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "findings_manager",
+      "description": "Findings DB with novelty triage. Actions: add, novelty, triage, list, update, stats, export, clear.\n\nDedup fingerprint = host|type|method|path|param|technique|evidence. add/novelty require\nconfidence+coverage when require_quality=true (default). Triage labels: novel, duplicate,\nregression, changed, untriaged. Status: new, confirmed, false_positive, fixing, fixed, retested, wont_fix.",
+      "implementation_files": [
+        "mcp/cyber_tools/findings_manager.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "datetime",
+        "json",
+        "os"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_novelty_engine.py",
+        "mcp/tests/test_pipeline_quality.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "generate_report",
+      "description": "Generate a penetration testing report from findings JSON.",
+      "implementation_files": [
+        "mcp/cyber_tools/report.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_accuracy_tuning.py",
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "gf_patterns",
+      "description": "Find sensitive patterns in URLs (debug, api, files, params).",
+      "implementation_files": [
+        "mcp/cyber_tools/gf_patterns.py"
+      ],
+      "import_roots": [
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ghdb_search",
+      "description": "Search Google Hacking Database (GHDB) for sensitive information dorks \u2014 files containing passwords, admin panels, directory listings.",
+      "implementation_files": [
+        "mcp/cyber_tools/ghdb_search.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "github_issue",
+      "description": "Create GitHub issue from security finding. Requires repo (owner/repo) and token with repo scope.",
+      "implementation_files": [
+        "mcp/cyber_tools/github_issue.py"
+      ],
+      "import_roots": [
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "gitleaks_check",
+      "description": "Git secret scanning in a repository. Requires gitleaks CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "gobuster_dir",
+      "description": "Directory/file brute-forcing. Requires gobuster CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "graphql_depth_bypass",
+      "description": "GraphQL depth limit bypass \u2014 batching, alias attacks, circular fragments, resource exhaustion.",
+      "implementation_files": [
+        "mcp/cyber_tools/graphql_depth_bypass.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "json",
+        "time",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "graphql_injection",
+      "description": "Test GraphQL endpoints \u2014 SQL injection, deep nesting, alias batching, introspection, auth bypass.",
+      "implementation_files": [
+        "mcp/cyber_tools/graphql_injection.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "json",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "graphql_introspect",
+      "description": "Test for GraphQL introspection endpoint.",
+      "implementation_files": [
+        "mcp/cyber_tools/graphql_introspect.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "hash_analyze",
+      "description": "Identify hash type from its format (MD5, SHA1, bcrypt, NTLM, etc).",
+      "implementation_files": [
+        "mcp/cyber_tools/hash_analyze.py"
+      ],
+      "import_roots": [
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "hash_detect",
+      "description": "Identify hash type from format \u2014 MD5, SHA1/256/512, bcrypt, NTLM, argon2, and 20+ more.",
+      "implementation_files": [
+        "mcp/cyber_tools/hash_detect.py"
+      ],
+      "import_roots": [
+        "math",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "host_header_injection",
+      "description": "Test host header injection \u2014 password reset poisoning, cache poison.",
+      "implementation_files": [
+        "mcp/cyber_tools/host_header.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "http_ingest",
+      "description": "HTTP ingest \u2014 parse URL, OpenAPI, HAR, Burp XML, raw HTTP, curl \u2192 standardized findings.",
+      "implementation_files": [
+        "mcp/cyber_tools/http_ingest.py"
+      ],
+      "import_roots": [
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "http_logger",
+      "description": "Persistent HTTP request/response logger. Actions: log, list, search, stats, export, clear.",
+      "implementation_files": [
+        "mcp/cyber_tools/http_logger.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json",
+        "os"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "http_probe_target",
+      "description": "Probe HTTP/HTTPS service, detect technology stack and headers.",
+      "implementation_files": [
+        "mcp/cyber_tools/http_probe.py"
+      ],
+      "import_roots": [
+        "http",
+        "re",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_accuracy_tuning.py",
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "http_request_splitting",
+      "description": "HTTP request splitting \u2014 CRLF injection in headers, request line splitting, chunked encoding abuse.",
+      "implementation_files": [
+        "mcp/cyber_tools/http_request_splitting.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "time",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "hydra_brute",
+      "description": "Online password brute forcing. Requires hydra CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/hydra_brute.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "idor_access_validation",
+      "description": "IDOR/BOLA validation with dual-role differential. Single-role enum is LOW confidence; both cookies/headers required for HIGH BOLA.",
+      "implementation_files": [
+        "mcp/cyber_tools/idor_access_validation.py"
+      ],
+      "import_roots": [
+        "hashlib",
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "idor_detect",
+      "description": "Test for Insecure Direct Object References by accessing sequential IDs.",
+      "implementation_files": [
+        "mcp/cyber_tools/idor_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "injection_validator",
+      "description": "Unified injection validator \u2014 SQLi, XSS, NoSQL, CMD, LDAP, SSTI, XXE with multi-technique payloads.",
+      "implementation_files": [
+        "mcp/cyber_tools/injection_validator.py"
+      ],
+      "import_roots": [
+        "json",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ios_data_storage",
+      "description": "Check iOS app for insecure local data storage patterns.",
+      "implementation_files": [
+        "mcp/cyber_tools/ios_data_storage.py"
+      ],
+      "import_roots": [
+        "os",
+        "plistlib",
+        "zipfile"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ios_frida",
+      "description": "Run frida on iOS device \u2014 SSL pinning bypass, method tracing, process list.",
+      "implementation_files": [
+        "mcp/cyber_tools/ios_frida.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "shutil"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ios_objection",
+      "description": "Run objection iOS runtime exploration \u2014 keychain dump, sqlite, nsuserdefaults.",
+      "implementation_files": [
+        "mcp/cyber_tools/ios_objection.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "shutil"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ios_signing",
+      "description": "Check iOS app signing \u2014 provisioning profile, team ID, ad-hoc vs distribution.",
+      "implementation_files": [
+        "mcp/cyber_tools/ios_signing.py"
+      ],
+      "import_roots": [
+        "os",
+        "plistlib",
+        "zipfile"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ipa_analyze",
+      "description": "Analyze iOS IPA file \u2014 metadata, entitlements, plist, permissions.",
+      "implementation_files": [
+        "mcp/cyber_tools/ipa_analyze.py"
+      ],
+      "import_roots": [
+        "os",
+        "plistlib",
+        "zipfile"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "java_deserialize",
+      "description": "Check for Java deserialization endpoints, RMI, JNDI, and serialized data.",
+      "implementation_files": [
+        "mcp/cyber_tools/java_deserialize.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "jira_create",
+      "description": "Create a Jira issue from a security finding. Requires Jira URL, email, and API token.",
+      "implementation_files": [
+        "mcp/cyber_tools/jira_create.py"
+      ],
+      "import_roots": [
+        "base64",
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "joomla_scan",
+      "description": "Scan Joomla CMS \u2014 version, admin, components, plugins, exposed configs.",
+      "implementation_files": [
+        "mcp/cyber_tools/joomla_scan.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "jwt_analyze",
+      "description": "Decode and analyze a JWT token for security issues.",
+      "implementation_files": [
+        "mcp/cyber_tools/jwt_analyze.py"
+      ],
+      "import_roots": [
+        "base64",
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "jwt_forgery",
+      "description": "Test JWT for known attacks \u2014 none algorithm, weak secret, kid injection, algorithm confusion.",
+      "implementation_files": [
+        "mcp/cyber_tools/jwt_forgery.py"
+      ],
+      "import_roots": [
+        "base64",
+        "hashlib",
+        "hmac",
+        "json",
+        "re",
+        "time",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "k8s_scan",
+      "description": "Scan K8s API for unauthorized access, secrets exposure, RBAC issues.",
+      "implementation_files": [
+        "mcp/cyber_tools/k8s_scan.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "laravel_scan",
+      "description": "Scan Laravel app for .env leak, debug mode, artisan exposure. preset: observe-first|staging-deep.",
+      "implementation_files": [
+        "mcp/cyber_tools/laravel_scan.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "asyncio",
+        "httpx",
+        "re",
+        "time"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ldap_enum",
+      "description": "LDAP anonymous bind and server enumeration.",
+      "implementation_files": [
+        "mcp/cyber_tools/ldap_enum.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ldap_inject",
+      "description": "LDAP injection \u2014 test for LDAP query manipulation, auth bypass, error-based, boolean-blind, time-blind.",
+      "implementation_files": [
+        "mcp/cyber_tools/ldap_inject.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "lfi_detect",
+      "description": "Test for Local/Remote File Inclusion vulnerabilities.",
+      "implementation_files": [
+        "mcp/cyber_tools/lfi_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "base64",
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "llm_agent_hijack",
+      "description": "Test agent function call/tool injection in LLM.",
+      "implementation_files": [
+        "mcp/cyber_tools/llm_agent_hijack.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "llm_data_exposure",
+      "description": "Test for training data leakage (PII exposure) from LLM.",
+      "implementation_files": [
+        "mcp/cyber_tools/llm_data_exposure.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "llm_guardrails",
+      "description": "Check if LLM output is sanitized against XSS and event handlers.",
+      "implementation_files": [
+        "mcp/cyber_tools/llm_guardrails.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "llm_model_dos",
+      "description": "Test LLM for DoS via excessive token generation.",
+      "implementation_files": [
+        "mcp/cyber_tools/llm_model_dos.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "time"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "log4j_scan",
+      "description": "Test for Log4j JNDI injection via headers and params.",
+      "implementation_files": [
+        "mcp/cyber_tools/log4j_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "log_exposure",
+      "description": "Scan for exposed log files \u2014 access logs, error logs, debug logs with sensitive data.",
+      "implementation_files": [
+        "mcp/cyber_tools/log_exposure.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "magento_scan",
+      "description": "Magento security scan \u2014 admin, downloader, local.xml, system.log.",
+      "implementation_files": [
+        "mcp/cyber_tools/magento_scan.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "mass_assignment",
+      "description": "Mass assignment / overposting \u2014 test for parameter overwriting in APIs, privilege escalation.",
+      "implementation_files": [
+        "mcp/cyber_tools/mass_assignment.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "masscan_scan",
+      "description": "Ultra-fast TCP port scanner. Requires masscan CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "mcp_abuse_test",
+      "description": "Test MCP server for abuse vectors \u2014 dangerous tools, JSON-RPC injection, prompt injection in tool descriptions.",
+      "implementation_files": [
+        "mcp/cyber_tools/mcp_abuse_test.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "json",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "metrics_check",
+      "description": "Check for exposed metrics endpoints \u2014 Prometheus, Actuator, debug, health.",
+      "implementation_files": [
+        "mcp/cyber_tools/metrics_check.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "misplaced_files",
+      "description": "Scan for misplaced sensitive files \u2014 signatures, certs, configs, backups.",
+      "implementation_files": [
+        "mcp/cyber_tools/misplaced_files.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "nextjs_scan",
+      "description": "Next.js security scan \u2014 source maps, data endpoints, SSR misconfig.",
+      "implementation_files": [
+        "mcp/cyber_tools/nextjs_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "nikto_scan",
+      "description": "Web server vulnerability scanner. Requires nikto CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_detector_accuracy.py",
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "nmap_scan",
+      "description": "Full nmap network scan with service detection. Requires nmap CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/nmap_scan.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "xml"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "nosql_inject",
+      "description": "Test for NoSQL injection (MongoDB $ne, $gt, $where payloads).",
+      "implementation_files": [
+        "mcp/cyber_tools/nosql_inject.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "notify_webhook",
+      "description": "Send finding notifications to Slack/Discord/Teams webhook. Auto-detects platform from URL.",
+      "implementation_files": [
+        "mcp/cyber_tools/notify_webhook.py"
+      ],
+      "import_roots": [
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "nuclei_scan",
+      "description": "Template-based vulnerability scanner. Requires nuclei CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/nuclei_scan.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_novelty_engine.py",
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "oast_callback_server",
+      "description": "HTTP callback collector: start, generate, poll, status, clear, stop. Binds loopback; CYBERSEC_OAST_PUBLIC_URL may advertise an operator-managed forwarding endpoint. No DNS or third-party polling.",
+      "implementation_files": [
+        "mcp/cyber_tools/oast_callback_server.py"
+      ],
+      "import_roots": [
+        "atexit",
+        "http",
+        "json",
+        "os",
+        "secrets",
+        "threading",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_oast_http_integration.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "oauth_scan",
+      "description": "Scan OAuth/OIDC endpoints \u2014 authorize, token, .well-known, redirect_uri.",
+      "implementation_files": [
+        "mcp/cyber_tools/oauth_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "oob_test",
+      "description": "Test for blind OOB interaction (SSRF, RCE, template injection).",
+      "implementation_files": [
+        "mcp/cyber_tools/oob_test.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "open_redirect",
+      "description": "Test for open redirect vulnerabilities in common parameters.",
+      "implementation_files": [
+        "mcp/cyber_tools/open_redirect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "time",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "origin_ip_discovery",
+      "description": "Discover origin IP behind CDN via historical DNS and records.",
+      "implementation_files": [
+        "mcp/cyber_tools/origin_ip_discovery.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "socket",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "param_discovery",
+      "description": "Discover HTTP parameters by testing common parameter names.",
+      "implementation_files": [
+        "mcp/cyber_tools/param_discovery.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "password_audit",
+      "description": "Multi-protocol password audit \u2014 SSH, FTP, SMTP, HTTP form, RDP. Default wordlist included.",
+      "implementation_files": [
+        "mcp/cyber_tools/password_audit.py"
+      ],
+      "import_roots": [
+        "base64",
+        "ftplib",
+        "json",
+        "paramiko",
+        "smtplib",
+        "socket",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "pentest_workflow",
+      "description": "Plan by default. execute=true runs supported HTTP detector steps with per-step scope checks, 180s budget, explicit skipped steps and normalized findings. No implicit approval, conditions, tickets or exploit actions. request_json preserves SQLi/XSS sessions/bodies.",
+      "implementation_files": [
+        "mcp/cyber_tools/pentest_workflow.py",
+        "mcp/cyber_tools/workflow_runner.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "re",
+        "time"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "people_osint",
+      "description": "Individual OSINT \u2014 GitHub profile, LinkedIn/Twitter/search, email analysis with Gravatar.",
+      "implementation_files": [
+        "mcp/cyber_tools/people_osint.py"
+      ],
+      "import_roots": [
+        "hashlib",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "phone_osint",
+      "description": "Phone number intelligence \u2014 parse carrier, region, line type, timezones (offline via phonenumbers lib). Generates lookup URLs for Truecaller, GetContact, sync.me, and Google search.",
+      "implementation_files": [
+        "mcp/cyber_tools/phone_osint.py"
+      ],
+      "import_roots": [
+        "phonenumbers",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "php2shell_scan",
+      "description": "Identify PHP2SHELL CVE-2026-109618/109619 on an authorized single origin.\n\nDedicated lightweight GET/HEAD/OPTIONS and optional common phpinfo pages;\nno unrelated vulnerability/credential checks. Max 8 requests by default\n(1..12), 200 KB body/read, TLS verified, 30s whole-scan deadline.\nSame-origin redirects only. Stop on HTTP 429. No OOM/race/load/exploit probes.\nReturns php2shell version assessment with HIGH/MEDIUM/LOW confidence, SAPI/proxy\ncaveats, coverage, evidence, allowlisted configuration and findings.\nUnknown/blocked does not mean safe. deep_version expands GET-only allowlisted\npaths (default off). local runs php -v/-i on the MCP host only (default off).\nNo raw page/cookies, secrets discovery, origin bypass or subdomain fan-out.",
+      "implementation_files": [
+        "mcp/cyber_tools/php2shell_remote.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "html",
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_php2shell_remote.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "php_deserialize",
+      "description": "Check for PHP deserialization vulnerabilities via gadget chains.",
+      "implementation_files": [
+        "mcp/cyber_tools/php_deserialize.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "pickle_deserialize",
+      "description": "Python pickle deserialization \u2014 detect and test for insecure deserialization, RCE confirmation.",
+      "implementation_files": [
+        "mcp/cyber_tools/pickle_deserialize.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "base64",
+        "gzip",
+        "httpx",
+        "io",
+        "json",
+        "os",
+        "pickle",
+        "re",
+        "struct",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "port_scan",
+      "description": "Scan TCP ports on a target host.",
+      "implementation_files": [
+        "mcp/cyber_tools/port_scanner.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "re",
+        "socket",
+        "time"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "prompt_injection",
+      "description": "Test LLM endpoint for prompt injection vulnerability.",
+      "implementation_files": [
+        "mcp/cyber_tools/prompt_injection.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "prototype_pollution",
+      "description": "Test for client-side/server-side prototype pollution via query params and JSON body.",
+      "implementation_files": [
+        "mcp/cyber_tools/prototype_pollution.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "race_condition",
+      "description": "Test for race conditions by sending parallel requests to sensitive endpoints.",
+      "implementation_files": [
+        "mcp/cyber_tools/race_condition.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "json",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "rails_scan",
+      "description": "Scan Ruby on Rails app \u2014 exposed configs, mass assignment, debug console, routes.",
+      "implementation_files": [
+        "mcp/cyber_tools/rails_scan.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "raw_replay",
+      "description": "Faithful raw HTTP request replay \u2014 send exact bytes, capture full response.",
+      "implementation_files": [
+        "mcp/cyber_tools/raw_replay.py"
+      ],
+      "import_roots": [
+        "base64",
+        "json",
+        "socket",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "redis_enum",
+      "description": "Enumerate Redis server \u2014 check auth, keyspace, version.",
+      "implementation_files": [
+        "mcp/cyber_tools/redis_enum.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "report_export",
+      "description": "Export pentest report to multiple formats: html, csv, markdown, json. HTML includes styled executive summary with severity color coding.",
+      "implementation_files": [
+        "mcp/cyber_tools/report_export.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "report_schema_v2",
+      "description": "Report schema v2 \u2014 validate, convert v1\u2192v2, merge, create standardized reports with evidence chain.",
+      "implementation_files": [
+        "mcp/cyber_tools/report_schema_v2.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "hashlib",
+        "json",
+        "uuid"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_sqli_evidence.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "retest_vuln",
+      "description": "Retest a previously found vulnerability to confirm if it's fixed. Supports: sqli, xss, lfi, ssrf, open_redirect, ssti, log4j.",
+      "implementation_files": [
+        "mcp/cyber_tools/retest_vuln.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "httpx",
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "reverse_ip",
+      "description": "Find domains hosted on the same IP address.",
+      "implementation_files": [
+        "mcp/cyber_tools/reverse_ip.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "socket",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "risk_score",
+      "description": "Calculate risk score for a vulnerability finding. Combines CVSS severity, business impact, and exploitability likelihood. asset_value: low, medium, high, critical.",
+      "implementation_files": [
+        "mcp/cyber_tools/risk_score.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "s3_scanner",
+      "description": "Check if an S3 bucket is publicly accessible and list its contents.",
+      "implementation_files": [
+        "mcp/cyber_tools/s3_scanner.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sast_review",
+      "description": "Pattern-based code review \u2014 detect eval, deserialization, SQLi, XSS patterns.",
+      "implementation_files": [
+        "mcp/cyber_tools/sast_review.py"
+      ],
+      "import_roots": [
+        "os",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "scan_template",
+      "description": "Scan template combos. Defaults observe-first; also staging-deep, quick-recon, web-full, network-audit, api-security, cloud-audit, ad-pentest, code-audit, ctf.",
+      "implementation_files": [
+        "mcp/cyber_tools/scan_template.py"
+      ],
+      "import_roots": [
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "searchsploit",
+      "description": "Search exploit-db for exploits. Requires searchsploit CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/searchsploit.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "secret_scanner",
+      "description": "Regex + entropy-based secret scanning \u2014 API keys, tokens, passwords in code.",
+      "implementation_files": [
+        "mcp/cyber_tools/secret_scanner.py"
+      ],
+      "import_roots": [
+        "math",
+        "os",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "semgrep_scan",
+      "description": "Run semgrep multi-language SAST \u2014 auto or custom pattern.",
+      "implementation_files": [
+        "mcp/cyber_tools/semgrep_scan.py"
+      ],
+      "import_roots": [
+        "json",
+        "os",
+        "shutil",
+        "subprocess"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "service_fingerprint",
+      "description": "Deep service fingerprinting via banner grabbing.",
+      "implementation_files": [
+        "mcp/cyber_tools/service_fingerprint.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "session_verification",
+      "description": "Session verification \u2014 validate session cookies, tokens, expiry before testing.",
+      "implementation_files": [
+        "mcp/cyber_tools/session_verification.py"
+      ],
+      "import_roots": [
+        "base64",
+        "datetime",
+        "json",
+        "re",
+        "time"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sharepoint_scan",
+      "description": "Scan Microsoft SharePoint \u2014 version, exposed paths, web services, API endpoints.",
+      "implementation_files": [
+        "mcp/cyber_tools/sharepoint_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "shodan_lookup",
+      "description": "Search Shodan for exposed devices and services.",
+      "implementation_files": [
+        "mcp/cyber_tools/shodan_lookup.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py",
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "smb_enum",
+      "description": "Enumerate SMB services \u2014 check if port 445 is open.",
+      "implementation_files": [
+        "mcp/cyber_tools/smb_enum.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "smtp_enum",
+      "description": "Enumerate SMTP users via VRFY, EXPN, and RCPT commands.",
+      "implementation_files": [
+        "mcp/cyber_tools/smtp_enum.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "smuggling_check",
+      "description": "Test for HTTP request smuggling (CL.TE, TE.CL).",
+      "implementation_files": [
+        "mcp/cyber_tools/smuggling_check.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "ssl",
+        "time"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "snmp_enum",
+      "description": "Check SNMP service availability on port 161.",
+      "implementation_files": [
+        "mcp/cyber_tools/snmp_enum.py"
+      ],
+      "import_roots": [
+        "asyncio"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "social_osint",
+      "description": "Search for a username across 100+ social media platforms (Instagram, Twitter, TikTok, GitHub, Telegram, etc.). Sherlock-style \u2014 no API keys required. Returns found accounts with URLs and status codes.",
+      "implementation_files": [
+        "mcp/cyber_tools/social_osint.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "spring_scan",
+      "description": "Spring Boot actuator scan \u2014 env, heapdump, beans, mappings, configprops.",
+      "implementation_files": [
+        "mcp/cyber_tools/spring_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sqli_detect",
+      "description": "Controlled SQLi query or flat JSON/form probes. request_json: method, json/data, headers, cookies. preset observe-first or staging-deep. No extraction/timing.",
+      "implementation_files": [
+        "mcp/cyber_tools/sqli_detect.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_detector_accuracy.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_sqli_evidence.py",
+        "mcp/tests/test_sqli_mcp.py",
+        "mcp/tests/test_sqli_or_evidence.py",
+        "mcp/tests/test_sqli_sqlite_benchmark.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sqli_exploit",
+      "description": "Generate PoC SQL injection exploit payloads. Techniques: error-based, union-based, boolean, time-based, stacked.",
+      "implementation_files": [
+        "mcp/cyber_tools/sqli_exploit.py"
+      ],
+      "import_roots": [
+        "json",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sqlmap_check",
+      "description": "SQL injection detection. Requires sqlmap CLI (safe mode default).",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ssh_audit",
+      "description": "Audit SSH server \u2014 grab banner and check algorithm support.",
+      "implementation_files": [
+        "mcp/cyber_tools/ssh_audit.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ssl_check",
+      "description": "Analyze SSL/TLS certificate and protocol security.",
+      "implementation_files": [
+        "mcp/cyber_tools/ssl_analyzer.py"
+      ],
+      "import_roots": [
+        "re",
+        "socket",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ssl_pinning_check",
+      "description": "Check SSL certificate details, HSTS, and cert verification behavior.",
+      "implementation_files": [
+        "mcp/cyber_tools/ssl_pinning_check.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "socket",
+        "ssl"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sslyze_check",
+      "description": "Fast SSL/TLS scanning. Requires sslyze CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ssrf_detect",
+      "description": "Test for Server-Side Request Forgery vulnerabilities.",
+      "implementation_files": [
+        "mcp/cyber_tools/ssrf_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "html",
+        "httpx",
+        "ipaddress",
+        "random",
+        "re",
+        "socket",
+        "string",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_detector_benchmark.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "ssti_detect",
+      "description": "Test for Server-Side Template Injection vulnerabilities.",
+      "implementation_files": [
+        "mcp/cyber_tools/ssti_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "stego_detect",
+      "description": "Detect hidden data in files \u2014 steganography, LSB, metadata anomalies, embedded strings.",
+      "implementation_files": [
+        "mcp/cyber_tools/stego_detect.py"
+      ],
+      "import_roots": [
+        "os",
+        "re",
+        "struct"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "sub_takeover",
+      "description": "Check for subdomain takeover (dangling DNS CNAME).",
+      "implementation_files": [
+        "mcp/cyber_tools/sub_takeover.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "subdomain_enum",
+      "description": "Passive subdomain enumeration via crt.sh, DNS brute-force, and APIs.",
+      "implementation_files": [
+        "mcp/cyber_tools/subdomain_enum.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "socket",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "supply_chain",
+      "description": "Check exposed manifest files for known vulnerable package versions.",
+      "implementation_files": [
+        "mcp/cyber_tools/supply_chain.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "tech_detect",
+      "description": "Detect web technologies (CMS, JS frameworks, CDN, analytics) from HTTP response.",
+      "implementation_files": [
+        "mcp/cyber_tools/tech_detect.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "telegram_osint",
+      "description": "Gather public info about a Telegram user via t.me scraping \u2014 user ID, bio, profile photo, username history links (SangMata, TGStat). No Telegram API required.",
+      "implementation_files": [
+        "mcp/cyber_tools/telegram_osint.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "testssl_check",
+      "description": "SSL/TLS server testing. Requires testssl CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "tool_health",
+      "description": "Check CLI dependencies and read-only MCP startup source identity.\n\nruntime records version, initialization time, source fingerprint and install\nlocation of this server. files_on_disk is separate current disk evidence;\nmcp_vs_startup is match/different/unknown. Client plugin/skill loading remains\nunknown: disk files do not attest loaded client state. No reload/cache edits.\nLocal installation/Python paths and PID are diagnostics; redact before sharing.",
+      "implementation_files": [
+        "mcp/cyber_tools/runtime_info.py",
+        "mcp/cyber_tools/tool_health.py"
+      ],
+      "import_roots": [
+        "concurrent",
+        "copy",
+        "datetime",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "platform",
+        "re",
+        "shutil",
+        "subprocess",
+        "sys",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_routing_eval.py",
+        "mcp/tests/test_runtime_info.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "upload_bypass",
+      "description": "Test file upload filters \u2014 PHP/JSP/ASP shell, double ext, null byte, SVG XSS.",
+      "implementation_files": [
+        "mcp/cyber_tools/upload_bypass.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "os",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "upload_exploit_chain",
+      "description": "Upload exploit-chain validation \u2014 upload (PHP/JSP/ASP/SVG/PY/SH) \u2192 verify accessibility \u2192 execute payload.",
+      "implementation_files": [
+        "mcp/cyber_tools/upload_exploit_chain.py"
+      ],
+      "import_roots": [
+        "json",
+        "os",
+        "random",
+        "re",
+        "string",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vhost_discovery",
+      "description": "Discover virtual hosts by probing common subdomain vhosts via Host header manipulation.",
+      "implementation_files": [
+        "mcp/cyber_tools/vhost_discovery.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vuln_database",
+      "description": "Local vulnerability database. Actions: add, get, search, list, update, delete, stats, export, import, tags, clear.",
+      "implementation_files": [
+        "mcp/cyber_tools/vuln_database.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json",
+        "os"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vuln_diff",
+      "description": "Offline diff of two stored scans (vulnerabilities/findings/open_ports).\n\nLabels novel, resolved, changed and regression. Separate intel_changes compare\nstored EPSS, priority and KEV/source status for matching findings, without\nchanging finding identity or confidence. Timestamp-only changes and fresh vs\ncached status are ignored. Lost feed availability is degraded data quality,\nnot reduced risk. No network lookups or historical re-enrichment.",
+      "implementation_files": [
+        "mcp/cyber_tools/vuln_diff.py"
+      ],
+      "import_roots": [
+        "__future__",
+        "datetime",
+        "json"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_novelty_engine.py",
+        "mcp/tests/test_vuln_diff_intel.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vuln_scan",
+      "description": "Scan headers, exposed paths and CVE patterns; includes non-destructive PHP2SHELL header assessment.\n\nphp2shell.status is potentially_affected, not_affected_by_version or unknown.\nPHP2SHELL findings are probable version correlations, never verified RCE.\nUnknown (including hidden versions) is not safe; check vendor backports.\nNo PHP2SHELL crash/load probes are sent. Other existing scan checks still run.\nWhen epss_intel=True, CVE findings are enriched with FIRST EPSS probability,\npercentile, CISA KEV membership and a P0-P3 patch priority (read-only intel\nonly; enrichment failures never fail the scan). Default off.",
+      "implementation_files": [
+        "mcp/cyber_tools/vuln_scanner.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_php2shell.py",
+        "mcp/tests/test_vuln_scan_epss_intel.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vuln_validate",
+      "description": "Validate a vulnerability finding \u2014 confirm exploitability or flag as false positive. Accepts JSON with type, host, evidence, response.",
+      "implementation_files": [
+        "mcp/cyber_tools/vuln_validate.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "hashlib",
+        "json",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_audit_regressions.py",
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "vulnerable_fixture",
+      "description": "Vulnerable fixture \u2014 local vulnerable app for E2E tool validation. Actions: start, stop, status, endpoints, e2e, cleanup.",
+      "implementation_files": [
+        "mcp/cyber_tools/vulnerable_fixture.py"
+      ],
+      "import_roots": [
+        "datetime",
+        "json",
+        "os",
+        "shutil",
+        "signal",
+        "socket",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "waf_detection",
+      "description": "Detect Web Application Firewall (WAF) protecting a target.",
+      "implementation_files": [
+        "mcp/cyber_tools/waf_detect.py"
+      ],
+      "import_roots": [
+        "re",
+        "ssl",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "wayback_urls",
+      "description": "Fetch URL history from Wayback Machine.",
+      "implementation_files": [
+        "mcp/cyber_tools/wayback_urls.py"
+      ],
+      "import_roots": [
+        "httpx"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_workflow_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "webshell_connect",
+      "description": "Connect to an uploaded web shell and execute commands. Supports GET/POST, password auth, and extra parameters.",
+      "implementation_files": [
+        "mcp/cyber_tools/webshell_connect.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "webshell_detect",
+      "description": "Detect web shells on a target via signature scanning. Checks common filenames and content patterns (c99, r57, weevely, china chopper, etc.).",
+      "implementation_files": [
+        "mcp/cyber_tools/webshell_detect.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "webshell_gen",
+      "description": "Generate a web shell payload (PHP/JSP/ASP/ASPX). Types: cmd (command exec), eval (eval code), reverse (reverse shell). Optional obfuscation and password protection.",
+      "implementation_files": [
+        "mcp/cyber_tools/webshell_gen.py"
+      ],
+      "import_roots": [
+        "base64",
+        "random",
+        "string",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "webshell_upload",
+      "description": "Upload a web shell to a target via file upload vulnerability. Auto-discovers upload endpoints and verifies shell accessibility.",
+      "implementation_files": [
+        "mcp/cyber_tools/webshell_upload.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re",
+        "typing"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "websocket_test",
+      "description": "Test WebSocket endpoints \u2014 origin validation, CSWSH, Socket.IO detection.",
+      "implementation_files": [
+        "mcp/cyber_tools/websocket_test.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "json",
+        "re",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "whois_lookup",
+      "description": "Query WHOIS for domain registration information.",
+      "implementation_files": [
+        "mcp/cyber_tools/whois_lookup.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "re",
+        "shutil",
+        "subprocess",
+        "typing",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "wordpress_scan",
+      "description": "Scan WordPress site \u2014 version, plugins, themes, XML-RPC, REST API, exposed paths.",
+      "implementation_files": [
+        "mcp/cyber_tools/wordpress_scan.py"
+      ],
+      "import_roots": [
+        "httpx",
+        "re"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_novelty_engine.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "wpscan_check",
+      "description": "WordPress vulnerability scanner. Requires wpscan CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_remediation_20261104.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "xss_detect",
+      "description": "Bounded XSS HTTP reflection tests. request_json preserves flat json/data, headers and cookies. Authenticated body browser replay is not supported; reflection is not execution.",
+      "implementation_files": [
+        "mcp/cyber_tools/xss_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "html",
+        "httpx",
+        "json",
+        "playwright",
+        "random",
+        "re",
+        "string",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_core_tools.py",
+        "mcp/tests/test_detector_benchmark.py",
+        "mcp/tests/test_pipeline_quality.py",
+        "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_remediation_20261104.py",
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "xss_exploit",
+      "description": "Generate PoC XSS exploit payloads and steal links. Types: reflected, stored, dom_based, bypass_waf, cookie_steal.",
+      "implementation_files": [
+        "mcp/cyber_tools/xss_exploit.py"
+      ],
+      "import_roots": [
+        "json",
+        "urllib"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py",
+        "mcp/tests/test_tool_policy.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "xsstrike_check",
+      "description": "XSS vulnerability detection. Requires xsstrike CLI.",
+      "implementation_files": [
+        "mcp/cyber_tools/cli_tools.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "datetime",
+        "json",
+        "os",
+        "re",
+        "shutil",
+        "typing"
+      ],
+      "static_test_references": [
+        "mcp/tests/test_skill_contract.py"
+      ],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    },
+    {
+      "name": "xxe_detect",
+      "description": "Test for XML External Entity injection vulnerabilities.",
+      "implementation_files": [
+        "mcp/cyber_tools/xxe_detect.py"
+      ],
+      "import_roots": [
+        "asyncio",
+        "httpx",
+        "re",
+        "time",
+        "urllib"
+      ],
+      "static_test_references": [],
+      "accuracy": "not_measured_by_inventory",
+      "latency_p95_ms": null,
+      "requests_per_run": null
+    }
+  ]
+}

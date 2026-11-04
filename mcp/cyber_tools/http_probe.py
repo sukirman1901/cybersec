@@ -33,15 +33,21 @@ def _probe(host: str, port: int, use_ssl: bool) -> dict:
         conn.request("GET", "/", headers={"User-Agent": "Mozilla/5.0", "Host": host})
         resp = conn.getresponse()
         result["status"] = resp.status
-        headers_text = str(resp.headers)
+        headers = {key.lower(): val for key, val in resp.headers.items()}
+        # Arbitrary policy/cookie values are not framework evidence (e.g.
+        # "xr-spatial-tracking" contains "rack", but does not indicate Ruby).
+        headers_text = ' '.join(headers.get(key, '') for key in ('server', 'x-powered-by', 'x-generator', 'x-runtime-framework'))
         result["server"] = resp.getheader("Server", "")
         for key, val in resp.headers.items():
             result["headers"][key] = val
         for tech, patterns in TECH_PATTERNS.items():
             for p in patterns:
-                if re.search(p, headers_text, re.IGNORECASE) or re.search(p, result.get("server", ""), re.IGNORECASE):
+                if re.search(r'\b(?:' + p + r')\b', headers_text, re.IGNORECASE):
                     result["technologies"].append(tech)
                     break
+        if any(key.startswith('x-nextjs-') for key in headers):
+            result['technologies'].append('Next.js')
+        result['coverage'] = 'HTTP response header hints only; versions and origin runtime not verified'
         conn.close()
     except Exception as e:
         result["error"] = str(e)
