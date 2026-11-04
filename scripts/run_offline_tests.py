@@ -57,6 +57,9 @@ MODULES = (
     "test_credential_adapter_accuracy",
     "test_mobile_artifact_accuracy",
     "test_web_observation_accuracy",
+    "test_search_metadata_accuracy",
+    "test_dork_wrapper_accuracy",
+    "test_cloud_adapter_accuracy",
 )
 
 

@@ -1,7 +1,7 @@
 {
   "catalog_count": 209,
-  "entry_execution_observed": 137,
-  "tests_run": 893,
+  "entry_execution_observed": 147,
+  "tests_run": 965,
   "tests_successful": true,
   "failures": 0,
   "errors": 0,
@@ -470,9 +470,14 @@
           "symbol": "cloud_audit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.AggregateAccuracy.test_aggregate_positive_and_limits",
+        "test_cloud_adapter_accuracy.AggregateAccuracy.test_deadline_clamps_open_and_read_timeout",
+        "test_cloud_adapter_accuracy.AggregateAccuracy.test_shared_request_cap_and_fresh_budget_per_call",
+        "test_cloud_adapter_accuracy.AggregateAccuracy.test_skipped_audits_are_not_findings"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cloud_enum",
@@ -482,9 +487,14 @@
           "symbol": "cloud_enum"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_adapter_findings_include_evidence_scope",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_failures_are_incomplete",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_limits_invalid_inputs_and_not_found",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_positive_file_and_bucket_evidence"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cloud_iam_audit",
@@ -494,9 +504,17 @@
           "symbol": "cloud_iam_audit"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_adapter_findings_include_evidence_scope",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_cli_bad_outputs_not_empty_success",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_cli_inventory_positive_is_not_policy_audit",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_inventory_limits_and_pagination",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_inventory_schema_and_empty_controls",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_prowler_fail_pass_manual_and_malformed",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_runner_errors_and_missing_tools"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cloud_infra",
@@ -506,9 +524,16 @@
           "symbol": "cloud_infra"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_adapter_findings_include_evidence_scope",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_cli_bad_outputs_not_empty_success",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_inventory_limits_and_pagination",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_inventory_schema_and_empty_controls",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_runner_errors_and_missing_tools",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_scout_logs_are_not_an_audit"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "cmd_injection",
@@ -977,9 +1002,16 @@
           "symbol": "docker_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_adapter_findings_include_evidence_scope",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_failures_are_incomplete",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_generic_pages_do_not_confirm_exposure",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_limits_invalid_inputs_and_not_found",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_positive_file_and_bucket_evidence",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_invalid_port_is_rejected_before_http"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "dork_and_scan",
@@ -1047,9 +1079,16 @@
           "symbol": "google_dork"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_body_budget_and_close",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_challenge_distinct_from_explicit_empty",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_invalid_query_no_http",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_positive_decoded_redacted_results",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_six_matches_capped_at_five",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_google_timeout_redacted_and_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "drupal_scan",
@@ -1201,9 +1240,16 @@
           "symbol": "exploit_db_detail"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_detail_heading_alone_is_not_a_record",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_detail_timeout_does_not_echo_secrets",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_both_metadata_paths_stop_stream_at_budget",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_detail_challenge_and_rate_limit_incomplete",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_detail_invalid_id_no_http",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_detail_positive_metadata"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "exploit_db_download",
@@ -1225,9 +1271,21 @@
           "symbol": "exploit_db_search"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_bad_schema_is_incomplete",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_both_metadata_paths_stop_stream_at_budget",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_empty_is_completed",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_failures_not_counted_or_leaked",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_invalid_input_no_http",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_legacy_html_metadata",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_partial_rows_preserve_valid_records",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_positive_nested_metadata",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_query_and_metadata_redaction",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_edb_total_beyond_returned_is_partial",
+        "test_search_metadata_accuracy.MappedSearchAccuracy.test_quoted_secrets_are_redacted"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "exposed_backup",
@@ -1356,9 +1414,26 @@
           "symbol": "ghdb_search"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_category_filter_not_satisfied_by_unrelated_templates",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_challenge_html_is_not_empty_success",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_explicit_empty_response_is_distinct",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_fallback_count_equals_returned_results",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_invalid_category_makes_no_request",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_invalid_limits_make_no_request",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_invalid_query_makes_no_request",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_legacy_single_cell_extraction_remains_partial",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_matches_have_explicit_evidence_limits",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_provider_metadata_decodes_entities",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_provider_results_are_bounded_and_marked",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_provider_secret_assignments_are_redacted_in_links_too",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_rate_limit_is_incomplete_even_with_templates",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_response_read_is_bounded",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_rows_cannot_merge_across_table_boundaries",
+        "test_search_metadata_accuracy.SearchMetadataAccuracy.test_timeout_is_incomplete_without_exception_secrets"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "github_issue",
@@ -1845,9 +1920,19 @@
           "symbol": "k8s_scan"
         }
       ],
-      "entry_execution_observed": false,
-      "test_ids": [],
-      "verdict": "not_observed_in_this_run"
+      "entry_execution_observed": true,
+      "test_ids": [
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_adapter_findings_include_evidence_scope",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_empty_k8s_list_does_not_claim_secret_exposure",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_failures_are_incomplete",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_generic_pages_do_not_confirm_exposure",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_http_limits_invalid_inputs_and_not_found",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_invalid_port_is_rejected_before_http",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_k8s_discovery_is_not_full_access",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_k8s_secret_list_positive_without_secret_values",
+        "test_cloud_adapter_accuracy.CloudAccuracy.test_recursive_json_is_incomplete"
+      ],
+      "verdict": "fixture_execution_observed"
     },
     {
       "tool": "laravel_scan",

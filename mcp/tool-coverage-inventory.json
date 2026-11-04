@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tool_count": 209,
-  "with_static_test_references": 166,
+  "with_static_test_references": 170,
   "limitations": [
     "Static references can include generic contract tests, strings and mocks.",
     "No scanner executed. No accuracy or runtime coverage inferred.",
@@ -581,13 +581,14 @@
         "mcp/cyber_tools/cloud_audit.py"
       ],
       "import_roots": [
-        "hashlib",
-        "http",
         "json",
-        "socket",
-        "urllib"
+        "re",
+        "time",
+        "urllib",
+        "xml"
       ],
       "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py",
         "mcp/tests/test_skill_contract.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -601,9 +602,12 @@
         "mcp/cyber_tools/cloud_enum.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "xml"
       ],
       "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
       ],
@@ -618,11 +622,11 @@
         "mcp/cyber_tools/cloud_iam_audit.py"
       ],
       "import_roots": [
-        "asyncio",
         "json",
         "shutil"
       ],
       "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py",
         "mcp/tests/test_skill_contract.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
@@ -638,11 +642,11 @@
         "mcp/cyber_tools/cloud_infra.py"
       ],
       "import_roots": [
-        "asyncio",
         "json",
         "shutil"
       ],
       "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py",
         "mcp/tests/test_skill_contract.py",
         "mcp/tests/test_tool_policy.py",
         "mcp/tests/test_workflow_contract.py"
@@ -1098,9 +1102,13 @@
         "mcp/cyber_tools/docker_scan.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "re",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1190,17 +1198,20 @@
     },
     {
       "name": "dork_search",
-      "description": "Perform Google dorking to find vulnerable targets or exposed information.",
+      "description": "Return search metadata; matches do not establish vulnerability or authorization.",
       "implementation_files": [
         "mcp/cyber_tools/google_dork.py"
       ],
       "import_roots": [
+        "html",
         "re",
         "ssl",
         "urllib"
       ],
       "static_test_references": [
+        "mcp/tests/test_dork_wrapper_accuracy.py",
         "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_search_metadata_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -1349,10 +1360,13 @@
       ],
       "import_roots": [
         "httpx",
+        "json",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_search_metadata_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1365,6 +1379,7 @@
       ],
       "import_roots": [
         "httpx",
+        "json",
         "re",
         "urllib"
       ],
@@ -1383,10 +1398,13 @@
       ],
       "import_roots": [
         "httpx",
+        "json",
         "re",
         "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_search_metadata_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null
@@ -1532,12 +1550,14 @@
         "mcp/cyber_tools/ghdb_search.py"
       ],
       "import_roots": [
+        "html",
         "httpx",
         "re",
         "urllib"
       ],
       "static_test_references": [
         "mcp/tests/test_redirect_contract.py",
+        "mcp/tests/test_search_metadata_accuracy.py",
         "mcp/tests/test_tool_policy.py"
       ],
       "accuracy": "not_measured_by_inventory",
@@ -2086,9 +2106,13 @@
         "mcp/cyber_tools/k8s_scan.py"
       ],
       "import_roots": [
-        "httpx"
+        "httpx",
+        "json",
+        "urllib"
       ],
-      "static_test_references": [],
+      "static_test_references": [
+        "mcp/tests/test_cloud_adapter_accuracy.py"
+      ],
       "accuracy": "not_measured_by_inventory",
       "latency_p95_ms": null,
       "requests_per_run": null

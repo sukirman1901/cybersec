@@ -1,163 +1,219 @@
-"""Comprehensive cloud security audit — aggregates cloud_enum, S3, IAM, infra, K8s, Docker."""
+"""Bounded cloud HTTP observations; credential-dependent audits are explicit gaps."""
 import json
+import re
+import time
 import urllib.request
-from .http_guard import guarded_urlopen
-import socket
-import hashlib
+import urllib.error
+import xml.etree.ElementTree as ET
+from urllib.parse import urlsplit
+from .http_guard import NoRedirectHandler
+
+
+def guarded_urlopen(request, timeout=10, context=None):
+    """Do not follow redirects: each budgeted attempt issues one HTTP request."""
+    handlers = []
+    if context is not None:
+        handlers.append(urllib.request.HTTPSHandler(context=context))
+    return urllib.request.build_opener(NoRedirectHandler, *handlers).open(request, timeout=timeout)
+
+
+class _ObservationBudget:
+    """Per-call cooperative budget, never shared between audit invocations."""
+    def __init__(self):
+        self.deadline = time.monotonic() + 30
+        self.requests = 0
+        self.skipped = 0
+        self.outcome = 'not_started'
+
+    def remaining(self):
+        return max(0.0, min(8.0, self.deadline - time.monotonic()))
+
+    def start(self):
+        timeout = self.remaining()
+        if self.requests >= 40 or timeout <= 0:
+            self.skipped += 1
+            self.outcome = 'skipped_budget'
+            return 0.0
+        self.requests += 1
+        self.outcome = 'request_failed'
+        return timeout
+
 
 def cloud_audit(provider: str = "aws", targets: str = "", company: str = "", buckets: str = "", project: str = "") -> str:
-    result = {
-        "provider": provider,
-        "audits": [],
-        "summary": {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0},
-        "total_findings": 0
-    }
-
-    if company and provider == "aws":
-        result["audits"].append({"audit": "cloud_enum", "result": _cloud_enum(company)})
-    if buckets:
-        for bucket in buckets.split(","):
-            bucket = bucket.strip()
-            r = _s3_check(bucket)
-            result["audits"].append({"audit": "s3_public", "bucket": bucket, "result": r})
-    if targets:
-        for target in targets.split(","):
-            target = target.strip()
-            result["audits"].append({"audit": "k8s", "target": target, "result": _k8s_check(target)})
-            result["audits"].append({"audit": "docker", "target": target, "result": _docker_check(target)})
-
-    result["audits"].append({"audit": "iam_audit", "provider": provider, "result": _iam_check(provider)})
-    result["audits"].append({"audit": "infra_audit", "provider": provider, "result": _infra_check(provider)})
-
-    for a in result["audits"]:
-        findings = a.get("result", {}).get("issues", a.get("result", {}).get("findings", []))
-        for f in findings:
-            sev = f.get("severity", "info").lower()
-            if sev in result["summary"]:
-                result["summary"][sev] += 1
-            result["total_findings"] += 1
-
-    if result["total_findings"] == 0:
-        result["overall"] = "No cloud security issues detected"
-    elif result["summary"]["critical"] > 0 or result["summary"]["high"] > 0:
-        result["overall"] = "Critical cloud misconfigurations detected"
-    else:
-        result["overall"] = "Minor cloud issues detected"
-
+    result = {'audits': [], 'summary': {s: 0 for s in ('critical', 'high', 'medium', 'low', 'info')},
+              'total_findings': 0, 'coverage_complete': False}
+    if provider not in ('aws', 'azure', 'gcp') or any(not isinstance(v, str) or len(v) > 8192 for v in (targets, company, buckets, project)):
+        return json.dumps(dict(result, error='Invalid audit input'))
+    target_list = [t.strip() for t in targets.split(',') if t.strip()]
+    bucket_list = [b.strip() for b in buckets.split(',') if b.strip()]
+    if len(target_list) > 20 or len(bucket_list) > 20:
+        return json.dumps(dict(result, error='At most 20 targets and buckets per audit'))
+    if any(_base(t) is None for t in target_list) or any(not _bucket(b) for b in bucket_list) or (company and not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,39}', company)):
+        return json.dumps(dict(result, error='Invalid target, bucket or company identifier'))
+    result['provider'] = provider
+    budget = _ObservationBudget()
+    if company and provider == 'aws':
+        result['audits'].append({'audit': 'cloud_enum', 'result': _cloud_enum(company, budget)})
+    for bucket in bucket_list:
+        result['audits'].append({'audit': 's3_public', 'bucket': bucket, 'result': _s3_check(bucket, budget)})
+    for target in target_list:
+        result['audits'].append({'audit': 'k8s', 'target': target, 'result': _k8s_check(target, budget)})
+        result['audits'].append({'audit': 'docker', 'target': target, 'result': _docker_check(target, budget)})
+    result['audits'].extend([{'audit': 'iam_audit', 'result': _iam_check(provider)},
+                             {'audit': 'infra_audit', 'result': _infra_check(provider)}])
+    for audit in result['audits']:
+        for finding in audit['result'].get('findings', []):
+            result['summary'][finding['severity']] += 1
+            result['total_findings'] += 1
+    result['overall'] = 'Cloud audit incomplete; findings reflect only validated HTTP observations'
+    result['budget'] = {'request_limit': 40, 'seconds': 30, 'requests': budget.requests, 'skipped': budget.skipped,
+                        'limitation': 'Cooperative deadline with remaining-time I/O timeouts; synchronous blocking I/O is not a hard interrupt'}
     return json.dumps(result, indent=2)
 
 
-def _cloud_enum(company):
-    findings = []
-    for suffix in ["", "-dev", "-prod", "-staging", "-test", "-backup", "-qa"]:
-        for tld in [".s3.amazonaws.com", ".storage.googleapis.com", ".blob.core.windows.net"]:
-            bucket = company.lower().replace(" ", "-") + suffix
-            url = f"https://{bucket}{tld}"
+def _base(target):
+    try:
+        value = target if '://' in target else 'https://' + target
+        parsed = urlsplit(value)
+        if len(target) > 2048 or parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+            return None
+        parsed.port
+        return value.rstrip('/')
+    except (TypeError, ValueError):
+        return None
+
+
+def _bucket(name):
+    return isinstance(name, str) and bool(re.fullmatch(r'[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]', name))
+
+
+def _read(url, method='GET', budget=None):
+    budget = budget if budget is not None else _ObservationBudget()
+    timeout = budget.start()
+    if timeout <= 0:
+        return None, None
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Cybersec-CloudAudit/1.0'}, method=method)
+        with guarded_urlopen(req, timeout=timeout) as response:
+            remaining = budget.remaining()
+            if remaining <= 0:
+                budget.outcome = 'deadline_exceeded'
+                return None, None
+            # urllib HTTPResponse has no public timeout setter. Clamp the owned
+            # socket when available; synthetic/in-memory responses need none.
+            sock = getattr(getattr(getattr(response, 'fp', None), 'raw', None), '_sock', None)
+            if sock is not None:
+                sock.settimeout(remaining)
+            body = response.read(65537)
+            if budget.remaining() <= 0:
+                budget.outcome = 'deadline_exceeded'
+                return None, None
+            budget.outcome = 'response' if len(body) <= 65536 else 'body_limit'
+            return response.status, body if len(body) <= 65536 else None
+    except urllib.error.HTTPError as exc:
+        code = exc.code
+        exc.close()
+        if budget.remaining() <= 0:
+            budget.outcome = 'deadline_exceeded'
+            return None, None
+        budget.outcome = 'response'
+        return code, None
+    except Exception:
+        return None, None
+
+
+def _cloud_enum(company, budget=None):
+    budget = budget if budget is not None else _ObservationBudget()
+    if not isinstance(company, str) or not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,39}', company):
+        return {'findings': [], 'total': 0, 'coverage_complete': False, 'error': 'Invalid company'}
+    observations = []
+    for suffix in ['', '-dev', '-prod', '-staging', '-test', '-backup', '-qa']:
+        for tld in ['.s3.amazonaws.com', '.storage.googleapis.com', '.blob.core.windows.net']:
+            url = f'https://{company}{suffix}{tld}'
+            status, _ = _read(url, 'HEAD', budget)
+            observations.append({'url': url, 'status': status, 'outcome': budget.outcome})
+    return {'company': company, 'findings': [], 'total': 0, 'observations': observations, 'coverage_complete': False,
+            'coverage': 'HEAD candidates only; status does not confirm resource existence or public data'}
+
+
+def _s3_check(bucket_name, budget=None):
+    budget = budget if budget is not None else _ObservationBudget()
+    findings, observations = [], []
+    if not _bucket(bucket_name):
+        return {'findings': [], 'coverage_complete': False, 'error': 'Invalid bucket'}
+    for region in ['us-east-1', 'eu-west-1', 'ap-southeast-1']:
+        status, body = _read(f'https://{bucket_name}.s3.{region}.amazonaws.com/', budget=budget)
+        matched = False
+        if status == 200 and body is not None and b'<!DOCTYPE' not in body.upper():
             try:
-                req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"}, method="HEAD")
-                resp = guarded_urlopen(req, timeout=5)
-                if resp.status in (200, 403):
-                    findings.append({"type": "cloud_storage_found", "url": url, "http_status": resp.status, "severity": "high" if resp.status == 200 else "medium"})
-            except urllib.error.HTTPError as e:
-                if e.code in (200, 403):
-                    findings.append({"type": "storage_exists", "url": url, "http_status": e.code, "severity": "low"})
-            except Exception:
+                root = ET.fromstring(body)
+                matched = root.tag.rsplit('}', 1)[-1] == 'ListBucketResult' and any(
+                    child.tag.rsplit('}', 1)[-1] == 'Name' and child.text == bucket_name for child in root)
+            except ET.ParseError:
                 pass
-    return {"company": company, "findings": findings, "total": len(findings)}
+        observations.append({'region': region, 'status': status, 'matched': matched, 'outcome': budget.outcome})
+        if matched:
+            findings.append({'type': 's3_public_listing', 'bucket': bucket_name, 'region': region, 'severity': 'high', 'evidence': 'Matching bucket listing XML; object access not tested',
+                             'confidence': 'MEDIUM', 'coverage': 'HTTP listing structure candidate only; object access and ownership unverified'})
+    return {'bucket': bucket_name, 'regions_checked': sum(o['outcome'] != 'skipped_budget' for o in observations), 'findings': findings, 'observations': observations,
+            'is_public': bool(findings), 'coverage_complete': all(o['matched'] or o['status'] == 404 for o in observations)}
 
 
-def _s3_check(bucket_name):
-    findings = []
-    for region in ["us-east-1", "eu-west-1", "ap-southeast-1"]:
-        url = f"https://{bucket_name}.s3.{region}.amazonaws.com/"
+def _k8s_check(target, budget=None):
+    budget = budget if budget is not None else _ObservationBudget()
+    findings, observations = [], []
+    base = _base(target)
+    if base is None:
+        return {'findings': [], 'coverage_complete': False, 'error': 'Invalid target'}
+    for path, kind, field in [('/api/v1', 'APIResourceList', 'resources'),
+                              ('/api/v1/namespaces/kube-system/secrets', 'SecretList', 'items')]:
+        status, body = _read(base + path, budget=budget)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-            resp = guarded_urlopen(req, timeout=8)
-            body = resp.read().decode("utf-8", errors="ignore")
-            if "<ListBucketResult" in body:
-                findings.append({"type": "s3_public_listing", "bucket": bucket_name, "region": region, "severity": "critical", "evidence": "Bucket contents are publicly listable"})
-            else:
-                findings.append({"type": "s3_public_access", "bucket": bucket_name, "region": region, "severity": "high"})
-        except urllib.error.HTTPError as e:
-            if e.code == 403:
-                findings.append({"type": "s3_exists_but_denied", "bucket": bucket_name, "region": region, "severity": "info"})
-            elif e.code == 404:
-                pass
-        except Exception:
-            pass
-    return {"bucket": bucket_name, "regions_checked": 3, "findings": findings, "is_public": any(f["severity"] == "critical" for f in findings)}
+            data = json.loads(body) if body is not None else None
+        except (ValueError, UnicodeError, RecursionError):
+            data = None
+        matched = status == 200 and isinstance(data, dict) and data.get('kind') == kind and isinstance(data.get(field), list)
+        observations.append({'endpoint': path, 'status': status, 'matched': matched, 'outcome': budget.outcome})
+        if matched:
+            findings.append({'type': 'k8s_discovery_accessible' if field == 'resources' else 'k8s_secret_list_accessible',
+                             'severity': 'info' if field == 'resources' or not data[field] else 'critical',
+                             'confidence': 'MEDIUM', 'coverage': 'HTTP structure candidate for this endpoint only; broader permissions and exploitation untested',
+                             'evidence': 'Expected Kubernetes response structure without authentication; no broader permissions inferred'})
+    return {'target': target, 'findings': findings, 'observations': observations,
+            'coverage_complete': all(o['matched'] or o['status'] == 404 for o in observations)}
 
 
-def _k8s_check(target):
-    findings = []
-    url = f"https://{target}/api/v1" if not target.startswith("http") else f"{target}/api/v1"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-        resp = guarded_urlopen(req, timeout=8)
-        body = resp.read().decode("utf-8", errors="ignore")
-        findings.append({"type": "k8s_api_unauthenticated", "target": target, "severity": "critical", "evidence": "K8s API accessible without auth"})
-    except urllib.error.HTTPError as e:
-        if e.code == 401:
-            findings.append({"type": "k8s_api_protected", "target": target, "severity": "info"})
-        elif e.code == 403:
-            findings.append({"type": "k8s_api_auth_required", "target": target, "severity": "low"})
-    except Exception:
-        pass
-
-    url2 = f"https://{target}/api/v1/namespaces/kube-system/secrets" if not target.startswith("http") else f"{target}/api/v1/namespaces/kube-system/secrets"
-    try:
-        req = urllib.request.Request(url2, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-        resp = guarded_urlopen(req, timeout=8)
-        findings.append({"type": "k8s_secret_access_unauthenticated", "target": target, "severity": "critical", "evidence": "K8s secrets accessible without auth"})
-    except Exception:
-        pass
-    return {"target": target, "findings": findings}
-
-
-def _docker_check(target):
-    findings = []
-    protocols = [
-        ("unix", "unix:///var/run/docker.sock"),  # local
-        ("tcp", f"tcp://{target}:2375"),
-        ("tcp_tls", f"https://{target}:2376"),
-    ]
-    for proto, addr in protocols:
+def _docker_check(target, budget=None):
+    budget = budget if budget is not None else _ObservationBudget()
+    findings, observations = [], []
+    base = _base(target)
+    if base is None:
+        return {'findings': [], 'coverage_complete': False, 'error': 'Invalid target'}
+    host = urlsplit(base).hostname
+    if ':' in host:
+        host = '[' + host + ']'
+    for addr in (f'http://{host}:2375', f'https://{host}:2376'):
+        status, body = _read(addr + '/containers/json', budget=budget)
         try:
-            if proto == "unix":
-                import http.client
-                c = http.client.HTTPConnection("localhost", 0)
-                c.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                c.sock.connect("/var/run/docker.sock")
-                c.request("GET", "/containers/json")
-                resp = c.getresponse()
-                if resp.status == 200:
-                    findings.append({"type": "docker_socket_exposed", "address": addr, "severity": "critical", "evidence": "Docker socket accessible"})
-            else:
-                url = f"{addr}/containers/json" if proto == "tcp" else f"{addr}/containers/json"
-                req = urllib.request.Request(url, headers={"User-Agent": "Cybersec-CloudAudit/1.0"})
-                resp = guarded_urlopen(req, timeout=8)
-                if resp.status == 200:
-                    findings.append({"type": "docker_api_exposed", "address": addr, "severity": "critical", "evidence": "Docker API accessible without auth"})
-        except Exception:
-            pass
-    return {"target": target, "findings": findings}
+            data = json.loads(body) if body is not None else None
+        except (ValueError, UnicodeError, RecursionError):
+            data = None
+        # An empty array or generic JSON alone cannot fingerprint a Docker API.
+        matched = status == 200 and isinstance(data, list) and bool(data) and all(
+            isinstance(item, dict) and isinstance(item.get('Id'), str) and bool(re.fullmatch(r'[0-9a-f]{64}', item['Id']))
+            and isinstance(item.get('Image'), str) and isinstance(item.get('Names'), list) for item in data)
+        observations.append({'address': addr, 'status': status, 'matched': matched, 'outcome': budget.outcome})
+        if matched:
+            findings.append({'type': 'docker_container_inventory_accessible', 'address': addr, 'severity': 'high',
+                             'confidence': 'MEDIUM', 'coverage': 'HTTP inventory structure candidate only; write and execution permissions untested',
+                             'evidence': 'Docker container inventory structure matched; no execution or write access tested'})
+    return {'target': target, 'findings': findings, 'observations': observations,
+            'coverage_complete': all(o['matched'] or o['status'] == 404 for o in observations)}
 
 
 def _iam_check(provider):
-    return {
-        "provider": provider,
-        "findings": [
-            {"type": "iam_audit_skipped", "severity": "info", "note": "Full IAM audit requires cloud credentials. Configure AWS CLI / gcloud / az CLI for detailed scan."},
-            {"type": "recommendation", "severity": "low", "note": "Check for: overly permissive roles (*:* permissions), public S3 buckets, cross-account trust policies, unused access keys, MFA not enforced for root/admin."},
-        ]
-    }
+    return {'provider': provider, 'findings': [], 'coverage_complete': False, 'coverage': 'skipped: credentials required for IAM audit'}
 
 
 def _infra_check(provider):
-    return {
-        "provider": provider,
-        "findings": [
-            {"type": "infra_audit_skipped", "severity": "info", "note": "Full infra audit requires cloud credentials. Use cloud provider CLI tools for deep scan."},
-            {"type": "recommendation", "severity": "low", "note": "Check for: open security groups (0.0.0.0/0), unencrypted EBS volumes, public RDS instances, public load balancers, missing VPC flow logs."},
-        ]
-    }
+    return {'provider': provider, 'findings': [], 'coverage_complete': False, 'coverage': 'skipped: credentials required for infrastructure audit'}

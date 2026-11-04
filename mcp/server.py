@@ -298,9 +298,33 @@ def waf_detection(target: str) -> str:
 
 @mcp.tool()
 def dork_search(query: str) -> str:
-    """Perform Google dorking to find vulnerable targets or exposed information."""
+    """Return search metadata; matches do not establish vulnerability or authorization."""
     results = google_dork(query)
-    return json.dumps({"query": query, "results": results, "count": len(results)}, indent=2)
+    matches = [row for row in results if isinstance(row, dict)
+               and row.get('record_type', 'search_match') == 'search_match'
+               and 'error' not in row and isinstance(row.get('url'), str)
+               and row['url'].startswith(('https://', 'http://'))
+               and isinstance(row.get('title'), str)]
+    diagnostic_count = len(results) - len(matches)
+    rows = [row for row in results if isinstance(row, dict)]
+    truncated = any(row.get('truncated') is True for row in rows)
+    incomplete = diagnostic_count > 0 or any(row.get('assessment') == 'incomplete' for row in rows)
+    invalid = any(row.get('execution_status') == 'invalid_input' for row in rows)
+    partial = incomplete or truncated or any(row.get('execution_status') == 'partial' for row in rows)
+    response = {
+        "query": "[REDACTED]", "results": results, "count": len(matches),
+        "diagnostic_count": diagnostic_count, "truncated": truncated,
+        "assessment": "incomplete" if incomplete else ("provider_records" if matches else "no_results_in_response"),
+        "execution_status": "invalid_input" if invalid else ("partial" if partial else "completed"),
+        "coverage_complete": False,
+        "coverage": "One bounded provider response; corpus completeness unverified. Search matches "
+                    "do not establish target vulnerability or authorization. Results retain diagnostic "
+                    "entries for compatibility; count includes only search matches.",
+    }
+    errors = [row['error'] for row in rows if isinstance(row.get('error'), str)]
+    if errors:
+        response['error'] = errors[0]
+    return json.dumps(response, indent=2)
 
 @mcp.tool()
 def generate_report(target: str, findings: str, format: str = "markdown") -> str:

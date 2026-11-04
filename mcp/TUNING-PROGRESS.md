@@ -530,6 +530,41 @@ Stable cycle-4 integration:
   interoperability remains unverified. Connected MCP startup identity has not been
   refreshed by these source tests.
 
+## Autonomous cycle 5 — verified source integration
+
+Cloud/container observation adapters and search metadata adapters are under
+offline review. No cloud credentials, live providers, containers or infrastructure
+are used. Parent independently verified search metadata fixtures: **38 tests + 15
+subtests passed** across GHDB and the actual mapped `google_dork.py` /
+`exploit_db.py` modules. Download implementation remains unchanged. Provider
+layouts are not operationally validated; redaction remains pattern-based.
+Parent review confirmed `dork_search`'s server wrapper still echoed raw queries
+and counted diagnostic rows. A narrowly scoped wrapper fix and regression suite
+completed. Parent verification of search metadata plus wrapper: **46 tests + 15
+subtests passed**. The wrapper's regression tests execute its actual function via
+isolated AST extraction, not MCP dispatch. Query echo is fully redacted, diagnostic
+rows are counted separately, and incomplete/truncation metadata is preserved.
+Cloud follow-up independently passed **26 tests**. Aggregate probes share a
+per-call **40-request / 30-second cooperative budget**, clamp remaining I/O time,
+disable redirects, and mark skipped probes incomplete. Synchronous blocking I/O
+cannot be hard-interrupted. Findings carry confidence/coverage; CLI inventories
+explicitly do not establish a complete audit. No local Docker socket is probed
+implicitly. No cloud accounts, credentials, providers or containers were used.
+
+Initial full integration found one static redirect-inventory failure: a no-redirect
+handler was supplied indirectly in a list. Supplying the same handler explicitly
+resolved classification without weakening the test. Related regression run:
+**40 tests + 19 subtests passed**.
+
+Stable integration after source freeze:
+- Full pytest: **998 tests + 1918 subtests passed**, 97 warnings, **104.61 seconds**.
+- Network-disabled trace: **965 tests passed**, **46.320 seconds**, zero failures/errors.
+- Mapped entries observed: **147/209**; **62 unobserved** in this trace. AST-only
+  wrapper tests do not establish connected MCP dispatch coverage.
+- Nusaiba repeat at **2026-11-04T18:01:02.973Z**: one authorized credential-free
+  GET `/` returned **200**, with four recorded security headers present. Response
+  body cancelled unread; no cloud/scanner validation inferred from this smoke.
+
 ## Remaining work
 
 - Expand family-specific labelled fixtures and execution evidence beyond the

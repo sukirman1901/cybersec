@@ -66,3 +66,13 @@ five-second abort and immediate body cancellation were retained. No new navigati
 body read, scanner execution or negative-route request was made in this repeat.
 This checks current availability/header presence only, not updated MCP runtime
 behavior or vulnerability absence. The persistent browser remains open.
+
+## Cycle 5 repeat — 18:01:02 UTC
+
+Exact-origin engagement validation returned authorized/in-scope with no violations.
+The persistent una CLI browser supplied a fresh homepage snapshot. One explicit
+GET `/`, credentials omitted and redirects manual, returned **200** with CSP,
+HSTS, X-Content-Type-Options and X-Frame-Options present. A five-second abort bound
+was used and the body stream was cancelled unread. No navigation, credential
+attempt, upload or cloud probe occurred. Header presence is not policy validation.
+The browser/daemon remain running.
